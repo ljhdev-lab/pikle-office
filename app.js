@@ -9,21 +9,23 @@
   var LEGACY_KEY = 'byeol-office-v1';
   var WEEK = ['일', '월', '화', '수', '목', '금', '토'];
 
-  /* 좌표는 assets/office-map-v1.webp (864×1152) 안의 위치를 % 로 적은 값.
+  /* 좌표는 assets/office-map-v2.webp (864×1152, 3:4) 안의 위치를 % 로 적은 값.
+     캐릭터 중심(spot)·머리 위 이름표(tag)·말풍선 기준점(bubble)을 실측해 둔 것이다.
      이미지를 바꾸면 이 값만 다시 맞추면 된다. */
   var PARTS = [
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
-      color: '#4f6ee8', deep: '#3149b8', soft: '#eaf0ff',
-      spot: [53, 31], tag: [53, 18], bubble: [53, 13], tail: 'down', delay: 0 },
+      color: '#6c91c5', deep: '#456a98', soft: '#eaf1fa',
+      spot: [49.9, 39.2], tag: [49.9, 27.0], bubble: [49.9, 48.5], tail: 'up', delay: 0 },
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
-      color: '#4fc7a4', deep: '#2a9377', soft: '#e6f8f1',
-      spot: [18, 53], tag: [18, 41], bubble: [21, 36], tail: 'down', delay: 0.6 },
+      color: '#5fbf9c', deep: '#3b8a6f', soft: '#e6f7f0',
+      spot: [24.4, 53.9], tag: [24.4, 42.0], bubble: [24.4, 36.0], tail: 'down', delay: 0.6 },
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
-      color: '#ef8f6b', deep: '#c2603f', soft: '#fdece4',
-      spot: [85, 52], tag: [84, 40], bubble: [82, 35], tail: 'down', delay: 1.2 },
+      color: '#ea9c76', deep: '#b96a44', soft: '#fdeee5',
+      spot: [76.7, 55.3], tag: [76.7, 44.0], bubble: [76.7, 38.0], tail: 'down', delay: 1.2 },
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
-      color: '#a98bf2', deep: '#7752d0', soft: '#f1ebff',
-      spot: [52, 68], tag: [52, 85], bubble: [52, 58], tail: 'down', delay: 1.8 }
+      color: '#7f9ee0', deep: '#5a6bb8', soft: '#eef1fb',
+      dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
+      spot: [25.0, 79.4], tag: [25.0, 66.0], bubble: [26.0, 88.5], tail: 'up', delay: 1.8 }
   ];
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
@@ -272,55 +274,89 @@
   }
 
   /* ---------------------------------------------------------
-     mini clay avatars (inline SVG, 52×52)
+     mini mascot avatars (inline SVG, 52×52)
+     각 사의 고유 심볼을 작은 아이콘으로 옮긴다.
+       별이  : 파란 'ㅂ' 피클 몸체
+       GPT   : OpenAI Blossom — 6갈래 고리가 맞물린 꽃매듭
+       클로드 : Claude Spark — 길이가 고른 편이 아닌 방사형 광선
+       제미나이: Gemini 반짝이 — 오목한 변의 4각 별 + 구글 4색
      --------------------------------------------------------- */
+
+  var EYE = '#3f3a4d';
+
+  function faceDots(cx, cy, gap, r, mouthW) {
+    return '<circle cx="' + (cx - gap) + '" cy="' + cy + '" r="' + r + '" fill="' + EYE + '"/>' +
+      '<circle cx="' + (cx + gap) + '" cy="' + cy + '" r="' + r + '" fill="' + EYE + '"/>' +
+      '<path d="M' + (cx - mouthW) + ' ' + (cy + r + 1.6) + 'q' + mouthW + ' 2.4 ' + (mouthW * 2) +
+        ' 0" fill="none" stroke="' + EYE + '" stroke-width="1.5" stroke-linecap="round"/>';
+  }
+
+  function blossomSVG(color) {
+    var loops = '';
+    for (var i = 0; i < 6; i += 1) {
+      loops += '<ellipse cx="26" cy="26" rx="9.6" ry="5.5" transform="rotate(' + (i * 60) +
+        ' 26 26)"/>';
+    }
+    return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
+      '<g fill="none" stroke="' + color + '" stroke-width="3.6">' + loops + '</g>' +
+      '<circle cx="26" cy="26" r="6.8" fill="' + color + '"/>' +
+      faceDots(26, 25.4, 2.6, 1.15, 2.2) +
+      '</svg>';
+  }
+
+  function sparkSVG(color) {
+    var lens = [11.8, 13.4, 10.6, 12.6, 11.2, 13.8, 10.4, 12.2, 11.6, 13.2, 10.8, 12.8];
+    var rays = '';
+    for (var i = 0; i < 12; i += 1) {
+      var a = (i * 30 - 90) * Math.PI / 180;
+      var r0 = 4.6;
+      var r1 = lens[i];
+      var x0 = 26 + Math.cos(a) * r0;
+      var y0 = 26 + Math.sin(a) * r0;
+      var x1 = 26 + Math.cos(a) * r1;
+      var y1 = 26 + Math.sin(a) * r1;
+      rays += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'L' + x1.toFixed(1) + ' ' +
+        y1.toFixed(1) + '"/>';
+    }
+    return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
+      '<g stroke="' + color + '" stroke-width="3" stroke-linecap="round" fill="none">' + rays + '</g>' +
+      '<circle cx="26" cy="26" r="6.4" fill="' + color + '"/>' +
+      faceDots(26, 25.4, 2.5, 1.1, 2.1) +
+      '</svg>';
+  }
 
   function avatarSVG(partId) {
     var p = PART_MAP[partId] || PARTS[0];
-    var body = '';
-    var face = '<circle cx="21" cy="26" r="1.8" fill="#3f3a4d"/>' +
-               '<circle cx="31" cy="26" r="1.8" fill="#3f3a4d"/>' +
-               '<path d="M22.6 30.6q3.4 2.6 6.8 0" fill="none" stroke="#3f3a4d" stroke-width="1.6" stroke-linecap="round"/>';
 
-    if (partId === 'byeol') {
-      body = '<g fill="' + p.color + '">' +
-               '<rect x="11.5" y="11" width="9.5" height="30" rx="3.2"/>' +
-               '<rect x="31" y="11" width="9.5" height="30" rx="3.2"/>' +
-               '<rect x="16" y="20.5" width="20" height="7.4" rx="2.4"/>' +
-               '<rect x="16" y="32.5" width="20" height="7.4" rx="2.4"/>' +
-             '</g>' +
-             '<ellipse cx="26" cy="24.2" rx="10" ry="2.4" fill="#ffffff" opacity=".18"/>';
-    } else if (partId === 'gpt') {
-      body = '<ellipse cx="26" cy="28" rx="13" ry="12.4" fill="' + p.color + '"/>' +
-             '<ellipse cx="26" cy="22.6" rx="12" ry="7" fill="#ffffff" opacity=".22"/>';
-      var pencil = '<g transform="rotate(32 37 17)">' +
-        '<rect x="34.6" y="8" width="4.6" height="13" rx="2" fill="#f6b64c"/>' +
-        '<rect x="34.6" y="8" width="4.6" height="3.2" rx="1.6" fill="#ffd9a0"/>' +
-        '<path d="M34.6 21h4.6l-2.3 4.4z" fill="#e8a08c"/></g>';
+    if (partId === 'gpt') return blossomSVG(p.color);
+    if (partId === 'claude') return sparkSVG(p.color);
+
+    if (partId === 'gemini') {
       return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-        body + face + pencil + '</svg>';
-    } else if (partId === 'claude') {
-      body = '<ellipse cx="26" cy="28" rx="13" ry="12.4" fill="' + p.color + '"/>' +
-             '<ellipse cx="26" cy="22.6" rx="12" ry="7" fill="#ffffff" opacity=".2"/>';
-      var glasses = '<g fill="none" stroke="#8a4a33" stroke-width="1.6">' +
-        '<circle cx="21" cy="26" r="3.6"/><circle cx="31" cy="26" r="3.6"/>' +
-        '<path d="M24.6 26h2.8M17.4 25l-3-1M34.6 25l3-1"/></g>';
-      var lens = '<g transform="rotate(38 42 40)">' +
-        '<circle cx="42" cy="40" r="4.4" fill="none" stroke="#c96a45" stroke-width="2"/>' +
-        '<path d="M45.4 43.4l3.6 3.6" stroke="#c96a45" stroke-width="2.4" stroke-linecap="round"/></g>';
-      return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-        body + face + glasses + lens + '</svg>';
-    } else {
-      body = '<ellipse cx="26" cy="28" rx="13" ry="12.4" fill="' + p.color + '"/>' +
-             '<ellipse cx="26" cy="22.6" rx="12" ry="7" fill="#ffffff" opacity=".24"/>';
-      var stylus = '<g transform="rotate(-24 16 18)">' +
-        '<rect x="13" y="7" width="4.2" height="14" rx="2.1" fill="#efe6ff"/>' +
-        '<path d="M13 21h4.2l-2.1 4z" fill="#6c4bb8"/></g>' +
-        '<path d="M38.6 10.4l1 2.2 2.3.4-1.7 1.7.5 2.3-2.1-1.2-2 1.2.4-2.3-1.7-1.7 2.4-.4z" fill="#ffe08a"/>';
-      return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-        body + face + stylus + '</svg>';
+        '<defs><linearGradient id="gemAvatar" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0" stop-color="#fbbc04"/>' +
+          '<stop offset=".34" stop-color="#ea4335"/>' +
+          '<stop offset=".68" stop-color="#34a853"/>' +
+          '<stop offset="1" stop-color="#4285f4"/>' +
+        '</linearGradient></defs>' +
+        '<path d="M26 4.5C27.7 17.2 34.8 24.3 47.5 26 34.8 27.7 27.7 34.8 26 47.5 ' +
+          '24.3 34.8 17.2 27.7 4.5 26 17.2 24.3 24.3 17.2 26 4.5Z" fill="url(#gemAvatar)"/>' +
+        '<circle cx="25.4" cy="25.4" r="1.15" fill="#ffffff" opacity=".9"/>' +
+        faceDots(26, 25.4, 2.5, 1.15, 2.1) +
+        '</svg>';
     }
-    return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' + body + '</svg>';
+
+    /* 별이 — 'ㅂ' 실루엣 */
+    return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
+      '<g fill="' + p.color + '">' +
+        '<rect x="12" y="10.5" width="9.4" height="31" rx="3.4"/>' +
+        '<rect x="30.6" y="10.5" width="9.4" height="31" rx="3.4"/>' +
+        '<rect x="16.4" y="19.2" width="19.2" height="7.2" rx="2.6"/>' +
+        '<rect x="16.4" y="31.6" width="19.2" height="7.2" rx="2.6"/>' +
+      '</g>' +
+      '<ellipse cx="26" cy="22.6" rx="10" ry="2.2" fill="#ffffff" opacity=".2"/>' +
+      faceDots(26, 22.2, 4.4, 1.7, 3) +
+      '</svg>';
   }
 
   /* ---------------------------------------------------------
@@ -331,7 +367,7 @@
     var tags = PARTS.map(function (p) {
       return '<span class="tag' + (isActive(p.id) ? '' : ' is-off') + '" style="left:' + p.tag[0] +
         '%;top:' + p.tag[1] + '%">' +
-        '<i class="tag__dot" style="background:' + p.color + '"></i>' +
+        '<i class="tag__dot" style="background:' + (p.dot || p.color) + '"></i>' +
         '<span class="tag__name">' + esc(p.name) + '</span></span>';
     }).join('');
 

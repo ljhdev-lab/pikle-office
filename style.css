@@ -477,6 +477,12 @@ body.motion .toggle__dot { transform: translateX(16px); }
   transform: translateX(-50%) rotate(45deg);
   border-radius: 0 0 3px 0;
 }
+.bubble--up::after {
+  left: 50%;
+  top: -6px;
+  transform: translateX(-50%) rotate(-135deg);
+  border-radius: 0 0 3px 0;
+}
 .bubble--right::after {
   right: -5px;
   left: auto;
