@@ -358,19 +358,20 @@
   function byeolSVG(color) {
     var rows = [
       '...............',
+      '.BBBB.....BBBB.',
+      '.BBBB.....BBBB.',
+      '.BBBBBBBBBBBBB.',
+      '.BBEEBBBBBEEBB.',
+      '.BBEEBBBBBEEBB.',
+      '.BBBBBBBBBBBBB.',
+      '.BBBBBBMMBBBBB.',
+      '.BBBBBBBBBBBBB.',
+      '.BBBBBBBBBBBBB.',
+      '.BBBBB...BBBBB.',
+      '.BBBBB...BBBBB.',
+      '.BBBBBBBBBBBBB.',
       '..BBB.....BBB..',
-      '..BBB.....BBB..',
-      '..BBBBBBBBBBB..',
-      '..BBEEBBBEEBB..',
-      '..BBEEBBBEEBB..',
-      '..BBBBBMBBBBB..',
-      '..BBBBBBBBBBB..',
-      '..BBBBBBBBBBB..',
-      '...BBBBBBBBB...',
-      '...BBB...BBB...',
-      '...BBB...BBB...',
-      '...BBBBBBBBB...',
-      '...BB.....BB...'
+      '..BBB.....BBB..'
     ];
     var colors = { B: color, E: '#2f3d57', M: '#2f3d57' };
     return svgOpen(64) + pixelSprite(rows, colors) + '</svg>';
