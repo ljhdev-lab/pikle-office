@@ -147,10 +147,14 @@
       Object.keys(old.parts).forEach(function (k) {
         var to = LEGACY_PARTS[k];
         if (!to || !old.parts[k]) return;
+        // 역할이 그대로인 '기타 → 총괄(별이)'만 상태 문구를 넘기고,
+        // 나머지는 새 담당의 기본 문구를 쓴다.
         out.parts[to] = {
-          status: old.parts[k].status,
           active: old.parts[k].active !== false
         };
+        if (k === 'etc' && typeof old.parts[k].status === 'string') {
+          out.parts[to].status = old.parts[k].status;
+        }
       });
     }
     return out;
