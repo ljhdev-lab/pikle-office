@@ -14,18 +14,18 @@
      이미지를 바꾸면 이 값만 다시 맞추면 된다. */
   var PARTS = [
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
-      color: '#6c91c5', deep: '#456a98', soft: '#eaf1fa',
-      spot: [49.9, 39.2], tag: [49.9, 29.2], bubble: [49.9, 48.5], tail: 'up', delay: 0 },
+      color: '#6790d0', deep: '#4a68a6', soft: '#eaf1fb',
+      spot: [50.0, 39.9], tag: [50.0, 30.0], bubble: [50.0, 50.5], tail: 'up', delay: 0 },
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
-      color: '#5fbf9c', deep: '#3b8a6f', soft: '#e6f7f0',
-      spot: [24.4, 53.9], tag: [24.4, 42.0], bubble: [24.4, 36.0], tail: 'down', delay: 0.6 },
+      color: '#52b394', deep: '#2f8a6e', soft: '#e6f7f0',
+      spot: [24.1, 56.0], tag: [24.1, 46.0], bubble: [24.1, 39.0], tail: 'down', delay: 0.6 },
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
-      color: '#ea9c76', deep: '#b96a44', soft: '#fdeee5',
-      spot: [76.7, 55.3], tag: [76.7, 46.0], bubble: [76.7, 38.0], tail: 'down', delay: 1.2 },
+      color: '#e27f5f', deep: '#b25a3a', soft: '#fdeee7',
+      spot: [76.0, 56.9], tag: [76.0, 46.0], bubble: [76.0, 39.5], tail: 'down', delay: 1.2 },
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
-      color: '#7f9ee0', deep: '#5a6bb8', soft: '#eef1fb',
+      color: '#6f8fe0', deep: '#5a6bb8', soft: '#eef1fb',
       dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
-      spot: [25.0, 79.4], tag: [25.0, 66.0], bubble: [26.0, 88.5], tail: 'up', delay: 1.8 }
+      spot: [26.6, 84.3], tag: [26.6, 74.8], bubble: [26.6, 92.9], tail: 'up', delay: 1.8 }
   ];
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
@@ -274,68 +274,120 @@
   }
 
   /* ---------------------------------------------------------
-     mini mascot avatars (inline SVG, 52×52)
-     각 사의 고유 심볼을 작은 아이콘으로 옮긴다.
-       별이  : 파란 'ㅂ' 피클 몸체
-       GPT   : OpenAI Blossom — 6갈래 고리가 맞물린 꽃매듭
-       클로드 : Claude Spark — 길이가 고른 편이 아닌 방사형 광선
-       제미나이: Gemini 반짝이 — 오목한 변의 4각 별 + 구글 4색
+     mini mascot avatars (inline pixel SVG)
+     픽셀 오피스맵과 같은 결이 나도록 네 캐릭터를 도트로 옮긴다.
+       별이  : 파란 'ㅂ' 픽셀 실루엣 (위가 트인 홈, 아래 구멍, 두 발)
+       GPT   : 에메랄드 꽃매듭 (OpenAI Blossom 모티프)
+       클로드 : Claw'd — 테라코타 블록 몸통 + 옆 팔 + 네 다리 + 검은 사각 눈
+       제미나이: 구글 4색 4각 반짝이 별
      --------------------------------------------------------- */
 
   var EYE = '#3f3a4d';
   var avatarSeq = 0;
 
+  /* 픽셀 느낌을 위해 눈은 각진 사각형, 입은 짧은 선으로 찍는다. */
   function faceDots(cx, cy, gap, r, mouthW) {
-    return '<circle cx="' + (cx - gap) + '" cy="' + cy + '" r="' + r + '" fill="' + EYE + '"/>' +
-      '<circle cx="' + (cx + gap) + '" cy="' + cy + '" r="' + r + '" fill="' + EYE + '"/>' +
-      '<path d="M' + (cx - mouthW) + ' ' + (cy + r + 1.6) + 'q' + mouthW + ' 2.4 ' + (mouthW * 2) +
-        ' 0" fill="none" stroke="' + EYE + '" stroke-width="1.5" stroke-linecap="round"/>';
+    var s = r * 1.9;
+    return '<rect x="' + (cx - gap - s / 2) + '" y="' + (cy - s / 2) + '" width="' + s +
+        '" height="' + s + '" fill="' + EYE + '"/>' +
+      '<rect x="' + (cx + gap - s / 2) + '" y="' + (cy - s / 2) + '" width="' + s +
+        '" height="' + s + '" fill="' + EYE + '"/>' +
+      '<path d="M' + (cx - mouthW) + ' ' + (cy + s / 2 + 1.4) + 'q' + mouthW + ' 2.2 ' + (mouthW * 2) +
+        ' 0" fill="none" stroke="' + EYE + '" stroke-width="1.4" stroke-linecap="round"/>';
   }
 
+  /* 문자 격자를 4단위 정사각형(도트)으로 찍어 픽셀 스프라이트를 만든다. */
+  var PX = 4;
+  function pixelSprite(rows, colors) {
+    var cells = '';
+    for (var y = 0; y < rows.length; y += 1) {
+      var row = rows[y];
+      for (var x = 0; x < row.length; x += 1) {
+        var fill = colors[row.charAt(x)];
+        if (!fill) continue;
+        cells += '<rect x="' + (x * PX) + '" y="' + (y * PX) + '" width="' + PX +
+          '" height="' + PX + '" fill="' + fill + '"/>';
+      }
+    }
+    return cells;
+  }
+
+  function svgOpen(box) {
+    return '<svg class="mini-char" viewBox="0 0 ' + box + ' ' + box +
+      '" shape-rendering="crispEdges" aria-hidden="true" focusable="false">';
+  }
+
+  /* GPT — 6갈래 고리가 맞물린 꽃매듭 */
   function blossomSVG(color, soft) {
     var petals = '';
     for (var i = 0; i < 6; i += 1) {
-      petals += '<ellipse cx="26" cy="17.6" rx="3.5" ry="5.9" transform="rotate(' + (i * 60) +
+      petals += '<ellipse cx="26" cy="17.6" rx="4.6" ry="7.4" transform="rotate(' + (i * 60) +
         ' 26 26)"/>';
     }
-    return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-      '<g fill="' + color + '" stroke="' + soft + '" stroke-width="2.2">' + petals +
-        '<circle cx="26" cy="26" r="5.3"/></g>' +
-      faceDots(26, 25.4, 2.4, 1.15, 2.0) +
+    return svgOpen(52) +
+      '<g fill="' + color + '" stroke="' + soft + '" stroke-width="3.2">' + petals +
+        '<circle cx="26" cy="26" r="5.6"/></g>' +
+      faceDots(26, 25.4, 2.6, 1.15, 2.0) +
       '</svg>';
   }
 
-  function sparkSVG(color) {
-    var lens = [11.8, 13.4, 10.6, 12.6, 11.2, 13.8, 10.4, 12.2, 11.6, 13.2, 10.8, 12.8];
-    var rays = '';
-    for (var i = 0; i < 12; i += 1) {
-      var a = (i * 30 - 90) * Math.PI / 180;
-      var r0 = 4.6;
-      var r1 = lens[i];
-      var x0 = 26 + Math.cos(a) * r0;
-      var y0 = 26 + Math.sin(a) * r0;
-      var x1 = 26 + Math.cos(a) * r1;
-      var y1 = 26 + Math.sin(a) * r1;
-      rays += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'L' + x1.toFixed(1) + ' ' +
-        y1.toFixed(1) + '"/>';
-    }
-    return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-      '<g stroke="' + color + '" stroke-width="3" stroke-linecap="round" fill="none">' + rays + '</g>' +
-      '<circle cx="26" cy="26" r="6.4" fill="' + color + '"/>' +
-      faceDots(26, 25.4, 2.5, 1.1, 2.1) +
-      '</svg>';
+  /* 클로드 — Claw'd 픽셀 마스코트 (블록 몸통 + 짧은 옆 팔 + 네 다리 + 검은 사각 눈) */
+  function clawdSVG(color) {
+    var rows = [
+      '...............',
+      '..CCCCCCCCCCC..',
+      '..CCCCCCCCCCC..',
+      '..CCCCCCCCCCC..',
+      '..CCEECCCEECC..',
+      '..CCCCCCCCCCC..',
+      'CCCCCCCCCCCCCCC',
+      'CCCCCCCCCCCCCCC',
+      '..CCCCCCCCCCC..',
+      '..CCCCCCCCCCC..',
+      '..CCCCCCCCCCC..',
+      '..CCCCCCCCCCC..',
+      '..CC.CC.CC.CC..',
+      '..CC.CC.CC.CC..',
+      '..CC.......CC..'
+    ];
+    var colors = { C: color, E: '#2e2a28' };
+    return svgOpen(60) + pixelSprite(rows, colors) + '</svg>';
+  }
+
+  /* 별이 — 파란 'ㅂ' 픽셀 실루엣: 위가 트인 홈, 얼굴 아래 구멍, 두 발 */
+  function byeolSVG(color) {
+    var rows = [
+      '...............',
+      '...BB.....BB...',
+      '...BB.....BB...',
+      '...BB.....BB...',
+      '...BB.....BB...',
+      '...BB.....BB...',
+      '...BBBBBBBBB...',
+      '...BBBBBBBBB...',
+      '...BEEBMBEEB...',
+      '...BBBBBBBBB...',
+      '...BBBBBBBBB...',
+      '....BBBBBBB....',
+      '....BB...BB....',
+      '....BB...BB....',
+      '....BBBBBBB....',
+      '....BB...BB....'
+    ];
+    var colors = { B: color, E: '#2f3d57', M: '#2f3d57' };
+    return svgOpen(64) + pixelSprite(rows, colors) + '</svg>';
   }
 
   function avatarSVG(partId) {
     var p = PART_MAP[partId] || PARTS[0];
 
     if (partId === 'gpt') return blossomSVG(p.color, p.soft);
-    if (partId === 'claude') return sparkSVG(p.color);
+    if (partId === 'claude') return clawdSVG(p.color);
 
     if (partId === 'gemini') {
       avatarSeq += 1;
       var gid = 'gemAvatar' + avatarSeq;
-      return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
+      return svgOpen(52) +
         '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="1">' +
           '<stop offset="0" stop-color="#fbbc04"/>' +
           '<stop offset=".34" stop-color="#ea4335"/>' +
@@ -344,25 +396,11 @@
         '</linearGradient></defs>' +
         '<path d="M26 4.5C27.7 17.2 34.8 24.3 47.5 26 34.8 27.7 27.7 34.8 26 47.5 ' +
           '24.3 34.8 17.2 27.7 4.5 26 17.2 24.3 24.3 17.2 26 4.5Z" fill="url(#' + gid + ')"/>' +
-        '<circle cx="25.4" cy="25.4" r="1.15" fill="#ffffff" opacity=".9"/>' +
         faceDots(26, 25.4, 2.5, 1.15, 2.1) +
         '</svg>';
     }
 
-    /* 별이 — 'ㅂ' 실루엣: 둥근 몸통에 위가 트인 홈, 얼굴 아래 작은 구멍 */
-    avatarSeq += 1;
-    var mid = 'byeolMask' + avatarSeq;
-    return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-      '<defs><mask id="' + mid + '" maskUnits="userSpaceOnUse" x="0" y="0" width="52" height="52">' +
-        '<rect x="0" y="0" width="52" height="52" fill="#000"/>' +
-        '<rect x="11.5" y="10.5" width="29" height="32.5" rx="9.5" fill="#fff"/>' +
-        '<rect x="19.5" y="7" width="13" height="15.5" rx="6.5" fill="#000"/>' +
-        '<ellipse cx="26" cy="37" rx="4.6" ry="2.3" fill="#000"/>' +
-      '</mask></defs>' +
-      '<rect x="11.5" y="10.5" width="29" height="32.5" rx="9.5" fill="' + p.color +
-        '" mask="url(#' + mid + ')"/>' +
-      faceDots(26, 27.4, 4.2, 1.7, 2.9) +
-      '</svg>';
+    return byeolSVG(p.color);
   }
 
   /* ---------------------------------------------------------
