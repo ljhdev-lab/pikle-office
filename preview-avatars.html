@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>아바타 후보</title>
+<style>
+  body{margin:0;padding:16px;background:#fffdf8;font-family:-apple-system,sans-serif;color:#3f3a4d}
+  .row{display:flex;gap:18px;align-items:flex-end;margin-bottom:18px}
+  .cell{text-align:center}
+  .cell p{font-size:11px;margin:6px 0 0;color:#6b6355}
+  .chip{display:inline-grid;place-items:center;background:#e6f7f0;border-radius:12px;width:46px;height:46px}
+  .chip.big{width:120px;height:120px;border-radius:24px}
+  svg{display:block}
+</style>
+</head>
+<body>
+<div class="row" id="big"></div>
+<div class="row" id="small"></div>
+<script>
+var EYE='#3f3a4d';
+function face(cx,cy,gap,r,mw){return '<circle cx="'+(cx-gap)+'" cy="'+cy+'" r="'+r+'" fill="'+EYE+'"/><circle cx="'+(cx+gap)+'" cy="'+cy+'" r="'+r+'" fill="'+EYE+'"/><path d="M'+(cx-mw)+' '+(cy+r+1.5)+'q'+mw+' 2.2 '+(mw*2)+' 0" fill="none" stroke="'+EYE+'" stroke-width="1.5" stroke-linecap="round"/>'}
+var C='#5fbf9c', S='#e6f7f0';
+// A 육각 고리 + 가운데 얼굴
+function hexPts(r){var p=[];for(var i=0;i<6;i++){var a=(-90+i*60)*Math.PI/180;p.push((26+r*Math.cos(a)).toFixed(1)+' '+(26+r*Math.sin(a)).toFixed(1));}return p.join(' L');}
+var A='<path d="M'+hexPts(11.5)+'Z" fill="none" stroke="'+C+'" stroke-width="6" stroke-linejoin="round"/>'+
+      '<circle cx="26" cy="26" r="5.2" fill="'+S+'"/>'+face(26,25.4,2.2,1.1,1.9);
+// B 꽃잎 6장 + 얼굴
+function petals(rx,ry,dist,sw){var s='';for(var i=0;i<6;i++){s+='<ellipse cx="26" cy="'+(26-dist)+'" rx="'+rx+'" ry="'+ry+'" transform="rotate('+(i*60)+' 26 26)" fill="'+C+'"'+(sw?' stroke="'+S+'" stroke-width="'+sw+'"':'')+'/>';}return s;}
+var B=petals(3.0,6.4,8.6,2.0)+'<circle cx="26" cy="26" r="4.8" fill="'+C+'" stroke="'+S+'" stroke-width="2"/>'+face(26,25.4,2.1,1.1,1.8);
+// C 세 고리 매듭 + 얼굴
+var Cc='';for(var i=0;i<3;i++){Cc+='<ellipse cx="26" cy="21.6" rx="8.2" ry="4.6" transform="rotate('+(i*60)+' 26 26)" fill="none" stroke="'+C+'" stroke-width="3.4"/>';}
+var Ccand=Cc+'<circle cx="26" cy="26" r="4.6" fill="'+C+'"/>'+face(26,25.4,2.0,1.1,1.7);
+// D 채운 블로섬 + 육각 구멍 (얼굴 없음)
+var D='<path d="M'+hexPts(13.2)+'Z" fill="'+C+'"/><path d="M'+hexPts(5.6)+'Z" fill="'+S+'"/>';
+var cands=[['A 육각고리',A],['B 꽃잎',B],['C 매듭',Ccand],['D 구멍',D]];
+var big=document.getElementById('big'), small=document.getElementById('small');
+cands.forEach(function(c){
+  var b=document.createElement('div');b.className='cell';
+  b.innerHTML='<div class="chip big"><svg viewBox="0 0 52 52" width="120" height="120">'+c[1]+'</svg></div><p>'+c[0]+'</p>';
+  big.appendChild(b);
+  var s=document.createElement('div');s.className='cell';
+  s.innerHTML='<div class="chip"><svg viewBox="0 0 52 52" width="56" height="56">'+c[1]+'</svg></div><p>'+c[0]+'</p>';
+  small.appendChild(s);
+});
+</script>
+</body>
+</html>
