@@ -23,7 +23,7 @@
       spot: [85, 52], tag: [84, 40], bubble: [81, 38], tail: 'down', delay: 1.2 },
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
       color: '#a98bf2', deep: '#7752d0', soft: '#f1ebff',
-      spot: [52, 68], tag: [52, 85], bubble: [27, 84], tail: 'right', delay: 1.8 }
+      spot: [52, 68], tag: [52, 85], bubble: [52, 58], tail: 'down', delay: 1.8 }
   ];
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
@@ -168,6 +168,7 @@
   var toastTimer = null;
   var closeTimer = null;
   var bubbleTimer = null;
+  var focusHold = 0;
   var uidCount = 0;
 
   function uid() {
@@ -372,7 +373,8 @@
   function startBubbleLoop() {
     window.clearInterval(bubbleTimer);
     bubbleTimer = window.setInterval(function () {
-      if (!state.motion || document.hidden) return;
+      if (!state.motion || document.hidden || ui.sheet) return;
+      if (Date.now() - focusHold < 14000) return;
       var act = activeParts();
       if (!act.length) return;
       var i = act.map(function (p) { return p.id; }).indexOf(state.focus);
@@ -568,6 +570,7 @@
   function openRoom(id) {
     if (!PART_MAP[id]) return;
     state.focus = id;
+    focusHold = Date.now();
     save();
     ui.sheet = { type: 'part', id: id };
     refreshFocus();
