@@ -292,14 +292,14 @@
   }
 
   function blossomSVG(color) {
-    var loops = '';
+    var lobes = '';
     for (var i = 0; i < 6; i += 1) {
-      loops += '<ellipse cx="26" cy="26" rx="9.6" ry="5.5" transform="rotate(' + (i * 60) +
-        ' 26 26)"/>';
+      var a = i * Math.PI / 3 - Math.PI / 2;
+      lobes += '<circle cx="' + (26 + Math.cos(a) * 7.4).toFixed(1) + '" cy="' +
+        (26 + Math.sin(a) * 7.4).toFixed(1) + '" r="5.4"/>';
     }
     return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-      '<g fill="none" stroke="' + color + '" stroke-width="3.6">' + loops + '</g>' +
-      '<circle cx="26" cy="26" r="6.8" fill="' + color + '"/>' +
+      '<g fill="' + color + '">' + lobes + '<circle cx="26" cy="26" r="7.2"/></g>' +
       faceDots(26, 25.4, 2.6, 1.15, 2.2) +
       '</svg>';
   }
@@ -349,13 +349,12 @@
     /* 별이 — 'ㅂ' 실루엣 */
     return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
       '<g fill="' + p.color + '">' +
-        '<rect x="12" y="10.5" width="9.4" height="31" rx="3.4"/>' +
-        '<rect x="30.6" y="10.5" width="9.4" height="31" rx="3.4"/>' +
-        '<rect x="16.4" y="19.2" width="19.2" height="7.2" rx="2.6"/>' +
-        '<rect x="16.4" y="31.6" width="19.2" height="7.2" rx="2.6"/>' +
+        '<rect x="12" y="11.5" width="9.2" height="17" rx="4.6"/>' +
+        '<rect x="30.8" y="11.5" width="9.2" height="17" rx="4.6"/>' +
+        '<rect x="12" y="23" width="28" height="19.5" rx="9"/>' +
       '</g>' +
-      '<ellipse cx="26" cy="22.6" rx="10" ry="2.2" fill="#ffffff" opacity=".2"/>' +
-      faceDots(26, 22.2, 4.4, 1.7, 3) +
+      '<ellipse cx="26" cy="37" rx="4.2" ry="2.1" fill="' + p.soft + '"/>' +
+      faceDots(26, 29.2, 4.4, 1.7, 3) +
       '</svg>';
   }
 
