@@ -9,7 +9,7 @@
   var LEGACY_KEY = 'byeol-office-v1';
   var WEEK = ['일', '월', '화', '수', '목', '금', '토'];
 
-  /* 좌표는 assets/office-map-v2.webp (864×1152, 3:4) 안의 위치를 % 로 적은 값.
+  /* 좌표는 assets/office-map-v3.webp (864×1152, 3:4) 안의 위치를 % 로 적은 값.
      캐릭터 중심(spot)·머리 위 이름표(tag)·말풍선 기준점(bubble)을 실측해 둔 것이다.
      이미지를 바꾸면 이 값만 다시 맞추면 된다. */
   var PARTS = [
