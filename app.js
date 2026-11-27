@@ -279,12 +279,13 @@
                '<path d="M22.6 30.6q3.4 2.6 6.8 0" fill="none" stroke="#3f3a4d" stroke-width="1.6" stroke-linecap="round"/>';
 
     if (partId === 'byeol') {
-      body = '<g fill="none" stroke="' + p.color + '" stroke-width="6.4" stroke-linecap="round">' +
-               '<path d="M17.4 17v18M34.6 17v18M17.4 18.6h17.2M17.4 26h17.2M17.4 33.4h17.2"/>' +
+      body = '<g fill="' + p.color + '">' +
+               '<rect x="11.5" y="11" width="9.5" height="30" rx="3.2"/>' +
+               '<rect x="31" y="11" width="9.5" height="30" rx="3.2"/>' +
+               '<rect x="16" y="20.5" width="20" height="7.4" rx="2.4"/>' +
+               '<rect x="16" y="32.5" width="20" height="7.4" rx="2.4"/>' +
              '</g>' +
-             '<circle cx="23.4" cy="26" r="1.5" fill="#3f3a4d"/>' +
-             '<circle cx="29" cy="26" r="1.5" fill="#3f3a4d"/>' +
-             '<path d="M24.4 28.6q1.8 1.4 3.6 0" fill="none" stroke="#3f3a4d" stroke-width="1.3" stroke-linecap="round"/>';
+             '<ellipse cx="26" cy="24.2" rx="10" ry="2.4" fill="#ffffff" opacity=".18"/>';
     } else if (partId === 'gpt') {
       body = '<ellipse cx="26" cy="28" rx="13" ry="12.4" fill="' + p.color + '"/>' +
              '<ellipse cx="26" cy="22.6" rx="12" ry="7" fill="#ffffff" opacity=".22"/>';
