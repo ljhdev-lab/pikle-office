@@ -283,6 +283,7 @@
      --------------------------------------------------------- */
 
   var EYE = '#3f3a4d';
+  var avatarSeq = 0;
 
   function faceDots(cx, cy, gap, r, mouthW) {
     return '<circle cx="' + (cx - gap) + '" cy="' + cy + '" r="' + r + '" fill="' + EYE + '"/>' +
@@ -332,30 +333,34 @@
     if (partId === 'claude') return sparkSVG(p.color);
 
     if (partId === 'gemini') {
+      avatarSeq += 1;
+      var gid = 'gemAvatar' + avatarSeq;
       return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-        '<defs><linearGradient id="gemAvatar" x1="0" y1="0" x2="1" y2="1">' +
+        '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="1">' +
           '<stop offset="0" stop-color="#fbbc04"/>' +
           '<stop offset=".34" stop-color="#ea4335"/>' +
           '<stop offset=".68" stop-color="#34a853"/>' +
           '<stop offset="1" stop-color="#4285f4"/>' +
         '</linearGradient></defs>' +
         '<path d="M26 4.5C27.7 17.2 34.8 24.3 47.5 26 34.8 27.7 27.7 34.8 26 47.5 ' +
-          '24.3 34.8 17.2 27.7 4.5 26 17.2 24.3 24.3 17.2 26 4.5Z" fill="url(#gemAvatar)"/>' +
+          '24.3 34.8 17.2 27.7 4.5 26 17.2 24.3 24.3 17.2 26 4.5Z" fill="url(#' + gid + ')"/>' +
         '<circle cx="25.4" cy="25.4" r="1.15" fill="#ffffff" opacity=".9"/>' +
         faceDots(26, 25.4, 2.5, 1.15, 2.1) +
         '</svg>';
     }
 
     /* 별이 — 'ㅂ' 실루엣: 둥근 몸통에 위가 트인 홈, 얼굴 아래 작은 구멍 */
+    avatarSeq += 1;
+    var mid = 'byeolMask' + avatarSeq;
     return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-      '<defs><mask id="byeolMask" maskUnits="userSpaceOnUse" x="0" y="0" width="52" height="52">' +
+      '<defs><mask id="' + mid + '" maskUnits="userSpaceOnUse" x="0" y="0" width="52" height="52">' +
         '<rect x="0" y="0" width="52" height="52" fill="#000"/>' +
         '<rect x="11.5" y="10.5" width="29" height="32.5" rx="9.5" fill="#fff"/>' +
         '<rect x="19.5" y="7" width="13" height="15.5" rx="6.5" fill="#000"/>' +
         '<ellipse cx="26" cy="37" rx="4.6" ry="2.3" fill="#000"/>' +
       '</mask></defs>' +
       '<rect x="11.5" y="10.5" width="29" height="32.5" rx="9.5" fill="' + p.color +
-        '" mask="url(#byeolMask)"/>' +
+        '" mask="url(#' + mid + ')"/>' +
       faceDots(26, 27.4, 4.2, 1.7, 2.9) +
       '</svg>';
   }
