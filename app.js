@@ -294,13 +294,13 @@
   function blossomSVG(color, soft) {
     var petals = '';
     for (var i = 0; i < 6; i += 1) {
-      petals += '<ellipse cx="26" cy="17.4" rx="3.7" ry="5.5" transform="rotate(' + (i * 60) +
+      petals += '<ellipse cx="26" cy="17.6" rx="3.5" ry="5.9" transform="rotate(' + (i * 60) +
         ' 26 26)"/>';
     }
     return '<svg class="mini-char" viewBox="0 0 52 52" aria-hidden="true" focusable="false">' +
-      '<g fill="' + color + '" stroke="' + soft + '" stroke-width="1.7">' + petals +
-        '<circle cx="26" cy="26" r="5.8"/></g>' +
-      faceDots(26, 25.4, 2.5, 1.15, 2.1) +
+      '<g fill="' + color + '" stroke="' + soft + '" stroke-width="2.2">' + petals +
+        '<circle cx="26" cy="26" r="5.3"/></g>' +
+      faceDots(26, 25.4, 2.4, 1.15, 2.0) +
       '</svg>';
   }
 
@@ -351,7 +351,7 @@
       '<defs><mask id="byeolMask" maskUnits="userSpaceOnUse" x="0" y="0" width="52" height="52">' +
         '<rect x="0" y="0" width="52" height="52" fill="#000"/>' +
         '<rect x="11.5" y="10.5" width="29" height="32.5" rx="9.5" fill="#fff"/>' +
-        '<rect x="21" y="7" width="10" height="15" rx="5" fill="#000"/>' +
+        '<rect x="19.5" y="7" width="13" height="15.5" rx="6.5" fill="#000"/>' +
         '<ellipse cx="26" cy="37" rx="4.6" ry="2.3" fill="#000"/>' +
       '</mask></defs>' +
       '<rect x="11.5" y="10.5" width="29" height="32.5" rx="9.5" fill="' + p.color +
