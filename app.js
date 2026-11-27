@@ -335,20 +335,20 @@
   function clawdSVG(color) {
     var rows = [
       '...............',
-      '..CCCCCCCCCCC..',
-      '..CCCCCCCCCCC..',
-      '..CCCCCCCCCCC..',
-      '..CCEECCCEECC..',
-      '..CCCCCCCCCCC..',
+      '.CCCCCCCCCCCCC.',
+      '.CCCCCCCCCCCCC.',
+      '.CCCCCCCCCCCCC.',
+      '.CCCEECCCEECCC.',
+      '.CCCCCCCCCCCCC.',
       'CCCCCCCCCCCCCCC',
       'CCCCCCCCCCCCCCC',
-      '..CCCCCCCCCCC..',
-      '..CCCCCCCCCCC..',
-      '..CCCCCCCCCCC..',
-      '..CCCCCCCCCCC..',
-      '..CC.CC.CC.CC..',
-      '..CC.CC.CC.CC..',
-      '..CC.......CC..'
+      '.CCCCCCCCCCCCC.',
+      '.CCCCCCCCCCCCC.',
+      '.CCCCCCCCCCCCC.',
+      '.CCCCCCCCCCCCC.',
+      '.CC..CC.CC..CC.',
+      '.CC..CC.CC..CC.',
+      '.CC.........CC.'
     ];
     var colors = { C: color, E: '#2e2a28' };
     return svgOpen(60) + pixelSprite(rows, colors) + '</svg>';
@@ -386,15 +386,16 @@
     if (partId === 'gemini') {
       avatarSeq += 1;
       var gid = 'gemAvatar' + avatarSeq;
+      var star = 'M26 4.5C27.7 17.2 34.8 24.3 47.5 26 34.8 27.7 27.7 34.8 26 47.5 ' +
+        '24.3 34.8 17.2 27.7 4.5 26 17.2 24.3 24.3 17.2 26 4.5Z';
       return svgOpen(52) +
-        '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="1">' +
-          '<stop offset="0" stop-color="#fbbc04"/>' +
-          '<stop offset=".34" stop-color="#ea4335"/>' +
-          '<stop offset=".68" stop-color="#34a853"/>' +
-          '<stop offset="1" stop-color="#4285f4"/>' +
-        '</linearGradient></defs>' +
-        '<path d="M26 4.5C27.7 17.2 34.8 24.3 47.5 26 34.8 27.7 27.7 34.8 26 47.5 ' +
-          '24.3 34.8 17.2 27.7 4.5 26 17.2 24.3 24.3 17.2 26 4.5Z" fill="url(#' + gid + ')"/>' +
+        '<defs><clipPath id="' + gid + '"><path d="' + star + '"/></clipPath></defs>' +
+        '<g clip-path="url(#' + gid + ')">' +
+          '<rect x="0" y="0" width="26" height="26" fill="#fbbc04"/>' +
+          '<rect x="26" y="0" width="26" height="26" fill="#ea4335"/>' +
+          '<rect x="0" y="26" width="26" height="26" fill="#34a853"/>' +
+          '<rect x="26" y="26" width="26" height="26" fill="#4285f4"/>' +
+        '</g>' +
         faceDots(26, 25.4, 2.5, 1.15, 2.1) +
         '</svg>';
     }
