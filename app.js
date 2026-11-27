@@ -25,7 +25,7 @@
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
       color: '#6f8fe0', deep: '#5a6bb8', soft: '#eef1fb',
       dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
-      spot: [26.6, 84.3], tag: [26.6, 74.8], bubble: [26.6, 92.9], tail: 'up', delay: 1.8 }
+      spot: [26.6, 84.3], tag: [26.6, 74.8], bubble: [26.6, 90.4], tail: 'up', delay: 1.8 }
   ];
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
