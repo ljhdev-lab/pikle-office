@@ -431,9 +431,9 @@ body.motion .toggle__dot { transform: translateX(16px); }
 .spot:focus-visible { outline: none; }
 .spot:focus-visible .spot__ring,
 .spot.is-focus .spot__ring {
-  border-color: rgba(255, 255, 255, .85);
-  background: radial-gradient(circle, rgba(255, 255, 255, .2) 0%, rgba(255, 255, 255, 0) 70%);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, .38);
+  border-color: rgba(255, 255, 255, .72);
+  background: radial-gradient(circle, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 68%);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .3);
 }
 
 /* speech bubble */
@@ -978,6 +978,7 @@ body.motion .toggle__dot { transform: translateX(16px); }
   align-items: flex-end;
   justify-content: center;
 }
+.sheet-wrap[hidden] { display: none; }
 
 .sheet-backdrop {
   position: absolute;
