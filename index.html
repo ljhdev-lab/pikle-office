@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>별이 비서실</title>
+<meta name="description" content="별이 비서실 — 나만의 작은 AI 오피스 대시보드">
+<meta name="theme-color" content="#f6f2ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="별이 비서실">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand__icon" aria-hidden="true">
+        <svg viewBox="0 0 36 36">
+          <defs>
+            <linearGradient id="brandG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8ca8ff"/>
+              <stop offset="1" stop-color="#5c7bf0"/>
+            </linearGradient>
+          </defs>
+          <rect width="36" height="36" rx="11" fill="url(#brandG)"/>
+          <ellipse cx="18" cy="6" rx="15" ry="6" fill="#ffffff" opacity=".16"/>
+          <path d="M12.6 11.2v14.6M23.4 11.2v14.6M12.6 12.2h10.8M12.6 18.6h10.8M12.6 25h10.8"
+                fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+          <path d="M28.8 6.2l1 2.3 2.4.4-1.8 1.7.5 2.4-2.1-1.2-2.2 1.2.5-2.4-1.7-1.7 2.4-.4z" fill="#ffe08a"/>
+        </svg>
+      </span>
+      <div class="brand__text">
+        <h1 class="brand__title">별이 비서실</h1>
+        <p class="brand__sub"><span class="live-dot" id="liveDot"></span><span id="brandSub">4개 파트 가동 중</span></p>
+      </div>
+      <span class="brand__date" id="brandDate">11.27 금</span>
+    </div>
+
+    <nav class="tabs" id="tabs" role="tablist" aria-label="비서실 메뉴">
+      <button class="tab is-active" role="tab" id="tab-map" data-tab="map" aria-selected="true" aria-controls="view-map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 9.6 12 4l8 5.6V19a1 1 0 0 1-1 1h-4.4v-4.8h-5.2V20H5a1 1 0 0 1-1-1z"/>
+        </svg>
+        <span>오피스 맵</span>
+      </button>
+      <button class="tab" role="tab" id="tab-meeting" data-tab="meeting" aria-selected="false" aria-controls="view-meeting">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 5.6h16v9.6h-7.2L8 19v-3.8H4z"/>
+          <path d="M8 9.2h8M8 12h5"/>
+        </svg>
+        <span>회의실</span>
+        <i class="tab__dot" id="meetingDot" hidden></i>
+      </button>
+      <button class="tab" role="tab" id="tab-work" data-tab="work" aria-selected="false" aria-controls="view-work">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 6.2l1.6 1.6L8.2 5"/><path d="M11 6.6h9"/>
+          <path d="M4 12.2l1.6 1.6L8.2 11"/><path d="M11 12.6h9"/>
+          <path d="M4 18.2l1.6 1.6L8.2 17"/><path d="M11 18.6h6"/>
+        </svg>
+        <span>작업실</span>
+      </button>
+      <button class="tab" role="tab" id="tab-team" data-tab="team" aria-selected="false" aria-controls="view-team">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="9.2" cy="9" r="3"/>
+          <path d="M3.6 19c0-2.9 2.5-4.8 5.6-4.8S14.8 16.1 14.8 19"/>
+          <circle cx="17.4" cy="8.4" r="2.3"/>
+          <path d="M16.6 13.6c2.3.2 3.8 1.7 3.8 3.9"/>
+        </svg>
+        <span>비서현황</span>
+      </button>
+      <button class="tab" role="tab" id="tab-memo" data-tab="memo" aria-selected="false" aria-controls="view-memo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4.4" y="4" width="15.2" height="16" rx="3.6"/>
+          <path d="M8 9h8M8 12.4h8M8 15.8h5"/>
+        </svg>
+        <span>메모·백업</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="views">
+
+    <section class="view is-active" id="view-map" role="tabpanel" aria-labelledby="tab-map">
+      <div class="card today">
+        <div class="today__head">
+          <span class="eyebrow" id="todayEyebrow"><b class="eyebrow__nick">대표님</b> · 좋은 저녁이에요</span>
+          <span class="badge-live"><span class="live-dot"></span><span id="todayBadge">4개 파트 가동 중</span></span>
+        </div>
+        <textarea class="today__line" id="todayLine" rows="2" maxlength="90"
+                  aria-label="오늘의 한마디" placeholder="오늘의 한마디를 적어 두세요"></textarea>
+        <div class="today__foot">
+          <div class="toggle-wrap">
+            <span class="toggle__cap">움직임</span>
+            <button class="toggle" id="motionBtn" role="switch" aria-checked="true" aria-label="캐릭터 움직임">
+              <span class="toggle__track"><span class="toggle__dot"></span></span>
+            </button>
+            <span class="toggle__state" id="motionState">ON</span>
+          </div>
+          <span class="today__stats" id="todayStats"></span>
+        </div>
+      </div>
+
+      <div class="map-grid" id="mapGrid" aria-label="비서실 오피스맵"></div>
+      <p class="hint-line">방을 누르면 파트 상태와 할 일이 열려요.</p>
+    </section>
+
+    <section class="view" id="view-meeting" role="tabpanel" aria-labelledby="tab-meeting" hidden>
+      <div class="view__head">
+        <h2 class="view__title">회의실</h2>
+        <p class="view__sub">결정이 필요한 안건을 모아 두는 곳이에요.</p>
+      </div>
+      <form class="addbar" id="agendaForm" autocomplete="off">
+        <input class="input" id="agendaInput" maxlength="80" placeholder="새 안건을 적어 주세요" aria-label="새 안건">
+        <button class="btn-add" type="submit" aria-label="안건 추가">＋</button>
+      </form>
+      <ul class="list" id="agendaList"></ul>
+      <p class="empty" id="agendaEmpty" hidden>아직 안건이 없어요.<br>결정할 일이 생기면 여기에 적어 두세요.</p>
+    </section>
+
+    <section class="view" id="view-work" role="tabpanel" aria-labelledby="tab-work" hidden>
+      <div class="view__head">
+        <h2 class="view__title">작업실</h2>
+        <p class="view__sub">파트별 할 일을 체크해요.</p>
+      </div>
+      <form class="addbar addbar--task" id="taskForm" autocomplete="off">
+        <select class="input select" id="taskPart" aria-label="추가할 파트"></select>
+        <input class="input" id="taskInput" maxlength="80" placeholder="할 일을 적어 주세요" aria-label="새 할 일">
+        <button class="btn-add" type="submit" aria-label="할 일 추가">＋</button>
+      </form>
+      <div class="chips" id="taskFilters" role="group" aria-label="파트 필터"></div>
+      <div class="progress">
+        <div class="progress__bar"><span id="taskProgressBar"></span></div>
+        <span class="progress__text" id="taskProgressText">0 / 0</span>
+      </div>
+      <ul class="list" id="taskList"></ul>
+      <p class="empty" id="taskEmpty" hidden>아직 할 일이 없어요.<br>위에서 하나 적어 보세요.</p>
+    </section>
+
+    <section class="view" id="view-team" role="tabpanel" aria-labelledby="tab-team" hidden>
+      <div class="view__head">
+        <h2 class="view__title">비서현황</h2>
+        <p class="view__sub">네 파트 비서의 지금 상태예요. 문구는 직접 고칠 수 있어요.</p>
+      </div>
+      <div class="team" id="teamList"></div>
+    </section>
+
+    <section class="view" id="view-memo" role="tabpanel" aria-labelledby="tab-memo" hidden>
+      <div class="view__head">
+        <h2 class="view__title">메모·백업</h2>
+        <p class="view__sub">생각나는 건 아무거나 적어 두세요.</p>
+      </div>
+
+      <div class="card">
+        <div class="card__head">
+          <h3 class="card__title">자유 메모</h3>
+          <span class="card__hint" id="memoHint">자동 저장</span>
+        </div>
+        <textarea class="memo" id="memo" rows="7" maxlength="4000" placeholder="여기에 자유롭게 메모해 두세요."></textarea>
+      </div>
+
+      <div class="card">
+        <div class="card__head">
+          <h3 class="card__title">호칭</h3>
+        </div>
+        <div class="field-row">
+          <input class="input" id="nickInput" maxlength="12" placeholder="대표님" aria-label="호칭">
+        </div>
+        <p class="field__hint" id="nickPreview">“대표님, 오늘도 화이팅!”</p>
+      </div>
+
+      <div class="card">
+        <div class="card__head">
+          <h3 class="card__title">데이터</h3>
+        </div>
+        <p class="field__hint">이 브라우저에 자동으로 저장돼요. 기기를 바꿀 땐 JSON 파일로 옮겨요.</p>
+        <div class="btn-row">
+          <button class="btn" id="exportBtn" type="button">JSON 내보내기</button>
+          <button class="btn" id="importBtn" type="button">JSON 불러오기</button>
+        </div>
+        <button class="btn btn--danger" id="resetBtn" type="button">초기 상태로 되돌리기</button>
+        <p class="field__hint" id="storageInfo"></p>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+
+      <div class="card card--tip">
+        <div class="card__head">
+          <h3 class="card__title">아이폰 홈 화면에 추가</h3>
+        </div>
+        <ol class="steps">
+          <li><span>Safari로 이 페이지를 열어요</span></li>
+          <li><span>아래 공유 버튼을 눌러요</span></li>
+          <li><span>‘홈 화면에 추가’를 골라요</span></li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="sheet-wrap" id="sheetWrap" hidden>
+  <div class="sheet-backdrop" data-action="close-sheet"></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet__grab"></div>
+    <div class="sheet__head" id="sheetHead"></div>
+    <div class="sheet__body" id="sheetBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:24px;text-align:center">이 앱을 쓰려면 자바스크립트를 켜 주세요.</p></noscript>
+<script src="app.js"></script>
+</body>
+</html>
