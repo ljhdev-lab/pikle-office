@@ -492,61 +492,51 @@
   }
 
   function sceneLounge() {
-    return '<svg class="scene" viewBox="0 0 400 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">' +
-      '<rect width="400" height="150" fill="#f9f3ea"/>' +
-      '<ellipse cx="200" cy="4" rx="240" ry="60" fill="#fffdf8" opacity=".5"/>' +
-      '<rect y="70" width="400" height="80" fill="#f1e6d6"/>' +
-      '<rect y="67" width="400" height="3.5" fill="#e8d9c4"/>' +
+    return '<svg class="scene" viewBox="0 0 200 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">' +
+      '<rect width="200" height="150" fill="#f9f3ea"/>' +
+      '<rect y="70" width="200" height="80" fill="#f1e6d6"/>' +
+      '<rect y="67" width="200" height="3.5" fill="#e8d9c4"/>' +
 
-      '<rect x="40" y="18" width="66" height="42" rx="4" fill="#fffdf8" stroke="#e6d9c6" stroke-width="2"/>' +
-      '<path d="M50 50q10-18 22-7t22 0" fill="none" stroke="#b9c8ea" stroke-width="3" stroke-linecap="round"/>' +
-      '<circle cx="92" cy="30" r="6" fill="#f6cf9d"/>' +
+      '<rect x="18" y="16" width="44" height="32" rx="4" fill="#fffdf8" stroke="#e6d9c6" stroke-width="2"/>' +
+      '<path d="M26 40q8-13 16-5t14 0" fill="none" stroke="#b9c8ea" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<circle cx="52" cy="24" r="4" fill="#f6cf9d"/>' +
 
-      '<rect x="150" y="18" width="98" height="46" rx="5" fill="#fffdf8" stroke="#e0d6c6" stroke-width="2"/>' +
-      '<path d="M160 32h28M160 40h44M160 48h22" stroke="#cfd9ee" stroke-width="2" stroke-linecap="round"/>' +
-      '<rect x="212" y="26" width="14" height="14" rx="2" fill="#ffe1a8"/>' +
-      '<rect x="230" y="30" width="12" height="12" rx="2" fill="#cfe3d4"/>' +
+      '<rect x="112" y="20" width="64" height="34" rx="4" fill="#fffdf8" stroke="#e0d6c6" stroke-width="1.6"/>' +
+      '<path d="M120 32h20M120 40h30" stroke="#cfd9ee" stroke-width="2" stroke-linecap="round"/>' +
+      '<rect x="152" y="28" width="12" height="12" rx="2" fill="#ffe1a8"/>' +
 
-      '<rect x="300" y="40" width="72" height="5" rx="2.5" fill="#e6d2b2"/>' +
-      books(306, 40, ['#e8c3b0', '#a8c7ea', '#d3bce8', '#b6dcbe']) +
-
-      '<ellipse cx="300" cy="142" rx="94" ry="11" fill="#faf0e2" opacity=".95"/>' +
+      '<ellipse cx="104" cy="142" rx="86" ry="9" fill="#faf0e2"/>' +
 
       '<g>' +
-        '<path d="M352 116h26l-4 20h-18z" fill="#e7aa7f"/>' +
-        '<path d="M365 116c0-13-8-19-15-21 0 11 6 19 15 21z" fill="#8fcf9a"/>' +
-        '<path d="M365 116c0-15 8-22 15-24 0 13-6 21-15 24z" fill="#a9ddb3"/>' +
+        '<path d="M176 116h20l-3 20h-14z" fill="#e7aa7f"/>' +
+        '<path d="M186 116c0-11-6-16-12-18 0 9 5 16 12 18z" fill="#8fcf9a"/>' +
+        '<path d="M186 116c0-12 6-18 12-19 0 11-5 17-12 19z" fill="#a9ddb3"/>' +
       '</g>' +
 
-      '<rect x="228" y="98" width="3" height="42" fill="#d9c7ad"/>' +
-      '<path d="M216 98h27l-5-15h-17z" fill="#f8ddb0"/>' +
-      '<ellipse cx="229.5" cy="141" rx="10" ry="3" fill="#d9c7ad"/>' +
+      '<rect x="20" y="80" width="92" height="28" rx="11" fill="#c8d6f0"/>' +
+      '<rect x="28" y="86" width="36" height="22" rx="8" fill="#dde7fa"/>' +
+      '<rect x="68" y="86" width="36" height="22" rx="8" fill="#e8eefb"/>' +
+      '<rect x="14" y="104" width="104" height="21" rx="9" fill="#d5e0f6"/>' +
+      '<rect x="6" y="96" width="18" height="30" rx="9" fill="#c8d6f0"/>' +
+      '<rect x="106" y="96" width="18" height="30" rx="9" fill="#c8d6f0"/>' +
+      '<rect x="20" y="125" width="5" height="8" fill="#cbaa83"/>' +
+      '<rect x="104" y="125" width="5" height="8" fill="#cbaa83"/>' +
 
-      '<rect x="40" y="78" width="172" height="30" rx="12" fill="#c8d6f0"/>' +
-      '<rect x="52" y="84" width="70" height="24" rx="9" fill="#dde7fa"/>' +
-      '<rect x="128" y="84" width="70" height="24" rx="9" fill="#e8eefb"/>' +
-      '<rect x="34" y="104" width="184" height="26" rx="11" fill="#d5e0f6"/>' +
-      '<rect x="26" y="96" width="22" height="36" rx="11" fill="#c8d6f0"/>' +
-      '<rect x="204" y="96" width="22" height="36" rx="11" fill="#c8d6f0"/>' +
-      '<rect x="46" y="129" width="6" height="9" fill="#cbaa83"/>' +
-      '<rect x="196" y="129" width="6" height="9" fill="#cbaa83"/>' +
+      '<ellipse cx="86" cy="102" rx="13" ry="7" fill="#f7c9a8"/>' +
+      '<path d="M74 104q-7 2-4 8" stroke="#efb991" stroke-width="2.8" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="97" cy="96" r="6.6" fill="#f7c9a8"/>' +
+      '<path d="M92.5 90.5l-2-5.4 5.4 2.6z" fill="#f7c9a8"/>' +
+      '<path d="M101 90.5l2-5.4-5.4 2.6z" fill="#f7c9a8"/>' +
+      '<path d="M94 96q1.4 1.4 2.8 0M99.6 96q1.4 1.4 2.8 0" stroke="#c98f6c" ' +
+        'stroke-width="1.2" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="98.4" cy="99.4" r="1" fill="#d98f7a"/>' +
+      '<ellipse cx="91.4" cy="99" rx="1.8" ry="1.1" fill="#ff9db1" opacity=".4"/>' +
 
-      '<ellipse cx="176" cy="103" rx="16" ry="9" fill="#f7c9a8"/>' +
-      '<path d="M160 105q-9 3-5 10" stroke="#efb991" stroke-width="3.4" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="189" cy="96" r="8" fill="#f7c9a8"/>' +
-      '<path d="M184 89l-2.5-6.5 6.5 3.2z" fill="#f7c9a8"/>' +
-      '<path d="M194 89l2.5-6.5-6.5 3.2z" fill="#f7c9a8"/>' +
-      '<path d="M185.5 96q1.6 1.6 3.2 0M192.5 96q1.6 1.6 3.2 0" stroke="#c98f6c" ' +
-        'stroke-width="1.4" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="190.6" cy="100" r="1.2" fill="#d98f7a"/>' +
-      '<ellipse cx="182" cy="99.4" rx="2.2" ry="1.4" fill="#ff9db1" opacity=".4"/>' +
-
-      '<rect x="252" y="112" width="96" height="8" rx="4" fill="#e7c39c"/>' +
-      '<rect x="260" y="120" width="5" height="15" fill="#d8b189"/>' +
-      '<rect x="335" y="120" width="5" height="15" fill="#d8b189"/>' +
-      '<ellipse cx="278" cy="112" rx="9" ry="2.4" fill="#fffdf8" stroke="#ece1d0" stroke-width="1"/>' +
-      '<rect x="272" y="102" width="12" height="11" rx="2.5" fill="#fffdf8" stroke="#e2d6c6" stroke-width="1"/>' +
-      '<rect x="300" y="105" width="26" height="7" rx="1.5" fill="#cfe0d2"/>' +
+      '<rect x="128" y="114" width="56" height="7" rx="3.5" fill="#e7c39c"/>' +
+      '<rect x="134" y="121" width="4" height="15" fill="#d8b189"/>' +
+      '<rect x="172" y="121" width="4" height="15" fill="#d8b189"/>' +
+      '<rect x="146" y="104" width="10" height="10" rx="2" fill="#fffdf8" stroke="#e2d6c6" stroke-width="1"/>' +
+      '<rect x="160" y="107" width="18" height="6" rx="1.5" fill="#cfe0d2"/>' +
     '</svg>';
   }
 
@@ -606,7 +596,7 @@
 
   function loungeHTML() {
     var open = state.agenda.filter(function (a) { return !a.done; }).length;
-    return '<button class="room room--wide" type="button" data-action="open-room" data-part="lounge" ' +
+    return '<button class="room" type="button" data-action="open-room" data-part="lounge" ' +
       'style="--c:#b9c8ea" aria-label="회의실 라운지 열기">' +
       '<span class="room__scene">' + sceneLounge() + '</span>' +
       '<span class="room__foot">' +
