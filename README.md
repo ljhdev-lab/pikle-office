@@ -4,33 +4,46 @@
 
 - 빌드 도구 없이 동작하는 순수 HTML / CSS / JS 정적 사이트
 - 바깥으로 나가는 요청(폰트·스크립트·분석 도구)이 하나도 없습니다
-- 기록은 브라우저 `localStorage`(`byeol-office-v1`)에만 저장됩니다
+- 기록은 브라우저 `localStorage`(`byeol-office-v2`)에만 저장됩니다
+- 오피스맵은 3D 아이소메트릭 일러스트 한 장 위에 이름표·말풍선·핫스팟을 HTML/CSS로 얹은 구조입니다 (이미지 안에는 글자가 없습니다)
+
+## 네 사람
+
+| 자리 | 이름 | 역할 | 색 |
+| --- | --- | --- | --- |
+| 총괄 지휘실 | 별이 | 비서실장 · 총괄 지휘 | 코발트 블루 |
+| 콘텐츠·기획실 | GPT | 콘텐츠 · 기획 | 민트 |
+| 조사·분석실 | 클로드 | 조사 · 분석 · 문서 | 코랄 |
+| 디자인·검수실 | 제미나이 | 디자인 · 검수 · 이미지 | 라벤더 |
 
 ## 파일
 
 | 파일 | 설명 |
 | --- | --- |
 | `index.html` | 화면 구조와 PWA 메타 태그 |
-| `style.css` | 파스텔 톤 UI, 오피스맵 애니메이션 |
-| `app.js` | 상태 저장, 오피스맵 SVG, 체크리스트·메모·백업 |
+| `style.css` | 크림 톤 UI, 오피스맵 오버레이·말풍선 |
+| `app.js` | 상태 저장, 오피스맵 오버레이 좌표, 체크리스트·메모·백업 |
+| `assets/office-map-v1.webp` | 3D 아이소메트릭 오피스맵 (864×1152) |
 | `icon.svg`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | 앱 아이콘 |
 | `manifest.json` | 웹 앱 매니페스트 |
 | `tools/` | 아이콘·장면 미리보기용 개발 스크립트 (배포에는 필요 없음) |
 
+### 오피스맵 좌표 고치기
+
+`app.js` 위쪽 `PARTS` 의 `spot` · `tag` · `bubble` 값이 이미지 안의 % 위치입니다.
+이미지를 새로 뽑으면 그 값만 다시 맞추면 됩니다.
+
 ## 로컬에서 보기
 
 ```sh
-cd pickle-office
 python3 -m http.server 8000
 # 브라우저에서 http://localhost:8000
 ```
 
-## GitHub Pages에 올리기
+## GitHub Pages
 
-1. 이 폴더의 파일을 저장소 루트(또는 `docs/`)에 올립니다.
-2. 저장소 **Settings → Pages → Build and deployment** 에서
-   Source를 `Deploy from a branch`, 브랜치를 `main`, 폴더를 `/ (root)` 로 지정합니다.
-3. 잠시 뒤 `https://<계정>.github.io/<저장소>/` 로 열립니다.
+`main` 브랜치 루트를 그대로 배포합니다.
+`https://ljhdev-lab.github.io/pikle-office/`
 
 > 하위 경로에서도 동작하도록 모든 경로가 상대 경로로 되어 있습니다.
 
@@ -42,3 +55,4 @@ Safari로 페이지를 연 뒤 **공유 → 홈 화면에 추가**.
 
 `메모·백업` 탭에서 **JSON 내보내기**로 파일을 받아 두고,
 새 기기에서 **JSON 불러오기**로 그 파일을 고르면 그대로 복원됩니다.
+이전 버전(`byeol-office-v1`)의 기록은 처음 열 때 자동으로 새 구조로 옮겨 옵니다.

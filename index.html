@@ -14,6 +14,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
+<link rel="preload" as="image" href="assets/office-map-v1.webp" type="image/webp">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,19 +27,20 @@
           <defs>
             <linearGradient id="brandG" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stop-color="#8ca8ff"/>
-              <stop offset="1" stop-color="#5c7bf0"/>
+              <stop offset="1" stop-color="#4f6ee8"/>
             </linearGradient>
           </defs>
           <rect width="36" height="36" rx="11" fill="url(#brandG)"/>
-          <ellipse cx="18" cy="6" rx="15" ry="6" fill="#ffffff" opacity=".16"/>
-          <path d="M12.6 11.2v14.6M23.4 11.2v14.6M12.6 12.2h10.8M12.6 18.6h10.8M12.6 25h10.8"
-                fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-          <path d="M28.8 6.2l1 2.3 2.4.4-1.8 1.7.5 2.4-2.1-1.2-2.2 1.2.5-2.4-1.7-1.7 2.4-.4z" fill="#ffe08a"/>
+          <ellipse cx="18" cy="6" rx="15" ry="6" fill="#ffffff" opacity=".18"/>
+          <g fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+            <path d="M11.6 10.6v16M24.4 10.6v16M11.6 12.4h12.8M11.6 19h12.8M11.6 26.6h12.8"/>
+          </g>
+          <path d="M29.2 5.6l1 2.3 2.4.4-1.8 1.8.5 2.4-2.1-1.2-2.2 1.2.5-2.4-1.7-1.8 2.4-.4z" fill="#ffe08a"/>
         </svg>
       </span>
       <div class="brand__text">
         <h1 class="brand__title">별이 비서실</h1>
-        <p class="brand__sub"><span class="live-dot" id="liveDot"></span><span id="brandSub">4개 파트 가동 중</span></p>
+        <p class="brand__sub"><span class="live-dot" id="liveDot"></span><span id="brandSub">4인 체제 가동 중</span></p>
       </div>
       <span class="brand__date" id="brandDate">11.27 금</span>
     </div>
@@ -46,7 +48,8 @@
     <nav class="tabs" id="tabs" role="tablist" aria-label="비서실 메뉴">
       <button class="tab is-active" role="tab" id="tab-map" data-tab="map" aria-selected="true" aria-controls="view-map">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M4 9.6 12 4l8 5.6V19a1 1 0 0 1-1 1h-4.4v-4.8h-5.2V20H5a1 1 0 0 1-1-1z"/>
+          <path d="M12 3.2l7.4 4.1v9.4L12 20.8 4.6 16.7V7.3z"/>
+          <path d="M4.6 7.3L12 11.4l7.4-4.1M12 11.4v9.4"/>
         </svg>
         <span>오피스 맵</span>
       </button>
@@ -91,14 +94,14 @@
       <div class="card today">
         <div class="today__head">
           <span class="eyebrow" id="todayEyebrow"><b class="eyebrow__nick">대표님</b> · 좋은 저녁이에요</span>
-          <span class="badge-live"><span class="live-dot"></span><span id="todayBadge">4개 파트 가동 중</span></span>
+          <span class="badge-live"><span class="live-dot"></span><span id="todayBadge">4인 체제 가동 중</span></span>
         </div>
         <textarea class="today__line" id="todayLine" rows="1" maxlength="90"
                   aria-label="오늘의 한마디" placeholder="오늘의 한마디를 적어 두세요"></textarea>
         <div class="today__foot">
           <div class="toggle-wrap">
-            <span class="toggle__cap">움직임</span>
-            <button class="toggle" id="motionBtn" role="switch" aria-checked="true" aria-label="캐릭터 움직임">
+            <span class="toggle__cap">말풍선</span>
+            <button class="toggle" id="motionBtn" role="switch" aria-checked="true" aria-label="캐릭터 말풍선 움직임">
               <span class="toggle__track"><span class="toggle__dot"></span></span>
             </button>
             <span class="toggle__state" id="motionState">ON</span>
@@ -107,8 +110,41 @@
         </div>
       </div>
 
-      <div class="map-grid" id="mapGrid" aria-label="비서실 오피스맵"></div>
-      <p class="hint-line">방을 누르면 파트 상태와 할 일이 열려요.</p>
+      <div class="map-card">
+        <div class="map-stage" id="mapStage">
+          <img class="map-img" id="mapImg" src="assets/office-map-v1.webp" width="864" height="1152"
+               alt="네 명의 점토 캐릭터가 각자 자리에서 일하는 3D 아이소메트릭 비서실" decoding="async" fetchpriority="high">
+          <div class="map-overlay" id="mapOverlay"></div>
+        </div>
+        <div class="map-foot">
+          <span class="map-foot__hint">캐릭터를 누르면 그 비서의 오늘 일정이 열려요</span>
+        </div>
+      </div>
+
+      <div class="crew" id="crewList" aria-label="비서 4인 현황"></div>
+
+      <div class="shortcuts">
+        <button class="shortcut" type="button" data-action="go-meeting" style="--c:#c8b9ef">
+          <span class="shortcut__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 5.6h16v9.6h-7.2L8 19v-3.8H4z"/><path d="M8 9.2h8M8 12h5"/>
+            </svg>
+          </span>
+          <span class="shortcut__body"><b>회의실</b><small id="meetingMeta">안건 0건</small></span>
+          <span class="shortcut__go" aria-hidden="true">›</span>
+        </button>
+        <button class="shortcut" type="button" data-action="go-work-all" style="--c:#b9d8c4">
+          <span class="shortcut__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6.2l1.6 1.6L8.2 5"/><path d="M11 6.6h9"/>
+              <path d="M4 12.2l1.6 1.6L8.2 11"/><path d="M11 12.6h9"/>
+              <path d="M4 18.2l1.6 1.6L8.2 17"/><path d="M11 18.6h6"/>
+            </svg>
+          </span>
+          <span class="shortcut__body"><b>작업실</b><small id="workMeta">할 일 0건</small></span>
+          <span class="shortcut__go" aria-hidden="true">›</span>
+        </button>
+      </div>
     </section>
 
     <section class="view" id="view-meeting" role="tabpanel" aria-labelledby="tab-meeting" hidden>
@@ -127,14 +163,14 @@
     <section class="view" id="view-work" role="tabpanel" aria-labelledby="tab-work" hidden>
       <div class="view__head">
         <h2 class="view__title">작업실</h2>
-        <p class="view__sub">파트별 할 일을 체크해요.</p>
+        <p class="view__sub">네 사람의 할 일을 한 곳에서 체크해요.</p>
       </div>
       <form class="addbar addbar--task" id="taskForm" autocomplete="off">
-        <select class="input select" id="taskPart" aria-label="추가할 파트"></select>
+        <select class="input select" id="taskPart" aria-label="추가할 담당"></select>
         <input class="input" id="taskInput" maxlength="80" placeholder="할 일을 적어 주세요" aria-label="새 할 일">
         <button class="btn-add" type="submit" aria-label="할 일 추가">＋</button>
       </form>
-      <div class="chips" id="taskFilters" role="group" aria-label="파트 필터"></div>
+      <div class="chips" id="taskFilters" role="group" aria-label="담당 필터"></div>
       <div class="progress">
         <div class="progress__bar"><span id="taskProgressBar"></span></div>
         <span class="progress__text" id="taskProgressText">0 / 0</span>
@@ -146,7 +182,7 @@
     <section class="view" id="view-team" role="tabpanel" aria-labelledby="tab-team" hidden>
       <div class="view__head">
         <h2 class="view__title">비서현황</h2>
-        <p class="view__sub">네 파트 비서의 지금 상태예요. 문구는 직접 고칠 수 있어요.</p>
+        <p class="view__sub">네 사람의 지금 상태예요. 문구는 직접 고칠 수 있어요.</p>
       </div>
       <div class="team" id="teamList"></div>
     </section>
