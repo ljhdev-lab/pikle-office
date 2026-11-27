@@ -320,6 +320,10 @@
       '<ellipse cx="210" cy="141" rx="142" ry="13" fill="#f7ead5" opacity=".95"/>' +
       '<ellipse cx="210" cy="141" rx="118" ry="9" fill="none" stroke="#efdfc5" stroke-width="1.6"/>' +
 
+      '<rect x="72.5" y="98" width="3" height="42" fill="#d9c7ad"/>' +
+      '<path d="M60 98h28l-5-15h-18z" fill="#f8ddb0"/>' +
+      '<ellipse cx="74" cy="140" rx="10" ry="3" fill="#d9c7ad"/>' +
+
       '<g>' +
         '<path d="M352 117h26l-4 20h-18z" fill="#e7aa7f"/>' +
         '<path d="M365 117c0-13-8-19-15-21 0 11 6 19 15 21z" fill="#8fcf9a"/>' +
