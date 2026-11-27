@@ -321,13 +321,13 @@
   function blossomSVG(color, soft) {
     var petals = '';
     for (var i = 0; i < 6; i += 1) {
-      petals += '<ellipse cx="26" cy="17.6" rx="4.6" ry="7.4" transform="rotate(' + (i * 60) +
+      petals += '<ellipse cx="26" cy="17.2" rx="5.1" ry="8.1" transform="rotate(' + (i * 60) +
         ' 26 26)"/>';
     }
     return svgOpen(52) +
-      '<g fill="' + color + '" stroke="' + soft + '" stroke-width="3.2">' + petals +
-        '<circle cx="26" cy="26" r="5.6"/></g>' +
-      faceDots(26, 25.4, 2.6, 1.15, 2.0) +
+      '<g fill="' + color + '" stroke="' + soft + '" stroke-width="3.4">' + petals +
+        '<circle cx="26" cy="26" r="5.4"/></g>' +
+      faceDots(26, 25.2, 2.7, 1.2, 2.1) +
       '</svg>';
   }
 
@@ -358,21 +358,20 @@
   function byeolSVG(color) {
     var rows = [
       '...............',
-      '...BB.....BB...',
-      '...BB.....BB...',
-      '...BB.....BB...',
-      '...BB.....BB...',
-      '...BB.....BB...',
+      '..BB.......BB..',
+      '..BB.......BB..',
+      '..BB.......BB..',
+      '..BB.......BB..',
+      '..BBBBBBBBBBB..',
+      '..BEEBBBBBEEB..',
+      '..BEEBBBBBEEB..',
+      '..BBBBBMBBBBB..',
+      '..BBBBBBBBBBB..',
       '...BBBBBBBBB...',
+      '...BBB...BBB...',
+      '...BBB...BBB...',
       '...BBBBBBBBB...',
-      '...BEEBMBEEB...',
-      '...BBBBBBBBB...',
-      '...BBBBBBBBB...',
-      '....BBBBBBB....',
-      '....BB...BB....',
-      '....BB...BB....',
-      '....BBBBBBB....',
-      '....BB...BB....'
+      '...BB.....BB...'
     ];
     var colors = { B: color, E: '#2f3d57', M: '#2f3d57' };
     return svgOpen(64) + pixelSprite(rows, colors) + '</svg>';
