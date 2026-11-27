@@ -14,13 +14,13 @@
   var PARTS = [
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
       color: '#4f6ee8', deep: '#3149b8', soft: '#eaf0ff',
-      spot: [53, 31], tag: [53, 18], bubble: [53, 16], tail: 'down', delay: 0 },
+      spot: [53, 31], tag: [53, 18], bubble: [53, 13], tail: 'down', delay: 0 },
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
       color: '#4fc7a4', deep: '#2a9377', soft: '#e6f8f1',
-      spot: [18, 53], tag: [18, 41], bubble: [20, 39], tail: 'down', delay: 0.6 },
+      spot: [18, 53], tag: [18, 41], bubble: [21, 36], tail: 'down', delay: 0.6 },
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
       color: '#ef8f6b', deep: '#c2603f', soft: '#fdece4',
-      spot: [85, 52], tag: [84, 40], bubble: [81, 38], tail: 'down', delay: 1.2 },
+      spot: [85, 52], tag: [84, 40], bubble: [82, 35], tail: 'down', delay: 1.2 },
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
       color: '#a98bf2', deep: '#7752d0', soft: '#f1ebff',
       spot: [52, 68], tag: [52, 85], bubble: [52, 58], tail: 'down', delay: 1.8 }
