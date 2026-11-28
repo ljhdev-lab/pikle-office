@@ -1033,12 +1033,12 @@
       '<g fill="none" stroke="' + color + '" stroke-width="4.6" stroke-linecap="butt" shape-rendering="crispEdges">' +
         '<path d="M35.6 14.5A15 15 0 0 0 13.7 34.6"/>' +
         '<path d="M16.4 37.5A15 15 0 0 0 37.5 16.4"/>' +
-        '<path d="M32 19.2L47.2 3.4" stroke-width="5.2"/>' +
-        '<path d="M20 32.8L4.8 48.6" stroke-width="5.2"/>' +
+        '<path d="M36 16L49.4 2" stroke-width="6"/>' +
+        '<path d="M16 36L2.6 50" stroke-width="6"/>' +
       '</g>' +
-      '<rect x="17.4" y="22.2" width="3.4" height="3.4" fill="' + color + '"/>' +
-      '<rect x="24.6" y="22.2" width="3.4" height="3.4" fill="' + color + '"/>' +
-      '<rect x="20.6" y="29.6" width="4.2" height="1.7" fill="' + color + '"/>' +
+      '<rect x="18.2" y="22.4" width="3.4" height="3.4" fill="' + color + '"/>' +
+      '<rect x="25.4" y="22.4" width="3.4" height="3.4" fill="' + color + '"/>' +
+      '<rect x="21.4" y="29.8" width="4.2" height="1.7" fill="' + color + '"/>' +
       '</svg>';
   }
 
