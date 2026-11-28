@@ -22,13 +22,13 @@ GOLD = (244, 201, 93)
 COLORS = {0: BG, 1: BLUE, 2: NAVY, 3: GOLD}
 HEX = {0: "#DCEAF5", 1: "#4A91D4", 2: "#243B59", 3: "#F4C95D"}
 
-BX0, BY0, BX1, BY1 = 5, 9, 30, 31      # body block
-TOWER = 9                               # width of each vertical stroke
-NOTCH = 8                               # top opening between the strokes
-DEPTH = 8                               # how deep the opening runs down
-EYE, EYE_GAP = 3, 11
+BX0, BY0, BX1, BY1 = 3, 7, 32, 31      # body block
+TOWER = 10                              # width of each vertical stroke
+NOTCH = 10                              # top opening between the strokes
+DEPTH = 9                               # how deep the opening runs down
+EYE, EYE_GAP = 3, 12
 STAR = ["..#..", ".###.", "#####", ".###.", "..#.."]
-STAR_XY = (25, 2)
+STAR_XY = (27, 1)
 
 
 def mask():
