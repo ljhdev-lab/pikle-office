@@ -144,7 +144,6 @@
     ok: { label: '보통', fill: 62, tone: 'mid' },
     low: { label: '부족', fill: 30, tone: 'low' }
   };
-  var QUOTA_LEVEL_ORDER = ['plenty', 'ok', 'low'];
 
   /* 회의실 — v5 배경 가운데 유리 파티션 안의 좌석 4곳과, 각자 책상 앞에서
      그 좌석까지 걷는 경유점(발바닥 좌표 %). 가구와 유리벽을 뚫지 않도록
@@ -188,66 +187,67 @@
   }));
 
   /* 사용 가이드 — 평소에는 숨겨 두고 헤더의 ? 를 누를 때만 연다.
-     core 는 한 줄 요약, steps 는 바로 따라 하는 세 단계, routine 은 언제
-     쓰면 좋은지, note 는 실제 동작 중 알아 두면 좋은 것 하나.
-     문구는 ChatGPT·클로드·제미나이 3사 협의안을 다듬은 것이다. */
-  var GUIDE_ORDER = ['map', 'meeting', 'work', 'team', 'memo'];
+     core 는 한 줄 요약, steps 는 화면에서 바로 하는 일, routine 은 언제
+     보면 좋은지, note 는 알아 두면 좋은 것 하나.
+     이 앱은 보기 전용 모니터링 현황판이라, 모든 문구에서 추가·체크·
+     삭제 같은 조작 표현을 쓰지 않고 '채팅에서 시키고 여기서 확인한다'로 통일한다. */
+  var GUIDE_ORDER = ['map', 'meeting', 'work', 'team', 'info'];
 
   var GUIDE = {
     map: {
       title: '오피스 맵',
-      core: '네 사람의 상태와 토큰 체력을 한눈에 봐요.',
+      core: '네 사람의 상태와 토큰 한도를 한눈에 봐요.',
       steps: [
-        '오늘의 한마디를 적으면 바로 저장돼요.',
-        '파티 칸에서 상태·토큰 잔여·남은 일감을 봐요.',
-        '칸을 눌러 토큰을 맞추고 클로드 부스터 모드를 켜요.'
+        '위 파티 바에서 상태·토큰 잔여·남은 일감을 봐요.',
+        '캐릭터나 파티 칸을 누르면 그 비서의 현황이 열려요.',
+        '모션·회의 소집·시간 날씨 칩은 화면 연출을 보는 기능이에요.'
       ],
-      routine: '아침에 한마디를 남기고 토큰 잔여부터 확인해요.',
-      note: '체력바는 각 AI의 남은 토큰(한도)이에요. 30% 이하는 주황, 15% 이하는 빨강이고, 클로드 부스터 모드는 Opus로 고난도 작업을 맡길 때 켜요. 측정값이 없는 AI는 시킨 작업 수로 어림한 추정치라 ~17%처럼 물결표를 붙이고, 회복 시각(별이 매일 04:00 · 클로드 매주 토 05:00 · GPT 마지막 사용 5시간 뒤 · 제미나이 매일 00:00)이 지나면 100%로 돌아와요.'
+      routine: '앱을 열 때 파티 바의 잔여 한도부터 확인해요.',
+      note: '체력바는 각 AI의 남은 토큰(한도)이에요. 30% 이하는 주황, 15% 이하는 빨강이고, ⚡ 부스터는 클로드가 Opus로 일하는 중이라는 표시예요. 측정값이 없는 AI는 시킨 작업 수로 어림한 추정치라 ~17%처럼 물결표가 붙고, 회복 시각(별이 매일 04:00 · 클로드 매주 토 05:00 · GPT 마지막 사용 5시간 뒤 · 제미나이 매일 00:00)이 지나면 100%로 돌아와요.'
     },
     meeting: {
       title: '회의실',
-      core: '결정할 일을 안건으로 모아 둬요.',
+      core: '채팅에서 논의 중인 주요 안건을 모아서 봐요.',
       steps: [
-        '결정이 필요한 일을 안건으로 추가해요.',
-        '결정이 끝난 안건은 완료로 체크해요.',
-        '더 필요 없는 안건은 삭제해요.'
+        '채팅에서 정한 안건이 여기에 올라와요.',
+        '결정을 기다리는 안건은 진하게, 정리된 안건은 흐리게 보여요.',
+        '안건을 정하고 마무리하는 건 피클 채팅에서 해요.'
       ],
-      routine: '하루를 마칠 때 완료한 안건부터 체크해요.',
-      note: '모션이 켜져 있으면 안건을 추가할 때 모이고, 완료하면 흩어져요.'
+      routine: '하루를 마칠 때 남은 안건이 있는지 한 번 봐요.',
+      note: '모션을 켜 두면 회의 소집으로 네 사람이 회의실에 모이는 연출을 볼 수 있어요. 안건의 실제 논의는 채팅에서 이뤄져요.'
     },
     work: {
       title: '작업실',
-      core: '할 일을 담당별로 나눠 굴러가게 해요.',
+      core: '채팅에서 맡긴 일의 진행 현황을 확인해요.',
       steps: [
-        '담당을 고르고 할 일을 추가해요.',
-        '담당 칩으로 필요한 일만 골라 봐요.',
-        '끝나면 완료, 필요 없으면 삭제해요.'
+        '진행 중·완료 상태와 담당 비서, 날짜를 한 줄씩 봐요.',
+        '담당 칩으로 그 비서의 일만 골라 봐요.',
+        '값이 늦으면 새로고침을 눌러 다시 읽어요.'
       ],
-      routine: '아침에 할 일을 넣고 저녁에 진행률을 봐요.',
-      note: '모션이 켜져 있으면 할 일을 추가할 때 네 사람이 회의실로 모여요. 채팅에서 맡긴 일은 💬 채팅 배지로 함께 올라와요.'
+      routine: '오전에 한 번, 저녁에 한 번 진행률을 확인해요.',
+      note: '여기서는 추가·체크·삭제를 하지 않아요. 일을 맡기거나 끝난 일을 정리하는 건 피클 채팅에서 해요. 💬 채팅 배지가 붙은 항목이 채팅에서 맡긴 일이에요.'
     },
     team: {
       title: '비서현황',
-      core: '비서별 상태·토큰·가동을 정리해요.',
+      core: '네 사람의 상태·일감·한도를 팀 현황판으로 봐요.',
       steps: [
-        '카드에 한 줄 상태를 적어 둬요.',
-        '토큰 막대와 슬라이더로 잔여 한도를 맞춰요.',
-        '쉬게 할 비서는 가동 스위치를 꺼요.'
+        '지금 상태(가동·타자·회의·휴식)와 남은 일감을 봐요.',
+        '토큰 막대와 회복 시각으로 한도가 언제 차는지 봐요.',
+        '클로드 카드의 ⚡ 부스터는 지금 어느 모델로 일하는지 표시예요.'
       ],
-      routine: '하루를 시작할 때 토큰 잔여와 진행 건수를 봐요.',
-      note: '클로드 카드의 ⚡ 부스터는 Opus 고난도 작업을 맡길 때 켜요. ~17%처럼 물결표가 붙은 값은 시킨 작업 수로 어림한 추정이고, 슬라이더로 직접 맞기면 실측값(추정 표시 없음)이 돼요.'
+      routine: '아침에 토큰 잔여와 진행 건수를 한 번 훑어요.',
+      note: '상태 문구를 고치거나 가동을 끄는 조작은 없어요. 한도를 다시 맞추거나 쉬게 하려면 채팅에서 말해 주세요.'
     },
-    memo: {
-      title: '메모·백업',
-      core: '메모를 남기고 데이터를 지켜요.',
+    info: {
+      title: '동기화·안내',
+      core: '현황판이 어디서 값을 받는지 확인해요.',
       steps: [
-        '메모는 쓰는 대로 자동 저장돼요.',
-        'JSON 내보내기로 파일을 받아 둬요.',
-        '복원할 땐 JSON을 불러와요.'
+        '마지막 동기화 시각과 받은 작업·안건 수를 봐요.',
+        '새로고침을 누르면 최신 파일을 다시 읽어요.',
+        '한도 회복 주기와 모니터링 사용법을 여기서 봐요.'
       ],
-      routine: '주 1회, 그리고 초기화 전에 내보내 두세요.',
-      note: '호칭을 바꾸면 첫 인사말에 바로 반영돼요.'
+      routine: '값이 이상하면 새로고침부터 한 번 눌러요.',
+      note: '이 화면에는 입력·수정·삭제가 없어요. 무엇이든 바꾸려면 피클 채팅에서 별이에게 말하면 돼요.'
     }
   };
 
@@ -266,7 +266,7 @@
       motion: true,
       envTime: 'auto',
       envWeather: 'auto',
-      today: '오늘은 콘텐츠 한 편이랑 예약 확인 하나만 끝내면 돼요.',
+      today: '채팅에서 맡긴 일은 작업실에서, 한도는 위 파티 바에서 확인할 수 있어요.',
       tab: 'map',
       focus: 'byeol',
       parts: {
@@ -275,19 +275,8 @@
         claude: { status: '자료 조사해서 정리 중', active: true, boost: false, quota: defaultQuota('claude') },
         gemini: { status: '표지 이미지 다듬는 중', active: true, boost: false, quota: defaultQuota('gemini') }
       },
-      agenda: [
-        { id: 'a1', title: '이번 주 블로그 글 순서 정하기', done: false, at: now - 7200000 },
-        { id: 'a2', title: '주말 가족 일정 확정하기', done: false, at: now - 5400000 },
-        { id: 'a3', title: '다음 주 장보기 목록 정리', done: true, at: now - 86400000 }
-      ],
-      tasks: [
-        { id: 't1', title: '인스타 카드뉴스 다음 편 기획안 정리', part: 'gpt', done: false, at: now - 3600000 },
-        { id: 't2', title: '블로그 새 글 소재 세 개 추리기', part: 'gpt', done: false, at: now - 3000000 },
-        { id: 't3', title: '이번 주 영수증·지출 정리', part: 'claude', done: false, at: now - 2400000 },
-        { id: 't4', title: '블로그 커버 이미지 후보 세 장 뽑기', part: 'gemini', done: false, at: now - 1800000 },
-        { id: 't5', title: '다음 주 일정 한 번에 훑기', part: 'byeol', done: true, at: now - 900000 }
-      ],
-      memo: '',
+      agenda: [],
+      tasks: [],
       chatSyncedAt: 0,
       chatSyncedLabel: '',
       dismissedChatIds: [],
@@ -312,12 +301,12 @@
     if (!raw || typeof raw !== 'object') return base;
 
     if (typeof raw.nick === 'string' && raw.nick.trim()) base.nick = raw.nick.trim().slice(0, 12);
-    if (typeof raw.today === 'string') base.today = raw.today.slice(0, 120);
-    if (typeof raw.memo === 'string') base.memo = raw.memo.slice(0, 4000);
+    if (typeof raw.today === 'string' && raw.today.trim()) base.today = raw.today.slice(0, 120);
     base.motion = raw.motion !== false;
     if (['auto', 'morning', 'day', 'sunset', 'night'].indexOf(raw.envTime) >= 0) base.envTime = raw.envTime;
     if (['auto', 'clear', 'cloudy', 'rain', 'snow'].indexOf(raw.envWeather) >= 0) base.envWeather = raw.envWeather;
-    if (['map', 'meeting', 'work', 'team', 'memo'].indexOf(raw.tab) >= 0) base.tab = raw.tab;
+    if (['map', 'meeting', 'work', 'team', 'info'].indexOf(raw.tab) >= 0) base.tab = raw.tab;
+    if (raw.tab === 'memo') base.tab = 'info';   /* 예전 5번째 탭 이름 */
     if (PART_MAP[raw.focus]) base.focus = raw.focus;
 
     if (raw.parts && typeof raw.parts === 'object') {
@@ -358,10 +347,10 @@
           done: !!item.done,
           at: typeof item.at === 'number' ? item.at : Date.now()
         };
+        if (typeof item.date === 'string' && item.date) row.date = item.date.slice(0, 5);
         if (hasPart) {
           row.part = PART_MAP[item.part] ? item.part : (LEGACY_PARTS[item.part] || 'byeol');
           if (item.chat) row.chat = true;
-          if (typeof item.date === 'string' && item.date) row.date = item.date.slice(0, 5);
         }
         out.push(row);
       });
@@ -429,27 +418,14 @@
   var bubbleTurn = {};
   var bubbleEls = {};
   var lastMood = {};
-  var uidCount = 0;
 
-  function uid() {
-    uidCount += 1;
-    return 'x' + Date.now().toString(36) + uidCount.toString(36);
-  }
-
+  /* 화면 설정(모션·탭·시간 날씨 미리보기·필터)만 이 기기에 기억해 둔다.
+     일·안건·한도는 data/office-state.json 이 정본이다. */
   function save() {
     state.updatedAt = Date.now();
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) { /* private mode or full storage */ }
-    updateStorageInfo();
-  }
-
-  function saveSoon(cb) {
-    window.clearTimeout(saveTimer);
-    saveTimer = window.setTimeout(function () {
-      save();
-      if (cb) cb();
-    }, 400);
   }
 
   /* ---------------------------------------------------------
@@ -497,21 +473,6 @@
     return (fallback || Date.now()) - idx * 60000;
   }
 
-  function onlyDemoTasksLeft() {
-    if (!state.tasks.length) return false;
-    return state.tasks.every(function (t) { return DEMO_TASK_IDS[t.id] === 1; });
-  }
-
-  /* 예시 할 일만 남은 상태면 한 번만 비운다. 사용자가 직접 넣은
-     할 일(id x…)이 하나라도 있으면 아무것도 지우지 않는다. */
-  function clearDemoTasks() {
-    if (state.demoCleared) return false;
-    state.demoCleared = true;
-    if (!onlyDemoTasksLeft()) return false;
-    state.tasks = [];
-    return true;
-  }
-
   function mergeRemote(data) {
     var out = { ok: false, added: 0, changed: false };
     if (!data || typeof data !== 'object') return out;
@@ -543,7 +504,50 @@
       out.changed = true;
     });
 
-    if (clearDemoTasks()) out.changed = true;
+    /* 모니터링 현황판은 채팅이 적어 둔 값을 그대로 보여 준다.
+       예전 버전이 넣어 둔 예시 할 일(t1~t5)은 실제 일이 아니므로 걷어 낸다. */
+    var before = state.tasks.length;
+    state.tasks = state.tasks.filter(function (t) { return !DEMO_TASK_IDS[t.id]; });
+    if (state.tasks.length !== before) out.changed = true;
+
+    /* 오늘의 브리핑 요약 — 파일의 brief(또는 예전 이름 today)를 읽기 전용으로 보여 준다. */
+    var brief = typeof data.brief === 'string' ? data.brief
+      : (typeof data.today === 'string' ? data.today : '');
+    brief = brief.replace(/\s+/g, ' ').trim().slice(0, 160);
+    if (brief && brief !== state.today) { state.today = brief; out.changed = true; }
+
+    /* 부스터 모드 표시 — 채팅에서 정한 값이 파일에 실려 오면 그대로 따른다. */
+    var boost = (data.boost && typeof data.boost === 'object') ? data.boost : null;
+    if (boost) PARTS.forEach(function (p) {
+      if (typeof boost[p.id] !== 'boolean' || !state.parts[p.id]) return;
+      if (state.parts[p.id].boost === boost[p.id]) return;
+      state.parts[p.id].boost = boost[p.id];
+      out.changed = true;
+    });
+
+    /* 안건 — 채팅에서 오간 주요 안건을 목록째 받아 보여 준다. 안건의
+       내용과 진행 상태는 채팅이 정하고, 앱은 그대로 비추기만 한다. */
+    if (Array.isArray(data.agenda)) {
+      var nextAgenda = [];
+      data.agenda.forEach(function (row, i) {
+        if (!row || typeof row !== 'object') return;
+        var aTitle = typeof row.title === 'string' ? row.title.trim().slice(0, 80) : '';
+        if (!aTitle) return;
+        var aDate = typeof row.date === 'string' ? row.date.slice(0, 5) : '';
+        nextAgenda.push({
+          id: typeof row.id === 'string' && row.id ? row.id : 'ag' + i,
+          title: aTitle,
+          done: row.done === true,
+          date: aDate,
+          at: chatTaskAt(aDate, remoteAt, i)
+        });
+      });
+      var sig = function (a) { return [a.id, a.title, !!a.done, a.date || '']; };
+      if (JSON.stringify(nextAgenda.map(sig)) !== JSON.stringify(state.agenda.map(sig))) {
+        state.agenda = nextAgenda;
+        out.changed = true;
+      }
+    }
 
     var rows = Array.isArray(data.tasks) ? data.tasks : [];
     rows.forEach(function (row, i) {
@@ -590,34 +594,56 @@
     return out;
   }
 
+  /* 마지막 동기화 시각과 건수 — 작업실·회의실·동기화·안내가 같은 값을 함께 쓴다. */
   function chatSyncText() {
-    var el = $('#syncText');
-    if (!el) return;
     var label = state.chatSyncedLabel
       || (state.chatSyncedAt ? shortDate(state.chatSyncedAt) + ' ' + hhmm(state.chatSyncedAt) : '');
-    el.textContent = label ? '채팅 동기화 · ' + label : '채팅 동기화 · 대기 중';
-    var n = state.tasks.filter(function (t) { return t.chat && !t.done; }).length;
-    var cnt = $('#syncCount');
-    if (cnt) cnt.textContent = n ? n + '건 진행' : '모두 완료';
+
+    var el = $('#syncText');
+    if (el) {
+      el.textContent = label ? '채팅 동기화 · ' + label : '채팅 동기화 · 대기 중';
+      var n = state.tasks.filter(function (t) { return t.chat && !t.done; }).length;
+      var cnt = $('#syncCount');
+      if (cnt) cnt.textContent = n ? n + '건 진행' : '모두 완료';
+    }
+
+    var open = state.tasks.filter(function (t) { return !t.done; }).length;
+    var done = state.tasks.length - open;
+    var when = $('#infoSyncWhen');
+    if (when) when.textContent = label || '대기 중';
+    var counts = $('#infoSyncCounts');
+    if (counts) counts.textContent = state.tasks.length ? '진행 ' + open + ' · 완료 ' + done : '없음';
+
+    var openA = state.agenda.filter(function (a) { return !a.done; }).length;
+    var agCounts = $('#infoAgendaCounts');
+    if (agCounts) {
+      agCounts.textContent = state.agenda.length
+        ? '진행 ' + openA + ' · 정리 ' + (state.agenda.length - openA) : '없음';
+    }
+    var agTxt = $('#agendaSyncText');
+    if (agTxt) agTxt.textContent = label ? '동기화 · ' + label : '동기화 · 대기 중';
+    var agCnt = $('#agendaSyncCount');
+    if (agCnt) agCnt.textContent = state.agenda.length ? openA + '건 진행' : '';
   }
 
   function setChatBusy(on) {
     chatBusy = !!on;
     var bar = $('#syncBar');
     if (bar) bar.classList.toggle('is-busy', chatBusy);
-    var btn = $('#syncBtn');
-    if (btn) {
+    $$('.syncbar__btn, .btn-mini').forEach(function (btn) {
       btn.disabled = chatBusy;
       btn.textContent = chatBusy ? '불러오는 중' : '새로고침';
-    }
+    });
   }
 
   function renderAfterSync() {
     renderHeader();
     renderCrew();
+    renderAgenda();
     renderTasks();
     renderTeam();
-    renderSettings();
+    renderInfo();
+    chatSyncText();
     if (ui.sheet) renderSheet();
   }
 
@@ -692,13 +718,6 @@
     el.classList.add('is-on');
     window.clearTimeout(toastTimer);
     toastTimer = window.setTimeout(function () { el.classList.remove('is-on'); }, 1900);
-  }
-
-  function autosize(el) {
-    if (!el) return;
-    el.style.height = 'auto';
-    var h = el.scrollHeight;
-    if (h > 0) el.style.height = h + 'px';
   }
 
   function tasksOf(partId, includeDone) {
@@ -1433,7 +1452,7 @@
       hint.textContent = meeting.state === 'meeting' ? '회의실에 모여 안건을 보고 있어요 · 탭하면 해산' :
         meeting.state === 'gather' ? '하나둘씩 회의실로 걸어가는 중이에요' :
         meeting.state === 'return' ? '각자 자리로 돌아가는 중이에요' :
-        '캐릭터를 누르면 그 비서의 오늘 일정이 열려요';
+        '캐릭터를 누르면 그 비서의 현황이 열려요';
     }
     syncPartyStates();
   }
@@ -1964,9 +1983,9 @@
 
   function renderHeader() {
     var act = activeParts().length;
-    var txt = act ? act + '인 체제 가동 중' : '모두 휴식 중';
-    $('#brandSub').textContent = txt;
-    $('#todayBadge').textContent = txt;
+    var txt = act ? act + '인 가동 중' : '전원 휴식';
+    $('#brandSub').textContent = '실시간 현황판 · ' + txt;
+    $('#todayBadge').textContent = '모니터링 중';
     $('#liveDot').classList.toggle('is-off', act === 0);
 
     var openAgenda = state.agenda.filter(function (a) { return !a.done; }).length;
@@ -1974,7 +1993,7 @@
     $('#meetingMeta').textContent = openAgenda ? '안건 ' + openAgenda + '건' : '지금은 한가해요';
 
     var openTasks = state.tasks.filter(function (t) { return !t.done; }).length;
-    $('#workMeta').textContent = openTasks ? '할 일 ' + openTasks + '건' : '전부 정리됨';
+    $('#workMeta').textContent = openTasks ? '진행 ' + openTasks + '건' : '전부 정리됨';
 
     var d = new Date();
     $('#brandDate').textContent = (d.getMonth() + 1) + '.' + d.getDate() + ' ' + WEEK[d.getDay()];
@@ -1982,7 +2001,13 @@
     $('#todayEyebrow').innerHTML = '<b class="eyebrow__nick">' + esc(state.nick || '대표님') +
       '</b> · ' + esc(greeting());
 
-    $('#todayStats').textContent = '할 일 ' + openTasks + ' · 안건 ' + openAgenda;
+    var brief = $('#todayBrief');
+    if (brief) {
+      brief.textContent = state.today ||
+        '채팅에서 맡긴 일은 작업실에서, 한도는 위 파티 바에서 확인할 수 있어요.';
+    }
+
+    $('#todayStats').textContent = '진행 ' + openTasks + ' · 안건 ' + openAgenda;
 
     renderParty();
   }
@@ -2134,19 +2159,6 @@
     return changed;
   }
 
-  /* 작업 1건을 마칠 때·맡길 때 대략치만큼 깎는다. */
-  function spendQuota(id) {
-    var q = quotaOf(id);
-    if (!q || q.pct == null) return;
-    var cost = QUOTA_COST[id] || 5;
-    if (id === 'claude' && boostOn('claude')) cost = QUOTA_COST.claudeBoost;
-    var now = Date.now();
-    q.pct = clamp(Math.round(q.pct - cost), 0, 100);
-    q.est = true;          /* 깎은 뒤 값은 더 이상 실측이 아니다 */
-    q.checkedAt = now;
-    q.lastUsedAt = now;
-  }
-
   /* 칸 아래 한 줄 — 'Pro 97%' / '무료 ~17%' / '무료 · 여유'
      부스터 배지가 함께 서면 자리가 좁아 플랜 이름은 빼고 잔여만 남긴다. */
   function quotaLabel(q, v, boost) {
@@ -2234,42 +2246,21 @@
      --------------------------------------------------------- */
 
   var QUOTA_HINT = {
-    claude: '11.28 15:00 claude.ai › 설정 › 사용량 확인: 이번 주 3% 사용(잔여 97%, 12.5 05:00 초기화) · 현재 세션 10% 사용(잔여 90%, 오늘 16:30 초기화). 위 값은 그렇게 확인한 실측값이고, 작업을 맡기면 1건당 대략 -4%(부스터 -8%)씩 깎여 추정치(~/추정)로 바뀝니다.',
+    claude: '11.28 15:00 claude.ai › 설정 › 사용량 확인: 이번 주 3% 사용(잔여 97%, 12.5 05:00 초기화) · 현재 세션 10% 사용(잔여 90%, 오늘 16:30 초기화). 이 값은 그렇게 확인한 실측값이고, 채팅에서 작업을 맡길 때마다 1건당 대략 -4%(부스터 -8%)씩 깎인 추정치로 바뀝니다.',
     byeol: '별이(피클)는 일일 한도를 %로 보여 주지 않아요. 11.28 15:37 확인한 일일 잔여 17%를 기준으로, 맡긴 작업 수만큼 대략 -8%씩 깎은 추정치입니다. 매일 04:00에 100%로 회복합니다.',
     gpt: 'ChatGPT 무료 플랜은 한도 %를 보여 주지 않아요. 오늘 작업량으로 잰 92%에서 작업 1건당 대략 -10%씩 깎은 추정치이고, 마지막 사용에서 5시간이 지나면 100%로 회복합니다.',
     gemini: '제미나이 무료 플랜은 한도 %를 보여 주지 않아요. 오늘 작업량으로 잰 90%에서 작업 1건당 대략 -8%씩 깎은 추정치이고, 매일 00:00에 100%로 회복합니다.',
-    free: '무료 플랜은 사용량 %를 보여 주지 않아 지어내지 않고 상태로만 표시해요. 실제 한도가 화면에 뜨면 그만큼 여유·보통·부족을 골라 두세요.'
+    free: '무료 플랜은 사용량 %를 보여 주지 않아 지어내지 않고 상태만 표시해요.'
   };
 
+  /* 토큰 한도 패널 — 보기 전용. 막대와 숫자, 기준 시각, 회복 주기만 보여 준다.
+     잔여 %는 채팅에서 확인한 값을 data/office-state.json 의 tokens 로 받아 온다. */
   function quotaPanelHTML(p, compact) {
     var q = quotaOf(p.id);
     var v = quotaView(q);
     var pctMode = q.pct != null;
     var when = (q.est ? '추정 ' : '실측 ') +
-      (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '직접 맞춤') + ' 기준';
-    var controls;
-    if (pctMode) {
-      controls = '<input class="quota__range" type="range" min="0" max="100" step="1" value="' + v.pct +
-          '" data-quota="' + p.id + '" aria-label="' + esc(p.name) + ' 잔여 토큰 %">' +
-        (compact ? '' : '<p class="quota__hint">' + esc(QUOTA_HINT[p.id] || QUOTA_HINT.free) + '</p>') +
-        '<div class="quota__foot">' +
-          (p.id === 'claude'
-            ? '<a class="quota__btn" href="https://claude.ai/settings/usage" target="_blank" rel="noopener">사용량 열어 확인</a>'
-            : '') +
-          (QUOTA_DEFAULTS[p.id] && QUOTA_DEFAULTS[p.id].pct != null
-            ? '<button class="quota__btn" type="button" data-action="quota-default" data-part="' + p.id + '">' +
-              (QUOTA_DEFAULTS[p.id].est ? '기준값 ' : '측정값 ') + QUOTA_DEFAULTS[p.id].pct + '%로</button>'
-            : '') +
-        '</div>';
-    } else {
-      controls = '<div class="quota__levels">' + QUOTA_LEVEL_ORDER.map(function (k) {
-          var on = (q.level || 'plenty') === k;
-          return '<button class="quota__lv' + (on ? ' is-on' : '') + '" type="button" data-action="quota-level"' +
-            ' data-part="' + p.id + '" data-level="' + k + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
-            QUOTA_LEVEL[k].label + '</button>';
-        }).join('') + '</div>' +
-        (compact ? '' : '<p class="quota__hint">' + esc(QUOTA_HINT.free) + '</p>');
-    }
+      (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '확인 전') + ' 기준';
     return '<div class="quota' + (compact ? ' quota--compact' : '') + '" data-quota-box="' + p.id + '">' +
       '<div class="quota__head">' +
         '<span class="quota__plan">' + esc(p.name) + ' · ' + esc(q.plan) + '</span>' +
@@ -2278,58 +2269,61 @@
       '</div>' +
       '<div class="quota__bar" data-quota-bar="' + p.id + '" data-tone="' + v.tone + '">' +
         '<i style="width:' + v.fill + '%"></i></div>' +
-      controls +
-      (pctMode ? '<p class="quota__when" data-quota-when="' + p.id + '">' + esc(when) + '</p>' : '') +
+      (compact ? '' : '<p class="quota__hint">' + esc(QUOTA_HINT[p.id] || QUOTA_HINT.free) + '</p>') +
+      (pctMode ? '<div class="quota__foot">' +
+          (p.id === 'claude'
+            ? '<a class="quota__btn" href="https://claude.ai/settings/usage" target="_blank" rel="noopener">사용량 열어 확인</a>'
+            : '') +
+        '</div>' : '') +
+      (pctMode ? '<p class="quota__when">' + esc(when) + '</p>' : '') +
       (pctMode && QUOTA_RECOVER[p.id]
-        ? '<p class="quota__when quota__when--reset" data-quota-reset="' + p.id + '">' +
-          esc(QUOTA_RECOVER[p.id]) + '</p>' : '') +
+        ? '<p class="quota__when quota__when--reset">' + esc(QUOTA_RECOVER[p.id]) + '</p>' : '') +
     '</div>';
   }
 
-  /* 클로드 부스터 모드 — Opus(상위 모델)로 고난도 작업을 맡길 때 켜는 스위치.
-     켜 두면 파티 칸이 금빛 배지로 바뀌고, 시트·비서현황에 설명이 남는다. */
+  /* 클로드 부스터 모드 — 지금 Opus(상위 모델)로 일하는 중이라는 표시.
+     켜고 끄는 건 채팅에서 '부스터 모드'라고 말하면 된다. */
   function boostPanelHTML(p) {
     var on = boostOn(p.id);
     return '<div class="boost' + (on ? ' is-on' : '') + '">' +
       '<div class="boost__top">' +
         '<span class="boost__title"><i aria-hidden="true">⚡</i>부스터 모드</span>' +
-        '<button class="switch switch--boost" type="button" data-action="toggle-boost" data-part="' + p.id + '" ' +
-          'aria-pressed="' + (on ? 'true' : 'false') + '" aria-label="' + esc(p.name) + ' 부스터 모드"></button>' +
+        '<span class="state-badge' + (on ? ' is-on' : '') + '">' + (on ? 'ON' : 'OFF') + '</span>' +
       '</div>' +
       '<p class="boost__desc">Opus 부스터 모드 · 고난도 분석/작성</p>' +
       '<p class="boost__hint">' + (on
-        ? '켜져 있어요. 어려운 분석·긴 문서처럼 Opus가 필요한 지시는 ‘부스터 모드’라고 부르면 돼요.'
-        : '켜면 파티 칸에 ⚡ 부스터 배지가 붙어요. Opus로 고난도 분석·작성을 맡길 때 켜 두세요.') + '</p>' +
+        ? '지금 클로드가 Opus로 일하고 있어요. 파티 칸에도 ⚡ 부스터 배지가 붙습니다.'
+        : '켜고 끄는 건 채팅에서 "부스터 모드로 해줘"처럼 말하면 돼요. 여기서는 상태만 보여요.') + '</p>' +
     '</div>';
   }
 
+  /* 여기서부터는 전부 읽기 전용 렌더다 — 체크·삭제·입력 버튼을 만들지 않는다.
+     값은 채팅이 적어 둔 data/office-state.json 을 따른다. */
+
   function taskItemHTML(t) {
     var p = PART_MAP[t.part] || PARTS[0];
-    return '<li class="item' + (t.done ? ' item--done' : '') + (t.chat ? ' item--chat' : '') + '">' +
-      '<button class="check" type="button" role="checkbox" aria-checked="' + (t.done ? 'true' : 'false') +
-        '" data-action="toggle-task" data-id="' + t.id + '" aria-label="완료 표시"></button>' +
+    return '<li class="item item--read' + (t.done ? ' item--done' : '') + '">' +
+      '<span class="state-pill' + (t.done ? ' is-done' : '') + '">' + (t.done ? '완료' : '진행 중') + '</span>' +
       '<div class="item__body">' +
         '<p class="item__title">' + esc(t.title) + '</p>' +
         '<p class="item__meta">' +
-          (t.chat ? '<span class="chat-badge">💬 채팅</span>' : '') +
           '<span class="tag-chip" style="background:' + p.soft + ';color:' + p.deep + '">' +
-          esc(p.name) + '</span>' + shortDate(t.at) + '</p>' +
+          esc(p.name) + '</span>' +
+          '<span>' + esc(t.date || shortDate(t.at)) + '</span>' +
+          (t.chat ? '<span class="chat-badge">💬 채팅</span>' : '') +
+        '</p>' +
       '</div>' +
-      '<button class="icon-btn" type="button" data-action="del-task" data-id="' + t.id + '" ' +
-        'aria-label="삭제">✕</button>' +
     '</li>';
   }
 
   function agendaItemHTML(a) {
-    return '<li class="item' + (a.done ? ' item--done' : '') + '">' +
-      '<button class="check" type="button" role="checkbox" aria-checked="' + (a.done ? 'true' : 'false') +
-        '" data-action="toggle-agenda" data-id="' + a.id + '" aria-label="결정 완료"></button>' +
+    return '<li class="item item--read' + (a.done ? ' item--done' : '') + '">' +
+      '<span class="state-pill' + (a.done ? ' is-done' : '') + '">' + (a.done ? '정리됨' : '결정 대기') + '</span>' +
       '<div class="item__body">' +
         '<p class="item__title">' + esc(a.title) + '</p>' +
-        '<p class="item__meta">' + (a.done ? '정리됨' : '결정 대기') + ' · ' + shortDate(a.at) + '</p>' +
+        '<p class="item__meta"><span>' + esc(a.date || shortDate(a.at)) + '</span>' +
+          '<span>💬 채팅 안건</span></p>' +
       '</div>' +
-      '<button class="icon-btn" type="button" data-action="del-agenda" data-id="' + a.id + '" ' +
-        'aria-label="삭제">✕</button>' +
     '</li>';
   }
 
@@ -2338,16 +2332,21 @@
       if (a.done !== b.done) return a.done ? 1 : -1;
       return (b.at || 0) - (a.at || 0);
     });
-    $('#agendaList').innerHTML = list.map(agendaItemHTML).join('');
-    $('#agendaEmpty').hidden = list.length > 0;
+    var ul = $('#agendaList');
+    if (ul) ul.innerHTML = list.map(agendaItemHTML).join('');
+    var empty = $('#agendaEmpty');
+    if (empty) empty.hidden = list.length > 0;
+    chatSyncText();
   }
 
   function renderTasks() {
+    var ul = $('#taskList');
+    if (!ul) return;
     var list = state.tasks.slice().sort(sortTask);
     if (ui.filter !== 'all') {
       list = list.filter(function (t) { return t.part === ui.filter; });
     }
-    $('#taskList').innerHTML = list.map(taskItemHTML).join('');
+    ul.innerHTML = list.map(taskItemHTML).join('');
     $('#taskEmpty').hidden = list.length > 0;
 
     var total = state.tasks.length;
@@ -2365,9 +2364,21 @@
     chatSyncText();
   }
 
+  /* 회복 시각 짧은 표기 — 비서현황과 안내 탭에서 쓴다. */
+  var RESET_LABEL = {
+    byeol: '매일 04:00',
+    gpt: '마지막 사용 5시간 뒤',
+    claude: '매주 토 05:00',
+    gemini: '매일 00:00'
+  };
+
   function agentHTML(p) {
     var st = state.parts[p.id];
     var n = tasksOf(p.id, false).length;
+    var q = quotaOf(p.id);
+    var v = quotaView(q);
+    var key = partyStateOf(p.id);
+    var meta = PARTY_STATE[key];
     return '<article class="agent' + (st.active ? '' : ' is-off') + '" style="--c:' + p.color +
       ';--soft:' + p.soft + '">' +
       '<div class="agent__top">' +
@@ -2376,45 +2387,50 @@
           '<h3 class="agent__name">' + esc(p.name) + '</h3>' +
           '<p class="agent__role">' + esc(p.room) + ' · ' + esc(p.role) + '</p>' +
         '</div>' +
-        '<button class="switch" type="button" data-action="toggle-active" data-part="' + p.id + '" ' +
-          'aria-pressed="' + (st.active ? 'true' : 'false') + '" aria-label="' + esc(p.name) + ' 가동"></button>' +
+        '<span class="state-badge" data-state="' + key + '">' + esc(meta.label) + '</span>' +
       '</div>' +
       '<p class="agent__persona">' + esc(p.persona) + '</p>' +
-      '<input class="agent__status" data-status="' + p.id + '" maxlength="40" value="' + esc(st.status) +
-        '" aria-label="' + esc(p.name) + ' 상태 문구">' +
+      '<p class="agent__line"><span class="agent__line-k">지금</span>' + esc(st.status) + '</p>' +
       quotaPanelHTML(p, true) +
       '<div class="agent__foot">' +
-        '<span class="pill-soft">' + (st.active ? '가동 중' : '휴식 중') + '</span>' +
-        '<span class="pill-soft">진행 ' + n + '건</span>' +
+        '<span class="pill-soft">남은 일 ' + n + '건</span>' +
+        '<span class="pill-soft">회복 ' + esc(RESET_LABEL[p.id] || '') + '</span>' +
         (p.id === 'claude'
-          ? '<button class="boost-chip' + (boostOn(p.id) ? ' is-on' : '') + '" type="button" ' +
-            'data-action="toggle-boost" data-part="' + p.id + '" aria-pressed="' +
-            (boostOn(p.id) ? 'true' : 'false') + '">⚡ 부스터 ' + (boostOn(p.id) ? 'ON' : 'OFF') + '</button>'
+          ? '<span class="boost-chip' + (boostOn(p.id) ? ' is-on' : '') + '">⚡ 부스터 ' +
+            (boostOn(p.id) ? 'ON' : 'OFF') + '</span>'
           : '') +
-        '<button class="link" type="button" data-action="go-work" data-part="' + p.id + '">할 일 보기 →</button>' +
+        '<button class="link" type="button" data-action="go-work" data-part="' + p.id + '">일 보기 →</button>' +
       '</div>' +
     '</article>';
   }
 
   function renderTeam() {
-    $('#teamList').innerHTML = PARTS.map(agentHTML).join('');
+    var el = $('#teamList');
+    if (el) el.innerHTML = PARTS.map(agentHTML).join('');
   }
 
-  function updateStorageInfo() {
-    var el = $('#storageInfo');
+  /* 동기화·안내 탭 — 한도 회복 주기 표 */
+  function renderResetList() {
+    var el = $('#resetList');
     if (!el) return;
-    var when = state.updatedAt ? timeLabel(state.updatedAt) : '아직 없음';
-    el.textContent = '마지막 저장 ' + when + ' · 할 일 ' + state.tasks.length +
-      '개 · 안건 ' + state.agenda.length + '개';
+    el.innerHTML = PARTS.map(function (p) {
+      var q = quotaOf(p.id);
+      var v = quotaView(q);
+      var cost = QUOTA_COST[p.id] || 0;
+      return '<div class="reset-row" style="--c:' + p.color + ';--soft:' + p.soft + '">' +
+        '<span class="reset-row__ico">' + avatarSVG(p.id) + '</span>' +
+        '<span class="reset-row__id"><b>' + esc(p.name) + '</b>' +
+          '<small>' + esc(q.plan) + ' · 작업 1건당 -' + cost + '%' +
+          (p.id === 'claude' ? ' (부스터 -' + QUOTA_COST.claudeBoost + '%)' : '') + '</small></span>' +
+        '<span class="reset-row__v"><b>' + esc(v.text) + '</b>' +
+          '<small>회복 ' + esc(RESET_LABEL[p.id] || '') + '</small></span>' +
+      '</div>';
+    }).join('');
   }
 
-  function renderSettings() {
-    var memo = $('#memo');
-    var nick = $('#nickInput');
-    if (memo && document.activeElement !== memo) memo.value = state.memo;
-    if (nick && document.activeElement !== nick) nick.value = state.nick;
-    $('#nickPreview').textContent = '“' + (state.nick || '대표님') + ', 오늘도 화이팅!”';
-    updateStorageInfo();
+  function renderInfo() {
+    renderResetList();
+    chatSyncText();
   }
 
   function renderAll() {
@@ -2424,23 +2440,7 @@
     renderAgenda();
     renderTasks();
     renderTeam();
-    renderSettings();
-  }
-
-  function syncStatusTexts() {
-    $$('.crew-card').forEach(function (card) {
-      var id = card.getAttribute('data-part');
-      var s = card.querySelector('.crew-card__status');
-      if (s && id) s.textContent = statusOf(id);
-    });
-    /* 상태 문구를 보여 주는 중인 말풍선은 글자만 바로 바꾸고 자리를 다시 잡는다 */
-    Object.keys(bubbleEls).forEach(function (id) {
-      var b = bubbleEls[id];
-      if (!b || b.hidden || b.classList.contains('bubble--mood')) return;
-      var btxt = $('.bubble__txt', b);
-      if (btxt) btxt.textContent = statusOf(id);
-      moveBubble(id, 0.2);
-    });
+    renderInfo();
   }
 
   /* ---------------------------------------------------------
@@ -2550,6 +2550,8 @@
     body.scrollTop = 0;
   }
 
+  /* 방 시트 — 비서 한 명의 현황을 보기만 하는 화면.
+     상태 문구·할 일 입력, 완료 체크, 삭제, 가동 스위치는 없다. */
   function renderSheet() {
     var target = ui.sheet;
     if (!target) return;
@@ -2563,6 +2565,8 @@
     var st = state.parts[p.id];
     var q = quotaOf(p.id);
     var v = quotaView(q);
+    var key = partyStateOf(p.id);
+    var meta = PARTY_STATE[key];
     var list = tasksOf(p.id, true).sort(sortTask);
     var openN = list.filter(function (t) { return !t.done; }).length;
 
@@ -2571,26 +2575,20 @@
       '<div class="sheet__id"><h3 class="sheet__title" id="sheetTitle">' + esc(p.name) + '</h3>' +
       '<p class="sheet__sub">' + esc(p.room) + ' · ' + esc(p.role) + '</p>' +
       '<p class="sheet__persona"><i aria-hidden="true">“</i>' + esc(p.persona) + '<i aria-hidden="true">”</i></p></div>' +
-      '<button class="switch" type="button" data-action="toggle-active" data-part="' + p.id + '" ' +
-        'aria-pressed="' + (st.active ? 'true' : 'false') + '" aria-label="' + esc(p.name) + ' 가동"></button>';
+      '<span class="state-badge" data-state="' + key + '">' + esc(meta.label) + '</span>';
 
     body.innerHTML =
-      '<label class="field"><span class="field__label">한 줄 상태</span>' +
-        '<input class="input input--soft" data-status="' + p.id + '" maxlength="40" value="' + esc(st.status) +
-          '" aria-label="상태 문구"></label>' +
+      '<p class="sheet__status"><span class="sheet__status-k">지금</span>' + esc(st.status) + '</p>' +
       '<div class="sheet__row"><h4 class="sheet__h4">토큰 한도</h4>' +
-        '<span class="sheet__count">' + esc(q.plan) + (v.pct == null ? ' · 상태 표시' : ' · 주간') + '</span></div>' +
+        '<span class="sheet__count">' + esc(q.plan) + (v.pct == null ? ' · 상태 표시' : ' · 남은 한도') + '</span></div>' +
       quotaPanelHTML(p) +
       (p.id === 'claude' ? boostPanelHTML(p) : '') +
-      '<div class="sheet__row"><h4 class="sheet__h4">할 일</h4>' +
+      '<div class="sheet__row"><h4 class="sheet__h4">배정된 작업</h4>' +
         '<span class="sheet__count">' + (openN ? openN + '건 진행 중' : '전부 정리됨') + '</span></div>' +
       (list.length
         ? '<ul class="list list--compact">' + list.map(taskItemHTML).join('') + '</ul>'
-        : '<p class="field__hint">아직 할 일이 없어요.</p>') +
-      '<form class="addbar" data-add="' + p.id + '" autocomplete="off">' +
-        '<input class="input" maxlength="80" placeholder="' + esc(p.name) + '에게 할 일 맡기기" aria-label="할 일 추가">' +
-        '<button class="btn-add" type="submit" aria-label="추가">＋</button>' +
-      '</form>' +
+        : '<p class="field__hint">아직 배정된 작업이 없어요.</p>') +
+      '<p class="sheet__note">여기서는 보기만 해요. 작업 지시와 상태 변경은 피클 채팅에서 해 주세요.</p>' +
       '<button class="btn btn--ghost btn--full" type="button" data-action="go-work" data-part="' +
         p.id + '">작업실에서 전체 보기</button>';
   }
@@ -2600,7 +2598,7 @@
      --------------------------------------------------------- */
 
   function setTab(name, silent) {
-    if (['map', 'meeting', 'work', 'team', 'memo'].indexOf(name) < 0) name = 'map';
+    if (['map', 'meeting', 'work', 'team', 'info'].indexOf(name) < 0) name = 'map';
     if (!silent && ui.sheet && ui.sheet.type === 'help') closeSheet();
     state.tab = name;
     $$('.tab').forEach(function (b) {
@@ -2618,7 +2616,6 @@
       window.scrollTo(0, 0);
     }
     if (name === 'map') window.requestAnimationFrame(function () {
-      autosize($('#todayLine'));
       syncBubble();     /* 숨어 있는 동안에도 대사가 바뀌었을 수 있어 자리만 다시 잡는다 */
     });
   }
@@ -2644,231 +2641,6 @@
 
   function setTypingAllOff() {
     Object.keys(spriteEls).forEach(function (id) { setTyping(id, false); });
-  }
-
-  function addTask(partId, title) {
-    var text = (title || '').trim();
-    if (!text) { toast('할 일을 먼저 적어 주세요'); return; }
-    if (!PART_MAP[partId]) partId = 'byeol';
-    state.tasks.unshift({ id: uid(), title: text.slice(0, 80), part: partId, done: false, at: Date.now() });
-    spendQuota(partId);
-    save();
-    renderCrew();
-    renderTasks();
-    renderTeam();
-    renderHeader();
-    if (ui.sheet) {
-      renderSheet();
-      var box = $('#sheetBody .addbar input');
-      if (box) box.focus();
-    }
-    toast('할 일을 추가했어요');
-    if (!ui.sheet) showMood(partId, ['focus', 'hype']);
-    conveneToRoom(true);
-  }
-
-  function addAgenda(title) {
-    var text = (title || '').trim();
-    if (!text) { toast('안건을 먼저 적어 주세요'); return; }
-    state.agenda.unshift({ id: uid(), title: text.slice(0, 80), done: false, at: Date.now() });
-    save();
-    renderAgenda();
-    renderHeader();
-    if (ui.sheet) renderSheet();
-    toast('안건을 올렸어요');
-    conveneToRoom(true);
-  }
-
-  function toggleTask(id) {
-    var before = null;
-    state.tasks.forEach(function (t) { if (t.id === id) before = t.done; });
-    state.tasks.forEach(function (t) { if (t.id === id) t.done = !t.done; });
-    var hit = null;
-    state.tasks.forEach(function (t) { if (t.id === id) hit = t; });
-    /* 끝낼 때 한 번 더 깎는다(되돌려도 돌려받지 않음) */
-    if (hit && hit.done && !before) spendQuota(hit.part);
-    save();
-    renderCrew();
-    renderTasks();
-    renderTeam();
-    renderHeader();
-    if (ui.sheet) renderSheet();
-    if (hit && hit.done) showMood(hit.part, ['proud', 'relief']);
-  }
-
-  function toggleAgenda(id) {
-    state.agenda.forEach(function (a) { if (a.id === id) a.done = !a.done; });
-    save();
-    renderAgenda();
-    renderHeader();
-    if (ui.sheet) renderSheet();
-    var hit = null;
-    state.agenda.forEach(function (a) { if (a.id === id) hit = a; });
-    if (hit && hit.done && state.motion) dismissMeeting(true);
-  }
-
-  function removeTask(id) {
-    var hit = null;
-    state.tasks.forEach(function (t) { if (t.id === id) hit = t; });
-    state.tasks = state.tasks.filter(function (t) { return t.id !== id; });
-    /* 채팅에서 온 항목을 지우면 새로고침 때 다시 올라오지 않게 기억한다 */
-    if (hit && hit.chat && state.dismissedChatIds.indexOf(id) < 0) {
-      state.dismissedChatIds.push(id);
-    }
-    save();
-    renderCrew();
-    renderTasks();
-    renderTeam();
-    renderHeader();
-    if (ui.sheet) renderSheet();
-    toast('할 일을 지웠어요');
-  }
-
-  function removeAgenda(id) {
-    state.agenda = state.agenda.filter(function (a) { return a.id !== id; });
-    save();
-    renderAgenda();
-    renderHeader();
-    if (ui.sheet) renderSheet();
-    toast('안건을 지웠어요');
-  }
-
-  /* 부스터 모드 토글 — 클로드만 쓴다(상위 모델 Opus 작업 표시) */
-  function toggleBoost(id) {
-    if (!state.parts[id]) return;
-    var on = !state.parts[id].boost;
-    state.parts[id].boost = on;
-    save();
-    renderParty();
-    renderTeam();
-    if (ui.sheet) renderSheet();
-    toast(on ? PART_MAP[id].name + ' 부스터 모드 ON · Opus 고난도 작업'
-      : PART_MAP[id].name + ' 부스터 모드 OFF · 기본 모델');
-  }
-
-  function setQuotaLevel(id, level) {
-    if (!state.parts[id] || !QUOTA_LEVEL[level]) return;
-    state.parts[id].quota.level = level;
-    save();
-    renderParty();
-    renderTeam();
-    if (ui.sheet) renderSheet();
-    toast(PART_MAP[id].name + ' 한도 ' + QUOTA_LEVEL[level].label + '으로 표시');
-  }
-
-  /* 슬라이더는 끄는 동안 시트를 다시 그리지 않고 숫자·막대만 바로 고친다. */
-  function setQuotaPct(id, pct) {
-    if (!state.parts[id]) return;
-    state.parts[id].quota.pct = clamp(Math.round(pct), 0, 100);
-    state.parts[id].quota.checkedAt = Date.now();
-    /* 직접 맞긴 값은 어림이 아니라 확인한 값으로 둔다 */
-    state.parts[id].quota.est = false;
-    saveSoon();
-    syncQuotaUI(id);
-  }
-
-  function syncQuotaUI(id) {
-    var q = quotaOf(id);
-    var v = quotaView(q);
-    syncPartyStates();
-    $$('[data-quota-val="' + id + '"]').forEach(function (el) {
-      el.textContent = v.pct == null ? v.text : v.text + ' 남음';
-    });
-    $$('[data-quota-bar="' + id + '"]').forEach(function (el) {
-      el.setAttribute('data-tone', v.tone);
-      var i = el.querySelector('i');
-      if (i) i.style.width = v.fill + '%';
-    });
-    $$('[data-quota-when="' + id + '"]').forEach(function (el) {
-      el.textContent = (q.est ? '추정 ' : '실측 ') +
-        (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '직접 맞춤') + ' 기준';
-    });
-    /* 시트와 비서현황에 같은 슬라이더가 둘 있어, 끌고 있지 않은 쪽도 숫자를 맞춘다 */
-    if (v.pct != null) $$('input[data-quota="' + id + '"]').forEach(function (el) {
-      if (document.activeElement === el) return;
-      if (String(el.value) !== String(v.pct)) el.value = v.pct;
-    });
-  }
-
-  function toggleActive(id) {
-    state.parts[id].active = !state.parts[id].active;
-    save();
-    renderMap();
-    renderCrew();
-    renderTeam();
-    renderHeader();
-    if (ui.sheet) renderSheet();
-    toast(state.parts[id].active ? PART_MAP[id].name + ' 가동 시작' : PART_MAP[id].name + ' 잠깐 휴식');
-  }
-
-  /* ---------------------------------------------------------
-     backup / restore
-     --------------------------------------------------------- */
-
-  function exportJSON() {
-    var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    var d = new Date();
-    a.href = url;
-    a.download = 'byeol-office-' + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '.json';
-    document.body.appendChild(a);
-    a.click();
-    window.setTimeout(function () {
-      URL.revokeObjectURL(url);
-      if (a.parentNode) a.parentNode.removeChild(a);
-    }, 1500);
-    toast('백업 파일을 내려받았어요');
-  }
-
-  function importJSON(file) {
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function () {
-      var obj = null;
-      try {
-        obj = JSON.parse(String(reader.result));
-      } catch (e) {
-        window.alert('파일을 읽을 수 없어요. 별이 비서실에서 내보낸 JSON 파일인지 확인해 주세요.');
-        return;
-      }
-      if (!obj || typeof obj !== 'object' || (!obj.parts && !obj.tasks && !obj.agenda)) {
-        window.alert('별이 비서실 백업 파일이 아니에요.');
-        return;
-      }
-      if (!window.confirm('지금 내용을 불러온 파일로 바꿀까요?\n지금 기록은 덮어써져요.')) return;
-      state = normalize(obj);
-      save();
-      applyState();
-      toast('백업을 불러왔어요');
-    };
-    reader.readAsText(file);
-  }
-
-  function resetAll() {
-    if (!window.confirm('모든 내용을 처음 상태로 되돌릴까요?\n메모와 할 일이 모두 사라져요.')) return;
-    state = defaultState();
-    save();
-    applyState();
-    syncChatTasks();
-    toast('처음 상태로 돌아왔어요');
-  }
-
-  function applyState() {
-    document.body.classList.toggle('motion', state.motion);
-    document.body.classList.toggle('no-motion', !state.motion);
-    $('#motionBtn').setAttribute('aria-checked', state.motion ? 'true' : 'false');
-    $('#motionState').textContent = state.motion ? 'ON' : 'OFF';
-    var tl = $('#todayLine');
-    tl.value = state.today;
-    autosize(tl);
-    $('#memo').value = state.memo;
-    $('#nickInput').value = state.nick;
-    $('#memoHint').textContent = '자동 저장';
-    if (refreshAllQuotas()) save();
-    renderAll();
-    setTab(state.tab || 'map', true);
-    applyEnv();
   }
 
   /* ---------------------------------------------------------
@@ -2905,78 +2677,8 @@
       });
     }
 
-    var today = $('#todayLine');
-    today.addEventListener('input', function () {
-      state.today = today.value.slice(0, 120);
-      autosize(today);
-      saveSoon();
-    });
-
-    var memo = $('#memo');
-    var memoTimer = null;
-    memo.addEventListener('input', function () {
-      state.memo = memo.value.slice(0, 4000);
-      $('#memoHint').textContent = '저장 중…';
-      window.clearTimeout(memoTimer);
-      saveSoon(function () {
-        $('#memoHint').textContent = '저장했어요';
-        memoTimer = window.setTimeout(function () {
-          $('#memoHint').textContent = '자동 저장';
-        }, 1800);
-      });
-    });
-
-    var nick = $('#nickInput');
-    nick.addEventListener('input', function () {
-      state.nick = nick.value.slice(0, 12);
-      $('#nickPreview').textContent = '“' + (state.nick.trim() || '대표님') + ', 오늘도 화이팅!”';
-      var eyebrow = $('#todayEyebrow');
-      if (eyebrow) {
-        eyebrow.innerHTML = '<b class="eyebrow__nick">' + esc(state.nick.trim() || '대표님') +
-          '</b> · ' + esc(greeting());
-      }
-      saveSoon();
-    });
-    nick.addEventListener('blur', function () {
-      var v = nick.value.trim();
-      if (!v) {
-        state.nick = '대표님';
-        nick.value = '대표님';
-        renderHeader();
-        save();
-      } else if (v !== state.nick) {
-        state.nick = v;
-        nick.value = v;
-        renderHeader();
-        save();
-      }
-    });
-
-    $('#exportBtn').addEventListener('click', exportJSON);
-    $('#importBtn').addEventListener('click', function () { $('#importFile').click(); });
-    $('#importFile').addEventListener('change', function (e) {
-      var f = e.target.files && e.target.files[0];
-      importJSON(f);
-      e.target.value = '';
-    });
-    $('#resetBtn').addEventListener('click', resetAll);
-
-    $('#agendaForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var input = $('#agendaInput');
-      addAgenda(input.value);
-      input.value = '';
-      input.focus();
-    });
-
-    $('#taskForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var input = $('#taskInput');
-      addTask($('#taskPart').value, input.value);
-      input.value = '';
-      input.focus();
-    });
-
+    /* 이 화면에는 입력·수정·삭제 조작이 없다. 클릭은 탭 이동·조회·
+       새로고침·화면 연출(모션·회의·시간 날씨)뿐이다. */
     document.addEventListener('click', function (e) {
       var el = e.target.closest ? e.target.closest('[data-action]') : null;
       if (!el) return;
@@ -2995,41 +2697,8 @@
         case 'env-weather':
           setEnv('weather', el.getAttribute('data-env'));
           break;
-        case 'toggle-task':
-          toggleTask(el.getAttribute('data-id'));
-          break;
-        case 'del-task':
-          removeTask(el.getAttribute('data-id'));
-          break;
         case 'sync-chat':
           syncChatTasks(true);
-          break;
-        case 'toggle-agenda':
-          toggleAgenda(el.getAttribute('data-id'));
-          break;
-        case 'del-agenda':
-          removeAgenda(el.getAttribute('data-id'));
-          break;
-        case 'toggle-active':
-          toggleActive(el.getAttribute('data-part'));
-          break;
-        case 'toggle-boost':
-          toggleBoost(el.getAttribute('data-part'));
-          break;
-        case 'quota-level':
-          setQuotaLevel(el.getAttribute('data-part'), el.getAttribute('data-level'));
-          break;
-        case 'quota-default':
-          var qid = el.getAttribute('data-part');
-          if (QUOTA_DEFAULTS[qid] && QUOTA_DEFAULTS[qid].pct != null) {
-            setQuotaPct(qid, QUOTA_DEFAULTS[qid].pct);
-            state.parts[qid].quota.est = QUOTA_DEFAULTS[qid].est === true;
-            state.parts[qid].quota.checkedAt = QUOTA_DEFAULTS[qid].checkedAt || Date.now();
-            save();
-            syncQuotaUI(qid);
-            if (ui.sheet) renderSheet();
-            toast(QUOTA_DEFAULTS[qid].est ? '오늘 기준값으로 맞췄어요' : '측정한 주간 잔여로 맞췄어요');
-          }
           break;
         case 'guide-tab':
           if (!ui.sheet || ui.sheet.type !== 'help') break;
@@ -3052,7 +2721,6 @@
           break;
         case 'filter':
           ui.filter = el.getAttribute('data-filter');
-          if (ui.filter !== 'all') $('#taskPart').value = ui.filter;
           renderTasks();
           break;
         default:
@@ -3060,39 +2728,11 @@
       }
     });
 
-    document.addEventListener('submit', function (e) {
-      var form = e.target;
-      if (!form || !form.getAttribute) return;
-      var part = form.getAttribute('data-add');
-      if (!part) return;
-      e.preventDefault();
-      var input = form.querySelector('input');
-      addTask(part, input.value);
-      input.value = '';
-      input.focus();
-    });
-
-    document.addEventListener('input', function (e) {
-      var t = e.target;
-      if (!t || !t.getAttribute) return;
-      var qid = t.getAttribute('data-quota');
-      if (qid && state.parts[qid]) {
-        setQuotaPct(qid, parseFloat(t.value) || 0);
-        return;
-      }
-      var id = t.getAttribute('data-status');
-      if (!id || !state.parts[id]) return;
-      state.parts[id].status = t.value.slice(0, 40);
-      syncStatusTexts();
-      saveSoon();
-    });
-
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && ui.sheet) closeSheet();
     });
 
     window.addEventListener('resize', function () {
-      autosize($('#todayLine'));
       fxResize();
       seedFx(fxKind);
       refreshFxRun();
@@ -3138,21 +2778,10 @@
      --------------------------------------------------------- */
 
   function init() {
-    $('#taskPart').innerHTML = PARTS.map(function (p) {
-      return '<option value="' + p.id + '">' + esc(p.task) + '</option>';
-    }).join('');
-    $('#taskPart').value = 'gpt';
-
     document.body.classList.toggle('motion', state.motion);
     document.body.classList.toggle('no-motion', !state.motion);
     $('#motionBtn').setAttribute('aria-checked', state.motion ? 'true' : 'false');
     $('#motionState').textContent = state.motion ? 'ON' : 'OFF';
-
-    var today = $('#todayLine');
-    today.value = state.today;
-    autosize(today);
-    $('#memo').value = state.memo;
-    $('#nickInput').value = state.nick;
 
     bind();
     if (refreshAllQuotas()) save();
@@ -3161,14 +2790,14 @@
     startBubbleLoop();
     startMotionLoop();
     syncChatTasks();
-    /* 회복 시각이 지나면 앱을 청 켜 둔 상태에서도 막대가 저절로 찬다 */
+    /* 회복 시각이 지나면 앱을 켜 둔 상태에서도 막대가 저절로 찬다 */
     window.setInterval(function () {
       if (!refreshAllQuotas()) return;
       save();
       renderParty();
+      renderTeam();
+      renderInfo();
       if (ui.sheet) renderSheet();
-      var ae = document.activeElement;
-      if (!ae || !ae.closest || !ae.closest('#teamList')) renderTeam();
     }, 60000);
 
     if (!guideSeen()) {

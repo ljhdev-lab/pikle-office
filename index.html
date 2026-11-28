@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>별이 비서실</title>
-<meta name="description" content="별이 비서실 — 나만의 작은 AI 오피스 대시보드">
+<title>별이 비서실 · 모니터링</title>
+<meta name="description" content="별이 비서실 — 채팅에서 맡긴 일과 AI 한도를 보는 모니터링 현황판">
 <meta name="theme-color" content="#f6f2ec">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="별이 비서실">
@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <link rel="preload" as="image" href="assets/office-map-v5.webp" type="image/webp">
-<link rel="stylesheet" href="style.css?v=48">
+<link rel="stylesheet" href="style.css?v=49">
 </head>
 <body>
 <div class="app" id="app">
@@ -39,18 +39,18 @@
         </svg>
       </span>
       <div class="brand__text">
-        <h1 class="brand__title">별이 비서실</h1>
-        <p class="brand__sub"><span class="live-dot" id="liveDot"></span><span id="brandSub">4인 체제 가동 중</span></p>
+        <h1 class="brand__title">별이 비서실<span class="brand__badge">모니터링</span></h1>
+        <p class="brand__sub"><span class="live-dot" id="liveDot"></span><span id="brandSub">실시간 현황판 · 4인 가동 중</span></p>
       </div>
-      <button class="help-btn" id="helpBtn" type="button" aria-label="사용 가이드"
+      <button class="help-btn" id="helpBtn" type="button" aria-label="모니터링 사용 안내"
               aria-haspopup="dialog" aria-expanded="false">
         <span class="help-btn__mark" aria-hidden="true">?</span>
         <i class="help-btn__dot" id="helpDot" aria-hidden="true" hidden></i>
       </button>
-      <span class="brand__date" id="brandDate">11.27 금</span>
+      <span class="brand__date" id="brandDate">11.28 토</span>
     </div>
 
-    <nav class="tabs" id="tabs" role="tablist" aria-label="비서실 메뉴">
+    <nav class="tabs" id="tabs" role="tablist" aria-label="비서실 모니터링 메뉴">
       <button class="tab is-active" role="tab" id="tab-map" data-tab="map" aria-selected="true" aria-controls="view-map">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 3.2l7.4 4.1v9.4L12 20.8 4.6 16.7V7.3z"/>
@@ -83,12 +83,12 @@
         </svg>
         <span>비서현황</span>
       </button>
-      <button class="tab" role="tab" id="tab-memo" data-tab="memo" aria-selected="false" aria-controls="view-memo">
+      <button class="tab" role="tab" id="tab-info" data-tab="info" aria-selected="false" aria-controls="view-info">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="4.4" y="4" width="15.2" height="16" rx="3.6"/>
-          <path d="M8 9h8M8 12.4h8M8 15.8h5"/>
+          <path d="M20 11.4A7.8 7.8 0 0 1 8.7 18.3L4 20l1.7-4.6A7.8 7.8 0 1 1 20 11.4z"/>
+          <path d="M12 10.6v4.6M12 8.2v.1"/>
         </svg>
-        <span>메모·백업</span>
+        <span>동기화·안내</span>
       </button>
     </nav>
   </header>
@@ -98,11 +98,11 @@
     <section class="view is-active" id="view-map" role="tabpanel" aria-labelledby="tab-map">
       <div class="card today">
         <div class="today__head">
-          <span class="eyebrow" id="todayEyebrow"><b class="eyebrow__nick">대표님</b> · 좋은 저녁이에요</span>
-          <span class="badge-live"><span class="live-dot"></span><span id="todayBadge">4인 체제 가동 중</span></span>
+          <span class="eyebrow" id="todayEyebrow">좋은 저녁이에요</span>
+          <span class="badge-live"><span class="live-dot"></span><span id="todayBadge">모니터링 중</span></span>
         </div>
-        <textarea class="today__line" id="todayLine" rows="1" maxlength="90"
-                  aria-label="오늘의 한마디" placeholder="오늘의 한마디를 적어 두세요"></textarea>
+        <p class="today__brief" id="todayBrief">채팅에서 맡긴 일은 작업실에서, 한도는 위 파티 바에서 확인할 수 있어요.</p>
+        <p class="today__note" id="todayNote">여기는 <b>현황을 보는 화면</b>이에요. 실제 작업 지시는 피클 채팅에서 해 주세요.</p>
         <div class="today__foot">
           <div class="toggle-wrap">
             <span class="toggle__cap">모션</span>
@@ -156,7 +156,7 @@
           </div>
         </div>
         <div class="map-foot">
-          <span class="map-foot__hint" id="mapFootHint">캐릭터를 누르면 그 비서의 오늘 일정이 열려요</span>
+          <span class="map-foot__hint" id="mapFootHint">캐릭터를 누르면 그 비서의 현황이 열려요</span>
         </div>
       </div>
 
@@ -189,20 +189,21 @@
     <section class="view" id="view-meeting" role="tabpanel" aria-labelledby="tab-meeting" hidden>
       <div class="view__head">
         <h2 class="view__title">회의실</h2>
-        <p class="view__sub">결정이 필요한 안건을 모아 두는 곳이에요.</p>
+        <p class="view__sub">채팅에서 오간 주요 안건과 협의 내역을 모아 보여드려요.</p>
       </div>
-      <form class="addbar" id="agendaForm" autocomplete="off">
-        <input class="input" id="agendaInput" maxlength="80" placeholder="새 안건을 적어 주세요" aria-label="새 안건">
-        <button class="btn-add" type="submit" aria-label="안건 추가">＋</button>
-      </form>
+      <p class="note-strip">안건을 정하고 정리하는 건 피클 채팅에서 해요. 여기서는 <b>진행 상태만</b> 확인해요.</p>
+      <div class="readbar">
+        <span class="readbar__txt" id="agendaSyncText">동기화 · 대기 중</span>
+        <span class="readbar__count" id="agendaSyncCount"></span>
+      </div>
       <ul class="list" id="agendaList"></ul>
-      <p class="empty" id="agendaEmpty" hidden>아직 안건이 없어요.<br>결정할 일이 생기면 여기에 적어 두세요.</p>
+      <p class="empty" id="agendaEmpty" hidden>아직 올라온 안건이 없어요.<br>채팅에서 안건이 정해지면 여기에 보여요.</p>
     </section>
 
     <section class="view" id="view-work" role="tabpanel" aria-labelledby="tab-work" hidden>
       <div class="view__head">
         <h2 class="view__title">작업실</h2>
-        <p class="view__sub">네 사람의 할 일을 한 곳에서 체크해요.</p>
+        <p class="view__sub">채팅에서 맡긴 일의 진행 현황을 확인해요. 여기서는 추가·체크·삭제를 하지 않아요.</p>
       </div>
       <div class="syncbar" id="syncBar">
         <span class="syncbar__dot" aria-hidden="true"></span>
@@ -210,64 +211,62 @@
         <span class="syncbar__count" id="syncCount"></span>
         <button class="syncbar__btn" type="button" id="syncBtn" data-action="sync-chat">새로고침</button>
       </div>
-      <form class="addbar addbar--task" id="taskForm" autocomplete="off">
-        <select class="input select" id="taskPart" aria-label="추가할 담당"></select>
-        <input class="input" id="taskInput" maxlength="80" placeholder="할 일을 적어 주세요" aria-label="새 할 일">
-        <button class="btn-add" type="submit" aria-label="할 일 추가">＋</button>
-      </form>
       <div class="chips" id="taskFilters" role="group" aria-label="담당 필터"></div>
       <div class="progress">
         <div class="progress__bar"><span id="taskProgressBar"></span></div>
         <span class="progress__text" id="taskProgressText">0 / 0</span>
       </div>
       <ul class="list" id="taskList"></ul>
-      <p class="empty" id="taskEmpty" hidden>아직 할 일이 없어요.<br>위에서 하나 적어 보세요.</p>
+      <p class="empty" id="taskEmpty" hidden>아직 동기화된 일이 없어요.<br>채팅에서 일을 맡기면 여기에 올라와요.</p>
     </section>
 
     <section class="view" id="view-team" role="tabpanel" aria-labelledby="tab-team" hidden>
       <div class="view__head">
         <h2 class="view__title">비서현황</h2>
-        <p class="view__sub">네 사람의 지금 상태예요. 문구는 직접 고칠 수 있어요.</p>
+        <p class="view__sub">네 사람의 지금 상태·남은 일감·토큰 잔여를 한눈에 봐요.</p>
       </div>
       <div class="team" id="teamList"></div>
     </section>
 
-    <section class="view" id="view-memo" role="tabpanel" aria-labelledby="tab-memo" hidden>
+    <section class="view" id="view-info" role="tabpanel" aria-labelledby="tab-info" hidden>
       <div class="view__head">
-        <h2 class="view__title">메모·백업</h2>
-        <p class="view__sub">생각나는 건 아무거나 적어 두세요.</p>
+        <h2 class="view__title">동기화·안내</h2>
+        <p class="view__sub">현황판이 어디서 값을 받는지, 한도는 언제 차는지 정리해 두었어요.</p>
       </div>
 
       <div class="card">
         <div class="card__head">
-          <h3 class="card__title">자유 메모</h3>
-          <span class="card__hint" id="memoHint">자동 저장</span>
+          <h3 class="card__title">동기화 상태</h3>
+          <button class="btn-mini" type="button" id="infoSyncBtn" data-action="sync-chat">새로고침</button>
         </div>
-        <textarea class="memo" id="memo" rows="7" maxlength="4000" placeholder="여기에 자유롭게 메모해 두세요."></textarea>
+        <dl class="kv">
+          <div class="kv__row"><dt>마지막 동기화</dt><dd id="infoSyncWhen">대기 중</dd></div>
+          <div class="kv__row"><dt>받은 작업</dt><dd id="infoSyncCounts">—</dd></div>
+          <div class="kv__row"><dt>받은 안건</dt><dd id="infoAgendaCounts">—</dd></div>
+          <div class="kv__row"><dt>데이터</dt><dd>data/office-state.json</dd></div>
+        </dl>
+        <p class="field__hint">채팅에서 맡긴 일·안건·한도는 별이가 이 파일에 적어 두고, 이 화면은 열 때마다 그 파일을 읽어요. 파일이 없거나 네트워크가 막히면 마지막으로 받은 값으로 보여드려요.</p>
       </div>
 
       <div class="card">
         <div class="card__head">
-          <h3 class="card__title">호칭</h3>
+          <h3 class="card__title">한도 회복 주기</h3>
+          <span class="card__hint">~ 는 추정치</span>
         </div>
-        <div class="field-row">
-          <input class="input" id="nickInput" maxlength="12" placeholder="대표님" aria-label="호칭">
-        </div>
-        <p class="field__hint" id="nickPreview">“대표님, 오늘도 화이팅!”</p>
+        <div class="reset-list" id="resetList"></div>
+        <p class="field__hint">클로드는 실제 화면에서 확인한 실측값이고, 나머지는 시킨 작업 수로 어림한 추정치예요. 회복 주기는 각 AI의 초기화 시간을 따른 거예요.</p>
       </div>
 
       <div class="card">
         <div class="card__head">
-          <h3 class="card__title">데이터</h3>
+          <h3 class="card__title">모니터링 사용법</h3>
         </div>
-        <p class="field__hint">이 브라우저에 자동으로 저장돼요. 기기를 바꿀 땐 JSON 파일로 옮겨요.</p>
-        <div class="btn-row">
-          <button class="btn" id="exportBtn" type="button">JSON 내보내기</button>
-          <button class="btn" id="importBtn" type="button">JSON 불러오기</button>
-        </div>
-        <button class="btn btn--danger" id="resetBtn" type="button">초기 상태로 되돌리기</button>
-        <p class="field__hint" id="storageInfo"></p>
-        <input type="file" id="importFile" accept="application/json,.json" hidden>
+        <ol class="steps">
+          <li><span>실제 작업 지시는 <b>피클 채팅</b>에서 한 줄로 해요.</span></li>
+          <li><span>이 화면에서는 진행 상태·한도·모임만 <b>확인</b>해요.</span></li>
+          <li><span>작업실은 맡긴 일, 회의실은 최근 안건을 보여줘요.</span></li>
+          <li><span>값이 늦으면 <b>새로고침</b>을 눌러 다시 읽어요.</span></li>
+        </ol>
       </div>
 
       <div class="card card--tip">
@@ -296,6 +295,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <noscript><p style="padding:24px;text-align:center">이 앱을 쓰려면 자바스크립트를 켜 주세요.</p></noscript>
-<script src="app.js?v=48"></script>
+<script src="app.js?v=49"></script>
 </body>
 </html>

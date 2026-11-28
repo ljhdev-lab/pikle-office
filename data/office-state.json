@@ -1,6 +1,8 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-28T15:48:00+09:00",
+  "updatedAt": "2026-11-28T16:55:00+09:00",
+  "brief": "오늘은 비서실 모니터링 화면을 정리하고, 남은 일감과 토큰 잔여를 한 번 훑어요.",
+  "boost": { "claude": false },
   "tokens": {
     "byeol": { "pct": 17, "basis": "estimate", "asOf": "2026-11-28T15:37:00+09:00", "reset": "매일 04:00" },
     "gpt": { "pct": 92, "basis": "estimate", "asOf": "2026-11-28T15:35:00+09:00", "reset": "마지막 사용 5시간 뒤" },
@@ -9,7 +11,35 @@
   },
   "claudeTokenPct": 97,
   "claudeCheckedAt": "2026-11-28T15:00:00+09:00",
+  "agenda": [
+    {
+      "id": "chat-1128-agenda-monitor",
+      "title": "비서실 모니터링 화면 정리 방향 확정",
+      "done": true,
+      "date": "11.28"
+    },
+    {
+      "id": "chat-1128-agenda-blog",
+      "title": "이번 주 블로그 주제 선정",
+      "done": false,
+      "date": "11.28"
+    },
+    {
+      "id": "chat-1129-agenda-weekly",
+      "title": "다음 주 일감 배분 방식 정하기",
+      "done": false,
+      "date": "11.29"
+    }
+  ],
   "tasks": [
+    {
+      "id": "chat-1128-monitor",
+      "title": "비서실 모니터링 전용 화면 개편",
+      "owner": "byeol",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
     {
       "id": "chat-1128-bubbles",
       "title": "비서실 4명 동시 말풍선 표시 수정",

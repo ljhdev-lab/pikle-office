@@ -86,6 +86,25 @@ input, textarea, select { font: inherit; color: inherit; }
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.03em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* '모니터링' 배지 — 이 화면이 보기 전용 현황판임을 제목 옆에서 바로 알린다 */
+.brand__badge {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #2f7f66;
+  background: #e9f8f1;
+  border: 1px solid #d3efe3;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex: none;
 }
 
 .brand__sub {
@@ -286,22 +305,24 @@ input, textarea, select { font: inherit; color: inherit; }
   white-space: nowrap;
 }
 
-.today__line {
-  width: 100%;
-  margin: 9px 0 2px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  resize: none;
-  overflow: hidden;
-  font-size: 15.5px;
+.today__brief {
+  margin: 9px 0 0;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.45;
   letter-spacing: -0.02em;
   color: var(--ink);
-  outline: none;
+  word-break: keep-all;
 }
-.today__line::placeholder { color: #c1b8ab; font-weight: 600; }
+
+.today__note {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  word-break: keep-all;
+}
+.today__note b { color: var(--ink-2); font-weight: 800; }
 
 .today__foot {
   display: flex;
@@ -1482,6 +1503,60 @@ body.no-motion .sprite { transition: none; }
 .field__hint { margin: 8px 0 0; line-height: 1.5; }
 .field-row { display: flex; gap: 8px; }
 
+/* 동기화·안내 탭 — 값 목록과 한도 회복 주기 */
+.kv { margin: 2px 0 0; padding: 0; }
+.kv__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px dashed var(--line-soft);
+  font-size: 12px;
+}
+.kv__row:last-child { border-bottom: 0; }
+.kv__row dt { color: var(--ink-3); font-weight: 700; flex: none; }
+.kv__row dd { margin: 0; font-weight: 800; color: var(--ink); text-align: right; word-break: break-all; }
+
+.reset-list { display: grid; gap: 6px; }
+.reset-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--card-2);
+}
+.reset-row__ico {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--soft);
+}
+.reset-row__ico .mini-char { width: 24px; height: 24px; }
+.reset-row__id { flex: 1; min-width: 0; }
+.reset-row__id b { display: block; font-size: 12.5px; font-weight: 800; }
+.reset-row__id small,
+.reset-row__v small { display: block; font-size: 10px; color: var(--ink-3); font-weight: 700; margin-top: 1px; }
+.reset-row__v { text-align: right; flex: none; }
+.reset-row__v b { font-size: 12px; font-weight: 900; color: var(--ink); }
+
+.btn-mini {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink-2);
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.btn-mini:disabled { opacity: .5; cursor: default; }
+
 .memo {
   width: 100%;
   padding: 12px 13px;
@@ -1707,6 +1782,74 @@ body.no-motion .sprite { transition: none; }
 
 /* ---------------- team ---------------- */
 
+/* 모니터링 안내 문장 — 각 탭 맨 위 한 줄 */
+.note-strip {
+  margin: 0 0 10px;
+  padding: 8px 11px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--card-2);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  word-break: keep-all;
+}
+.note-strip b { color: var(--ink); font-weight: 800; }
+
+/* 회의실 위 동기화 줄 (읽기 전용) */
+.readbar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 10px;
+  padding: 0 2px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+.readbar__count { margin-left: auto; font-size: 10px; font-weight: 800; }
+
+/* 상태 표시 — 진행 중·결정 대기·완료·정리됨 */
+.state-pill {
+  flex: none;
+  margin-top: 1px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #dfe6f8;
+  background: #f1f4fe;
+  color: #4a5fb0;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.state-pill.is-done {
+  border-color: #dcefe4;
+  background: #eff9f3;
+  color: #3f8668;
+}
+
+.state-badge {
+  flex: none;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card-2);
+  color: var(--ink-2);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.state-badge[data-state="typing"] { border-color: #d8e4f6; background: #edf3fc; color: #3f68a8; }
+.state-badge[data-state="meeting"] { border-color: #e3dcf5; background: #f5f2fc; color: #6a55a8; }
+.state-badge[data-state="walk"] { border-color: #ecdcc2; background: #faf1e4; color: #8a6414; }
+.state-badge[data-state="off"] { opacity: .7; }
+.state-badge.is-on { border-color: #ecd79a; background: #fdf3d8; color: #8a6414; }
+
+/* 읽기 전용 목록 항목 — 체크버튼·삭제버튼 자리에 상태 표시가 선다 */
+.item--read { align-items: flex-start; }
+.item--read .item__meta { flex-wrap: wrap; }
+
 .team { display: grid; gap: 10px; }
 
 .agent {
@@ -1740,18 +1883,28 @@ body.no-motion .sprite { transition: none; }
 .agent__name { font-size: 15px; font-weight: 800; letter-spacing: -0.03em; }
 .agent__role { font-size: 10.5px; color: var(--ink-3); margin-top: 1px; }
 
-.agent__status {
-  width: 100%;
+/* 비서현황 카드의 '지금' 한 줄 — 입력칸이 아니라 읽기 전용 */
+.agent__line {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
   margin-top: 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
+  padding: 9px 12px;
+  border: 1px solid var(--line-soft);
   border-radius: 13px;
   background: #fbf7f0;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  outline: none;
+  color: var(--ink);
+  word-break: keep-all;
 }
-.agent__status:focus { border-color: color-mix(in srgb, var(--brand) 40%, var(--line)); }
+.agent__line-k {
+  flex: none;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
 
 .agent__foot {
   display: flex;
@@ -1878,6 +2031,37 @@ body.no-motion .sprite { transition: none; }
 .sheet__sub { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
 
 .sheet__body { padding-top: 14px; }
+
+.sheet__status {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: #fbf7f0;
+  font-size: 13px;
+  font-weight: 600;
+  word-break: keep-all;
+}
+.sheet__status-k {
+  flex: none;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+
+.sheet__note {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  word-break: keep-all;
+}
 
 .sheet__row {
   display: flex;
@@ -2217,6 +2401,8 @@ body.no-motion .sprite { transition: none; }
   background-image: linear-gradient(180deg, #ffeaa8 0%, #f7cf62 100%);
   color: #6b4a06;
 }
+/* 비서현황 카드에서는 표시용이라 누를 수 있는 것처럼 보이지 않게 */
+.agent__foot .boost-chip { display: inline-block; cursor: default; }
 
 /* ---------------- misc ---------------- */
 

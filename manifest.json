@@ -1,7 +1,7 @@
 {
   "name": "별이 비서실",
   "short_name": "비서실",
-  "description": "별이 비서실 — 나만의 작은 오피스 대시보드",
+  "description": "별이 비서실 — 채팅에서 맡긴 일과 AI 한도를 보는 모니터링 현황판",
   "lang": "ko",
   "start_url": "./",
   "scope": "./",
