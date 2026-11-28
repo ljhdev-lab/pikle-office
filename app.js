@@ -133,6 +133,70 @@
     return { id: p.id, label: p.task };
   }));
 
+  /* 사용 가이드 — 평소에는 숨겨 두고 헤더의 ? 를 누를 때만 연다.
+     core 는 한 줄 요약, steps 는 바로 따라 하는 세 단계, routine 은 언제
+     쓰면 좋은지, note 는 실제 동작 중 알아 두면 좋은 것 하나.
+     문구는 ChatGPT·클로드·제미나이 3사 협의안을 다듬은 것이다. */
+  var GUIDE_ORDER = ['map', 'meeting', 'work', 'team', 'memo'];
+
+  var GUIDE = {
+    map: {
+      title: '오피스 맵',
+      core: '네 사람의 지금 상태를 한눈에 봐요.',
+      steps: [
+        '오늘의 한마디를 적으면 바로 저장돼요.',
+        '파티 칸에서 남은 일감과 게이지를 봐요.',
+        '칸이나 캐릭터를 누르면 그 비서 방이 열려요.'
+      ],
+      routine: '아침에 한마디를 남기고 남은 일감을 확인해요.',
+      note: '[회의 소집]을 누르면 넷이 회의실로 걸어가고, 시간·날씨 칩은 미리보기예요.'
+    },
+    meeting: {
+      title: '회의실',
+      core: '결정할 일을 안건으로 모아 둬요.',
+      steps: [
+        '결정이 필요한 일을 안건으로 추가해요.',
+        '결정이 끝난 안건은 완료로 체크해요.',
+        '더 필요 없는 안건은 삭제해요.'
+      ],
+      routine: '하루를 마칠 때 완료한 안건부터 체크해요.',
+      note: '안건을 추가하거나 완료하면 오피스 맵에서 네 사람이 회의실로 모였다 흩어져요.'
+    },
+    work: {
+      title: '작업실',
+      core: '할 일을 담당별로 나눠 굴러가게 해요.',
+      steps: [
+        '담당을 고르고 할 일을 추가해요.',
+        '담당 칩으로 필요한 일만 골라 봐요.',
+        '끝나면 완료, 필요 없으면 삭제해요.'
+      ],
+      routine: '아침에 할 일을 넣고 저녁에 진행률을 봐요.',
+      note: '할 일을 추가하면 네 사람이 회의실에 모였다 흩어져요.'
+    },
+    team: {
+      title: '비서현황',
+      core: '비서별 상태와 가동을 정리해요.',
+      steps: [
+        '카드에 한 줄 상태를 적어 둬요.',
+        '쉬게 할 비서는 가동 스위치를 꺼요.',
+        '[할 일 보기]로 맡은 일을 확인해요.'
+      ],
+      routine: '하루를 시작할 때 가동 여부와 진행 건수를 봐요.',
+      note: '휴식 중인 비서는 말풍선과 모션에서 빠져요.'
+    },
+    memo: {
+      title: '메모·백업',
+      core: '메모를 남기고 데이터를 지켜요.',
+      steps: [
+        '메모는 쓰는 대로 자동 저장돼요.',
+        'JSON 내보내기로 파일을 받아 둬요.',
+        '복원할 땐 JSON을 불러와요.'
+      ],
+      routine: '주 1회, 그리고 초기화 전에 내보내 두세요.',
+      note: '호칭을 바꾸면 첫 인사말에 바로 반영돼요.'
+    }
+  };
+
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
@@ -1895,7 +1959,24 @@
     ui.sheet = { type: 'part', id: id };
     refreshFocus();
     renderSheet();
+    showSheet();
+  }
+
+  /* 가이드 시트 — 지금 보고 있는 탭의 설명이 기본으로 열린다.
+     칩으로 다른 탭 설명만 바뀔 뿐 앱 탭은 그대로다. */
+  function openHelp(key) {
+    openEnvPanel(false);
+    ui.sheet = { type: 'help', gtab: GUIDE[key] ? key : 'map' };
+    renderSheet();
+    showSheet();
+  }
+
+  function showSheet() {
     var wrap = $('#sheetWrap');
+    var sheet = $('#sheetWrap .sheet');
+    var btn = $('#helpBtn');
+    if (sheet) sheet.classList.toggle('sheet--guide', !!(ui.sheet && ui.sheet.type === 'help'));
+    if (btn) btn.setAttribute('aria-expanded', 'true');
     window.clearTimeout(closeTimer);
     wrap.hidden = false;
     document.body.style.overflow = 'hidden';
@@ -1905,17 +1986,80 @@
   function closeSheet() {
     var wrap = $('#sheetWrap');
     if (wrap.hidden) return;
+    var wasHelp = !!(ui.sheet && ui.sheet.type === 'help');
+    var sheet = $('#sheetWrap .sheet');
+    var btn = $('#helpBtn');
     wrap.classList.remove('is-open');
     document.body.style.overflow = '';
     ui.sheet = null;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
     refreshFocus();
     window.clearTimeout(closeTimer);
-    closeTimer = window.setTimeout(function () { wrap.hidden = true; }, 340);
+    closeTimer = window.setTimeout(function () {
+      wrap.hidden = true;
+      if (sheet) sheet.classList.remove('sheet--guide');
+      if (wasHelp && btn) { try { btn.focus({ preventScroll: true }); } catch (e) { btn.focus(); } }
+    }, 340);
+  }
+
+  /* 첫 방문에만 ? 옆에 점을 하나 찍고 한 번만 살짝 커졌다 작아진다.
+     한 번 열면 다시 뜨지 않으며, 백업 JSON 과는 섞이지 않게 따로 저장한다. */
+  var GUIDE_SEEN_KEY = 'byeol-office-guide-seen';
+
+  function guideSeen() {
+    try { return window.localStorage.getItem(GUIDE_SEEN_KEY) === '1'; } catch (e) { return true; }
+  }
+
+  function markGuideSeen() {
+    try { window.localStorage.setItem(GUIDE_SEEN_KEY, '1'); } catch (e) { /* ignore */ }
+    var dot = $('#helpDot');
+    var btn = $('#helpBtn');
+    if (dot) dot.hidden = true;
+    if (btn) btn.classList.remove('is-new');
+  }
+
+  function renderGuide(key) {
+    var g = GUIDE[key] || GUIDE.map;
+    var head = $('#sheetHead');
+    var body = $('#sheetBody');
+    head.style.removeProperty('--c');
+    head.innerHTML =
+      '<div class="guide-head">' +
+        '<span class="guide-head__ico" aria-hidden="true">?</span>' +
+        '<div class="guide-head__id">' +
+          '<h3 class="sheet__title" id="sheetTitle">' + esc(g.title) + ' 가이드</h3>' +
+          '<p class="sheet__sub">이렇게 쓰면 편해요</p>' +
+        '</div>' +
+        '<button class="guide-close" type="button" data-action="close-sheet" aria-label="가이드 닫기">✕</button>' +
+      '</div>' +
+      '<div class="guide-tabs" role="group" aria-label="탭별 가이드">' +
+        GUIDE_ORDER.map(function (k) {
+          var on = k === key;
+          return '<button class="guide-chip' + (on ? ' is-on' : '') + '" type="button" ' +
+            'aria-pressed="' + (on ? 'true' : 'false') + '" data-action="guide-tab" data-gtab="' + k + '">' +
+            esc(GUIDE[k].title) + '</button>';
+        }).join('') +
+      '</div>';
+
+    body.innerHTML =
+      '<p class="guide-core">' + esc(g.core) + '</p>' +
+      '<p class="guide-label">이렇게 써요</p>' +
+      '<div class="guide-steps">' +
+        g.steps.map(function (t, i) {
+          return '<div class="guide-step"><span class="guide-step__n">' + (i + 1) + '</span>' +
+            '<span class="guide-step__t">' + esc(t) + '</span></div>';
+        }).join('') +
+      '</div>' +
+      '<div class="guide-routine"><b>추천 루틴</b><p>' + esc(g.routine) + '</p></div>' +
+      (g.note ? '<p class="guide-note"><i aria-hidden="true">💡</i><span>' + esc(g.note) + '</span></p>' : '');
+    body.scrollTop = 0;
   }
 
   function renderSheet() {
     var target = ui.sheet;
     if (!target) return;
+    if (target.type === 'help') { renderGuide(target.gtab); return; }
+
     var head = $('#sheetHead');
     var body = $('#sheetBody');
 
@@ -1956,6 +2100,7 @@
 
   function setTab(name, silent) {
     if (['map', 'meeting', 'work', 'team', 'memo'].indexOf(name) < 0) name = 'map';
+    if (!silent && ui.sheet && ui.sheet.type === 'help') closeSheet();
     state.tab = name;
     $$('.tab').forEach(function (b) {
       var on = b.getAttribute('data-tab') === name;
@@ -2181,6 +2326,15 @@
       setTab(btn.getAttribute('data-tab'));
     });
 
+    var helpBtn = $('#helpBtn');
+    if (helpBtn) {
+      helpBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        markGuideSeen();
+        openHelp(state.tab);
+      });
+    }
+
     var today = $('#todayLine');
     today.addEventListener('input', function () {
       state.today = today.value.slice(0, 120);
@@ -2285,6 +2439,11 @@
           break;
         case 'toggle-active':
           toggleActive(el.getAttribute('data-part'));
+          break;
+        case 'guide-tab':
+          if (!ui.sheet || ui.sheet.type !== 'help') break;
+          ui.sheet.gtab = el.getAttribute('data-gtab');
+          renderSheet();
           break;
         case 'go-work':
           ui.filter = el.getAttribute('data-part') || 'all';
@@ -2404,6 +2563,16 @@
     setTab(state.tab || 'map', true);
     startBubbleLoop();
     startMotionLoop();
+
+    if (!guideSeen()) {
+      var dot = $('#helpDot');
+      var btn = $('#helpBtn');
+      if (dot) dot.hidden = false;
+      if (btn) {
+        btn.classList.add('is-new');
+        window.setTimeout(function () { btn.classList.remove('is-new'); }, 1400);
+      }
+    }
 
     fxResize();
     applyEnv();
