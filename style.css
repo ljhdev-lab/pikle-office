@@ -1064,6 +1064,7 @@ body.no-motion .sprite { transition: none; }
 .bubble.m-eyes   { --mood-bg: #f6f0fb; --mood-line: #e4d7f2; }
 .bubble.m-catch  { --mood-bg: #eef8fa; --mood-line: #d3e9ee; }
 .bubble.m-alarm  { --mood-bg: #fff1f3; --mood-line: #fbd6dd; }
+.bubble.m-vex    { --mood-bg: #fdf0ec; --mood-line: #f6d2c6; }
 .bubble.m-relief { --mood-bg: #f0f9f1; --mood-line: #d7ebda; }
 
 /* 감정마다 살짝 다른 모서리 */
@@ -1159,16 +1160,16 @@ body.no-motion .sprite { transition: none; }
 
 .party__row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
 }
 
 .pm {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
-  padding: 5px 3px 4px;
+  padding: 4px 2px 3px;
   border: 0;
   border-radius: 0;
   background: var(--soft);
@@ -1183,15 +1184,15 @@ body.no-motion .sprite { transition: none; }
 .pm:active { transform: translateY(1px); }
 .pm[data-state="off"] { opacity: .55; }
 
-.pm__top { display: flex; align-items: center; gap: 3px; min-width: 0; }
+.pm__top { display: flex; align-items: center; gap: 2px; min-width: 0; }
 
-.pm__ico { flex: none; width: 15px; height: 15px; display: block; }
+.pm__ico { flex: none; width: 13px; height: 13px; display: block; }
 .pm__ico .mini-char { width: 100%; height: 100%; display: block; }
 
 .pm__name {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 900;
   letter-spacing: -.05em;
   color: #3b3548;
@@ -1209,8 +1210,8 @@ body.no-motion .sprite { transition: none; }
 }
 
 .pm__meta { display: flex; align-items: baseline; justify-content: space-between; gap: 2px; }
-.pm__st { font-size: 8.5px; font-weight: 900; letter-spacing: -.05em; color: var(--dotc); white-space: nowrap; }
-.pm__n { font-size: 8.5px; font-weight: 800; letter-spacing: -.04em; color: #867d6e; white-space: nowrap; }
+.pm__st { font-size: 8px; font-weight: 900; letter-spacing: -.05em; color: var(--dotc); white-space: nowrap; }
+.pm__n { font-size: 8px; font-weight: 800; letter-spacing: -.04em; color: #867d6e; white-space: nowrap; }
 
 /* 미니 게이지 — 1px 이음매로 픽셀 칸처럼 보이게 */
 .pm__bar {
@@ -1269,7 +1270,7 @@ body.no-motion .sprite { transition: none; }
   gap: 2px;
   min-width: 0;
   min-height: 10px;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 900;
   letter-spacing: -.04em;
   line-height: 1.1;
@@ -1310,6 +1311,9 @@ body.no-motion .sprite { transition: none; }
   gap: 8px;
   margin-bottom: 12px;
 }
+
+/* 다섯 장이면 마지막 한 장이 외톨이로 남지 않게 두 칸을 다 쓴다. */
+.crew-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
 .crew-card {
   display: flex;
@@ -1717,11 +1721,13 @@ body.no-motion .sprite { transition: none; }
 .list--compact .item { padding: 9px 10px; }
 .list--compact .item__title { font-size: 12.5px; }
 
+/* 담당 필터 — 여섯 개(전체+5인)가 390px에서 잘리지 않도록 자연스럽게 두 줄로 접는다. */
 .chips {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
-  overflow-x: auto;
   padding: 2px 0 10px;
+  overflow: visible;
   scrollbar-width: none;
 }
 .chips::-webkit-scrollbar { display: none; }

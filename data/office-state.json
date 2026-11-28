@@ -1,13 +1,14 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-28T19:35:00+09:00",
+  "updatedAt": "2026-11-28T19:40:00+09:00",
   "brief": "오늘은 비서실 모니터링 화면을 정리하고, 남은 일감과 토큰 잔여를 한 번 훑어요.",
   "boost": { "claude": false },
   "tokens": {
     "byeol": { "pct": 17, "basis": "estimate", "asOf": "2026-11-28T15:37:00+09:00", "reset": "매일 04:00" },
     "gpt": { "pct": 92, "basis": "estimate", "asOf": "2026-11-28T15:35:00+09:00", "reset": "마지막 사용 5시간 뒤" },
     "claude": { "pct": 97, "basis": "measured", "asOf": "2026-11-28T15:00:00+09:00", "reset": "매주 토 05:00" },
-    "gemini": { "pct": 90, "basis": "estimate", "asOf": "2026-11-28T15:35:00+09:00", "reset": "매일 00:00" }
+    "gemini": { "pct": 90, "basis": "estimate", "asOf": "2026-11-28T15:35:00+09:00", "reset": "매일 00:00" },
+    "grok": { "pct": 100, "basis": "estimate", "asOf": "2026-11-28T19:20:00+09:00", "reset": "마지막 사용 2시간 뒤(추정)" }
   },
   "claudeTokenPct": 97,
   "claudeCheckedAt": "2026-11-28T15:00:00+09:00",
@@ -32,6 +33,14 @@
     }
   ],
   "tasks": [
+    {
+      "id": "chat-1128-grok-join",
+      "title": "비서실 5인 체제(그록 합류) 확장",
+      "owner": "grok",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
     {
       "id": "chat-1128-work-sections",
       "title": "작업실 현재·예약 구분 UI 개편",

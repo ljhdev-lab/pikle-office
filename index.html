@@ -11,12 +11,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=55">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=55">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=55">
-<link rel="manifest" href="manifest.json?v=55">
-<link rel="preload" as="image" href="assets/office-map-v5.webp" type="image/webp">
-<link rel="stylesheet" href="style.css?v=55">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=56">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=56">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=56">
+<link rel="manifest" href="manifest.json?v=56">
+<link rel="preload" as="image" href="assets/office-map-v6.webp" type="image/webp">
+<link rel="stylesheet" href="style.css?v=56">
 </head>
 <body>
 <div class="app" id="app">
@@ -24,11 +24,11 @@
   <header class="topbar">
     <div class="brand">
       <span class="brand__icon" aria-hidden="true">
-        <img src="assets/app-icon.png?v=55" width="36" height="36" alt="">
+        <img src="assets/app-icon.png?v=56" width="36" height="36" alt="">
       </span>
       <div class="brand__text">
         <h1 class="brand__title">별이 비서실<span class="brand__badge">모니터링</span></h1>
-        <p class="brand__sub"><span class="live-dot" id="liveDot"></span><span id="brandSub">실시간 현황판 · 4인 가동 중</span></p>
+        <p class="brand__sub"><span class="live-dot" id="liveDot"></span><span id="brandSub">실시간 현황판 · 5인 가동 중</span></p>
       </div>
       <button class="help-btn" id="helpBtn" type="button" aria-label="모니터링 사용 안내"
               aria-haspopup="dialog" aria-expanded="false">
@@ -113,8 +113,8 @@
               <span class="sky__cloud sky__cloud--b"></span>
             </div>
             <canvas class="fx-canvas" id="fxCanvas" width="390" height="520" aria-hidden="true"></canvas>
-            <img class="map-img" id="mapImg" src="assets/office-map-v5.webp" width="864" height="1152"
-                 alt="대형 창문과 책상 네 개, 유리벽 회의실과 소파가 놓인 픽셀아트 아이소메트릭 비서실" decoding="async" fetchpriority="high">
+            <img class="map-img" id="mapImg" src="assets/office-map-v6.webp" width="864" height="1152"
+                 alt="대형 창문과 책상 다섯 개, 유리벽 회의실의 의자 다섯 석이 놓인 픽셀아트 아이소메트릭 비서실" decoding="async" fetchpriority="high">
             <div class="sprite-layer" id="spriteLayer"></div>
             <div class="light-wash" id="lightWash" aria-hidden="true"></div>
             <div class="lamp-layer" id="lampLayer" aria-hidden="true"></div>
@@ -148,7 +148,7 @@
         </div>
       </div>
 
-      <div class="crew" id="crewList" aria-label="비서 4인 현황"></div>
+      <div class="crew" id="crewList" aria-label="비서 5인 현황"></div>
 
       <div class="shortcuts">
         <button class="shortcut" type="button" data-action="go-meeting" style="--c:#c8b9ef">
@@ -212,7 +212,7 @@
     <section class="view" id="view-team" role="tabpanel" aria-labelledby="tab-team" hidden>
       <div class="view__head">
         <h2 class="view__title">비서현황</h2>
-        <p class="view__sub">네 사람의 지금 상태·남은 일감·토큰 잔여를 한눈에 봐요.</p>
+        <p class="view__sub">다섯 사람의 지금 상태·남은 일감·토큰 잔여를 한눈에 봐요.</p>
       </div>
       <div class="team" id="teamList"></div>
     </section>
@@ -286,6 +286,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <noscript><p style="padding:24px;text-align:center">이 앱을 쓰려면 자바스크립트를 켜 주세요.</p></noscript>
-<script src="app.js?v=55"></script>
+<script src="app.js?v=56"></script>
 </body>
 </html>
