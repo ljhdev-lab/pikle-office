@@ -332,7 +332,11 @@
         var tq = base.parts[p.id].quota;
         if (typeof q.plan === 'string' && q.plan.trim()) tq.plan = q.plan.trim().slice(0, 12);
         if (typeof q.pct === 'number' && isFinite(q.pct)) tq.pct = clamp(Math.round(q.pct), 0, 100);
-        else if (q.pct === null) tq.pct = null;
+        else if (q.pct === null) {
+          /* 한도가 '상태(여유·보통·부족)'만 있던 예전 값 — 확인 시각도 비워 둔다 */
+          tq.pct = null;
+          if (!(typeof q.checkedAt === 'number' && q.checkedAt > 0)) tq.checkedAt = 0;
+        }
         if (QUOTA_LEVEL[q.level]) tq.level = q.level;
         if (typeof q.checkedAt === 'number' && q.checkedAt > 0) tq.checkedAt = q.checkedAt;
         if (q.est === true) tq.est = true;
@@ -528,7 +532,8 @@
       if (!state.parts[p.id]) return;
       var q = state.parts[p.id].quota;
       var asOf = Date.parse(t.asOf || data.updatedAt || '') || remoteAt;
-      if (asOf <= (q.checkedAt || 0)) return;
+      /* 같은 시각이면 값 비교로 넘어간다(기본값과 파일 값이 같은 순간에 찍힌 경우) */
+      if (asOf < (q.checkedAt || 0)) return;
       var nextPct = clamp(Math.round(t.pct), 0, 100);
       var nextEst = t.basis ? t.basis === 'estimate' : !!q.est;
       if (nextPct === q.pct && nextEst === !!q.est) return;
