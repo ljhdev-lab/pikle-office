@@ -182,8 +182,9 @@
     relief: { icon: '😌', cls: 'relief' }
   };
 
+  /* 담당 필터 칩 — 390px 폭에서 다섯 개가 한 줄에 들어가도록 이름을 쓴다. */
   var FILTERS = [{ id: 'all', label: '전체' }].concat(PARTS.map(function (p) {
-    return { id: p.id, label: p.task };
+    return { id: p.id, label: p.name };
   }));
 
   /* 사용 가이드 — 평소에는 숨겨 두고 헤더의 ? 를 누를 때만 연다.
