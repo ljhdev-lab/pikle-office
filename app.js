@@ -794,13 +794,13 @@
       var monitors = [[50, 26.5], [14.2, 45.4], [85.2, 45.6], [13.4, 73.4]];
       var lights = [];
       monitors.forEach(function (m) {
-        lights.push('radial-gradient(circle at ' + m[0] + '% ' + m[1] + '%, rgba(150,205,255,' +
-          (0.40 * d + 0.03).toFixed(2) + ') 0%, rgba(120,180,240,' + (0.14 * d).toFixed(2) + ') 17%, rgba(90,140,210,0) 33%)');
+        lights.push('radial-gradient(circle 62px at ' + m[0] + '% ' + m[1] + '%, rgba(150,205,255,' +
+          (0.42 * d + 0.03).toFixed(2) + ') 0%, rgba(120,180,240,' + (0.16 * d).toFixed(2) + ') 45%, rgba(90,140,210,0) 100%)');
       });
       PARTS.forEach(function (p) {
         if (!isActive(p.id)) return;
-        lights.push('radial-gradient(circle at ' + p.home[0] + '% ' + (p.home[1] - 4) + '%, rgba(255,208,140,' +
-          (0.17 * d).toFixed(2) + ') 0%, rgba(255,200,120,0) 17%)');
+        lights.push('radial-gradient(circle 44px at ' + p.home[0] + '% ' + (p.home[1] - 4) + '%, rgba(255,208,140,' +
+          (0.20 * d).toFixed(2) + ') 0%, rgba(255,200,120,0) 100%)');
       });
       lampEl.style.backgroundImage = lights.join(',');
       lampEl.style.opacity = d > 0.05 ? (0.2 + 0.8 * d).toFixed(2) : '0';
