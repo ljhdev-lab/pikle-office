@@ -94,9 +94,9 @@
     { id: 'grok', room: '트렌드·속보실', name: '그록', role: 'X · 실시간 트렌드 · 직설 요약', task: '트렌드·요약',
       color: '#4b5163', deep: '#2c303a', soft: '#eceef3',
       dot: 'conic-gradient(from 200deg, #3a3f4a, #9aa1b1, #3a3f4a)',
-      home: [69.5, 89.5], seat: 'L3', w: 13.5, tag: [69.5, 75.9], bubble: [69.5, 73.2], tail: 'down', delay: 2.4,
+      home: [68.6, 89.8], seat: 'L3', w: 13.5, tag: [68.6, 76.2], bubble: [68.6, 73.5], tail: 'down', delay: 2.4,
       meet: [50, 84, 'up'],
-      paces: [[74.4, 90.4], [64.8, 89.8]], emoji: ['⚡', '📈', '🔥'],
+      paces: [[73.6, 90.6], [64.2, 90.0]], emoji: ['⚡', '📈', '🔥'],
       persona: '직설과 유쾌함으로 실시간 트렌드를 긁어 오는 트렌드 담당 · X에서 지금 뜨는 걸 제일 먼저 캐치',
       moods: [
         { e: 'hype', t: '이거 핫하다!' },
@@ -186,7 +186,7 @@
       claude: [[76.6, 60.2], [75.6, 55.4], [74.0, 52.8], [69.4, 54.2], [64.6, 55.8]],
       gemini: [[18.6, 88.4], [26.6, 90.4], [35.6, 89.4], [44.0, 88.2],
         [48.6, 83.4], [50.8, 79.2], [52.4, 72.6], [56.0, 69.6], [59.0, 67.4]],
-      grok: [[69.5, 89.5], [65.0, 91.6], [59.0, 90.2], [53.4, 86.4],
+      grok: [[68.6, 89.8], [64.0, 91.8], [58.6, 90.2], [53.4, 86.4],
         [49.6, 81.0], [47.6, 75.4], [46.8, 70.8]]
     }
   };
@@ -1030,15 +1030,15 @@
      양쪽으로 뻗은 두 획으로 나눠 30px에서도 형태가 뭉개지지 않게 했다. */
   function grokSVG(color, soft) {
     return svgOpen(52) +
-      '<g fill="none" stroke="' + color + '" stroke-width="4.6" stroke-linecap="butt" shape-rendering="crispEdges">' +
-        '<path d="M35.6 14.5A15 15 0 0 0 13.7 34.6"/>' +
-        '<path d="M16.4 37.5A15 15 0 0 0 37.5 16.4"/>' +
-        '<path d="M36 16L49.4 2" stroke-width="6"/>' +
-        '<path d="M16 36L2.6 50" stroke-width="6"/>' +
+      '<circle cx="26" cy="26" r="18" fill="' + color + '"/>' +
+      '<circle cx="26" cy="26" r="11.4" fill="' + soft + '"/>' +
+      '<g stroke="' + color + '" stroke-width="5" stroke-linecap="butt" shape-rendering="crispEdges">' +
+        '<path d="M35.4 16.6L45.4 6.6"/>' +
+        '<path d="M16.6 35.4L6.6 45.4"/>' +
       '</g>' +
-      '<rect x="18.2" y="22.4" width="3.4" height="3.4" fill="' + color + '"/>' +
-      '<rect x="25.4" y="22.4" width="3.4" height="3.4" fill="' + color + '"/>' +
-      '<rect x="21.4" y="29.8" width="4.2" height="1.7" fill="' + color + '"/>' +
+      '<rect x="18.8" y="22.6" width="3.6" height="3.6" fill="' + color + '"/>' +
+      '<rect x="26.4" y="22.6" width="3.6" height="3.6" fill="' + color + '"/>' +
+      '<rect x="21.6" y="30" width="4.6" height="1.8" fill="' + color + '"/>' +
       '</svg>';
   }
 
