@@ -77,9 +77,12 @@ input, textarea, select { font: inherit; color: inherit; }
   gap: 10px;
 }
 
-.brand__icon { width: 36px; height: 36px; flex: none; filter: drop-shadow(0 4px 7px rgba(36, 59, 89, .18)); }
-.brand__icon img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
-.brand__icon svg { width: 100%; height: 100%; display: block; }
+.brand__icon {
+  width: 36px; height: 36px; flex: none;
+  border-radius: 10px; overflow: hidden;
+  filter: drop-shadow(0 3px 6px rgba(36, 59, 89, .16));
+}
+.brand__icon img { width: 100%; height: 100%; display: block; image-rendering: auto; }
 
 .brand__text { flex: 1; min-width: 0; }
 
