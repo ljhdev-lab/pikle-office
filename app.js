@@ -788,11 +788,13 @@
     var tagEl = $('.tag[data-part="' + id + '"]');
     if (tagEl) tagEl.classList.remove('is-seated');
     window.clearTimeout(typeTimer[id]);
+    syncPartyStates();
 
     function next() {
       if (gen !== walkGen[id]) return;
       if (i >= path.length) {
         el.classList.remove('is-walk');
+        syncPartyStates();
         if (done) done();
         return;
       }
@@ -828,6 +830,7 @@
     var el = spriteEls[id];
     if (!el) return;
     el.classList.toggle('is-typing', !!on);
+    syncPartyStates();
   }
 
   /* 자리에서 타자를 치는 시간을 한 번에 길게 잡아, 390px 폭에서도
@@ -971,6 +974,7 @@
         meeting.state === 'return' ? '각자 자리로 돌아가는 중이에요' :
         '캐릭터를 누르면 그 비서의 오늘 일정이 열려요';
     }
+    syncPartyStates();
   }
 
   function conveneToRoom(quiet) {
@@ -1538,6 +1542,8 @@
       '</b> · ' + esc(greeting());
 
     $('#todayStats').textContent = '할 일 ' + openTasks + ' · 안건 ' + openAgenda;
+
+    renderParty();
   }
 
   function renderMap() {
@@ -1566,6 +1572,94 @@
   function renderCrew() {
     var el = $('#crewList');
     if (el) el.innerHTML = PARTS.map(crewHTML).join('');
+  }
+
+  /* ---------------------------------------------------------
+     파티 도트 바 — 오피스 맵 위 4인 상태창
+     이름·상태점·남은 일감·오늘 일 진행 게이지를 한 칸에 담고,
+     누르면 그 비서의 방(시트)이 열린다.
+     --------------------------------------------------------- */
+
+  var PARTY_STATE = {
+    on:      { label: '가동', long: '가동 중' },
+    typing:  { label: '타자', long: '타자 중' },
+    walk:    { label: '이동', long: '이동 중' },
+    meeting: { label: '회의', long: '회의 중' },
+    off:     { label: '휴식', long: '휴식 중' }
+  };
+
+  function partyStateOf(id) {
+    if (!isActive(id)) return 'off';
+    var el = spriteEls[id];
+    if (el && el.classList.contains('is-seated')) return 'meeting';
+    if (meeting.state === 'gather' || meeting.state === 'meeting') {
+      if (meeting.attendees.indexOf(id) >= 0) return 'meeting';
+    }
+    if (el && el.classList.contains('is-typing')) return 'typing';
+    if (el && el.classList.contains('is-walk')) return 'walk';
+    return 'on';
+  }
+
+  /* 오늘 할 일을 얼마나 처리했는지 — 일감이 없으면 가득 찬 게이지 */
+  function partyGauge(p) {
+    var total = tasksOf(p.id, true).length;
+    if (!total) return 100;
+    var open = tasksOf(p.id, false).length;
+    return Math.max(0, Math.min(100, Math.round((total - open) / total * 100)));
+  }
+
+  function partyCellHTML(p) {
+    var key = partyStateOf(p.id);
+    var meta = PARTY_STATE[key];
+    var open = tasksOf(p.id, false).length;
+    return '<button class="pm" type="button" data-action="open-room" data-part="' + p.id +
+      '" data-state="' + key + '"' +
+      ' style="--c:' + p.color + ';--soft:' + p.soft + ';--edge:' + p.color + '55;--fill:' +
+        partyGauge(p) + '%"' +
+      ' aria-label="' + esc(p.name + ' ' + meta.long + ' · 남은 일 ' + open + '건 · 방 열기') + '">' +
+      '<span class="pm__top">' +
+        '<span class="pm__ico">' + avatarSVG(p.id) + '</span>' +
+        '<span class="pm__name">' + esc(p.name) + '</span>' +
+        '<i class="pm__dot"></i>' +
+      '</span>' +
+      '<span class="pm__meta"><span class="pm__st">' + meta.label + '</span>' +
+        '<span class="pm__n">' + open + '건</span></span>' +
+      '<span class="pm__bar"><i></i></span>' +
+    '</button>';
+  }
+
+  function renderParty() {
+    var el = $('#partyBar');
+    if (!el) return;
+    var act = activeParts().length;
+    var open = state.tasks.filter(function (t) { return !t.done; }).length;
+    el.innerHTML = '<div class="party__frame"><div class="party__in">' +
+      '<div class="party__head"><span class="party__title">비서 파티</span>' +
+        '<span class="party__meta">' + (act ? act + '인 가동' : '전원 휴식') +
+        ' · 일감 ' + open + '건</span></div>' +
+      '<div class="party__row">' + PARTS.map(partyCellHTML).join('') + '</div>' +
+    '</div></div>';
+  }
+
+  /* 모션·회의처럼 상태만 바뀔 때는 칸을 다시 그리지 않고 표시만 갱신한다. */
+  function syncPartyStates() {
+    var row = $('#partyBar .party__row');
+    if (!row) return;
+    $$('.pm', row).forEach(function (cell) {
+      var id = cell.getAttribute('data-part');
+      var p = PART_MAP[id];
+      if (!p) return;
+      var key = partyStateOf(id);
+      var meta = PARTY_STATE[key];
+      var open = tasksOf(id, false).length;
+      cell.setAttribute('data-state', key);
+      cell.style.setProperty('--fill', partyGauge(p) + '%');
+      var st = $('.pm__st', cell);
+      if (st) st.textContent = meta.label;
+      var n = $('.pm__n', cell);
+      if (n) n.textContent = open + '건';
+      cell.setAttribute('aria-label', p.name + ' ' + meta.long + ' · 남은 일 ' + open + '건 · 방 열기');
+    });
   }
 
   function taskItemHTML(t) {
