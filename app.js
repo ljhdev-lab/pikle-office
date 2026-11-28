@@ -16,23 +16,91 @@
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
       color: '#6790d0', deep: '#4a68a6', soft: '#eaf1fb',
       home: [47.5, 46.4], w: 17.0, tag: [47.5, 31.6], bubble: [47.5, 29.2], tail: 'down', delay: 0,
-      paces: [[42.6, 48.8], [53.0, 49.6]], emoji: ['🗂', '✨', '☕'] },
+      paces: [[42.6, 48.8], [53.0, 49.6]], emoji: ['🗂', '✨', '☕'],
+      persona: '당차고 야무진 주디 홉스 스타일 — 오늘 할 일부터 챙기는 비서실장',
+      moods: [
+        { e: 'hype', t: '오늘도 야무지게!' },
+        { e: 'sigh', t: '후우… 일정이 산더미' },
+        { e: 'idea', t: '오, 이거 괜찮은데?' },
+        { e: 'proud', t: '대표님, 믿고 맡겨요' },
+        { e: 'tired', t: '밤에도 열일 중 ✨' },
+        { e: 'focus', t: '하나씩 정리하면 돼요' },
+        { e: 'coffee', t: '잠깐 커피 한 모금' },
+        { e: 'worry', t: '이건 여쭐까요?' },
+        { e: 'relief', t: '좋아, 이건 끝!' },
+        { e: 'catch', t: '여기 하나 빠졌어요' }
+      ] },
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
       color: '#52b394', deep: '#2f8a6e', soft: '#e6f7f0',
       home: [20.4, 60.2], w: 15.4, tag: [20.4, 46.6], bubble: [20.4, 43.9], tail: 'down', delay: 0.6,
-      paces: [[24.6, 62.8], [15.8, 62.4]], emoji: ['💡', '✍', '✨'] },
+      paces: [[24.6, 62.8], [15.8, 62.4]], emoji: ['💡', '✍', '✨'],
+      persona: '아이디어가 샘솟는 텐션 높은 기획자 · 숫자로 기획안을 다듬는 열정 만렙',
+      moods: [
+        { e: 'idea', t: '이거다! 대박 아이디어!' },
+        { e: 'worry', t: '음… 이건 좀 더 보자' },
+        { e: 'focus', t: '기획안 뽑아내는 중!' },
+        { e: 'sigh', t: '아… 수정 또 수정…' },
+        { e: 'coffee', t: '커피 없인 못 살아' },
+        { e: 'focus', t: '숫자는 거짓말 안 해!' },
+        { e: 'tired', t: '머리가 안 돌아가…' },
+        { e: 'hype', t: '잠깐만요! 해결 중!' },
+        { e: 'proud', t: '역시 내 기획이 최고!' },
+        { e: 'tired', t: '오늘도 야근 각인가…' }
+      ] },
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
       color: '#e27f5f', deep: '#b25a3a', soft: '#fdeee7',
       home: [76.6, 60.2], w: 15.0, tag: [76.6, 46.8], bubble: [76.6, 44.1], tail: 'down', delay: 1.2,
-      paces: [[71.8, 62.8], [81.4, 62.4]], emoji: ['🔎', '📄', '🧩'] },
+      paces: [[71.8, 62.8], [81.4, 62.4]], emoji: ['🔎', '📄', '🧩'],
+      persona: '차분하고 꼼꼼한 분석가 · 근거 없으면 작게 한숨 쉬고 끝까지 확인',
+      moods: [
+        { e: 'sigh', t: '휴, 출처가 없네요' },
+        { e: 'focus', t: '잠시만요, 대조 중' },
+        { e: 'hype', t: '검수는 제게 맡겨요' },
+        { e: 'worry', t: '음… 이 숫자 맞나요?' },
+        { e: 'catch', t: '어, 오타 찾았어요' },
+        { e: 'alarm', t: '원문이랑 다른데요?!' },
+        { e: 'tired', t: '표가 두 겹으로 보여…' },
+        { e: 'focus', t: '한 번만 더 볼게요' },
+        { e: 'proud', t: '팩트체크 통과예요' },
+        { e: 'relief', t: '근거 확실, 좋아요' }
+      ] },
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
       color: '#6f8fe0', deep: '#5a6bb8', soft: '#eef1fb',
       dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
       home: [18.6, 88.4], w: 15.0, tag: [18.6, 74.8], bubble: [18.6, 72.1], tail: 'down', delay: 1.8,
-      paces: [[24.8, 90.6], [12.2, 90.2]], emoji: ['🎨', '🖼', '✨'] }
+      paces: [[24.8, 90.6], [12.2, 90.2]], emoji: ['🎨', '🖼', '✨'],
+      persona: '1px도 놓치지 않는 감각적인 아트 디렉터 겸 깐깐한 최종 검수자',
+      moods: [
+        { e: 'idea', t: '오, 이 무드 딱인데?' },
+        { e: 'focus', t: '1픽셀까지 혼 갈아넣는 중' },
+        { e: 'eyes', t: '내 눈… 블루라이트 과다…' },
+        { e: 'sigh', t: '폰트 자간이 왜 이래' },
+        { e: 'catch', t: '여기 오타 하나 숨었네?' },
+        { e: 'focus', t: '건드리지 마, 감 잡았어' },
+        { e: 'idea', t: '요즘 이 컬러가 대세지~' },
+        { e: 'proud', t: '완벽해, 역시 내 안목!' },
+        { e: 'proud', t: '이 퀄리티면 무조건 통과!' }
+      ] }
   ];
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
+
+  /* 감정 말풍선 — 감정마다 작은 아이콘과 파스텔 톤을 하나씩.
+     e 는 moods 의 감정 키, cls 는 CSS 톤 클래스 접미사다. */
+  var EMOTIONS = {
+    idea:   { icon: '💡', cls: 'idea' },
+    worry:  { icon: '🤔', cls: 'worry' },
+    focus:  { icon: '🎯', cls: 'focus' },
+    hype:   { icon: '🔥', cls: 'hype' },
+    sigh:   { icon: '😮‍💨', cls: 'sigh' },
+    coffee: { icon: '☕', cls: 'coffee' },
+    tired:  { icon: '🫠', cls: 'tired' },
+    proud:  { icon: '✨', cls: 'proud' },
+    eyes:   { icon: '😵‍💫', cls: 'eyes' },
+    catch:  { icon: '🔍', cls: 'catch' },
+    alarm:  { icon: '😲', cls: 'alarm' },
+    relief: { icon: '😌', cls: 'relief' }
+  };
 
   var FILTERS = [{ id: 'all', label: '전체' }].concat(PARTS.map(function (p) {
     return { id: p.id, label: p.task };
@@ -183,6 +251,8 @@
   var closeTimer = null;
   var bubbleTimer = null;
   var focusHold = 0;
+  var bubbleTurn = 0;
+  var lastMood = {};
   var uidCount = 0;
 
   function uid() {
@@ -279,6 +349,88 @@
 
   function activeParts() {
     return PARTS.filter(function (p) { return isActive(p.id); });
+  }
+
+  /* ---------------------------------------------------------
+     감정 말풍선 — 지금 모션 상태(걷기·타이핑)·시간대·날씨·일감에
+     어울리는 대사를 가중치로 골라 낸다. 같은 대사가 연달아 나오지 않게
+     직전 선택은 무게를 크게 줄인다.
+     --------------------------------------------------------- */
+
+  function moodContext(id) {
+    var el = spriteEls[id];
+    return {
+      phase: phaseOf(baseHour()),
+      weather: weatherKind(),
+      walking: !!(el && el.classList.contains('is-walk')),
+      typing: !!(el && el.classList.contains('is-typing')),
+      busy: tasksOf(id, false).length > 0
+    };
+  }
+
+  function moodWeight(m, c) {
+    var e = m.e;
+    var w = 1;
+    if (c.phase === 'night') {
+      if (e === 'tired' || e === 'coffee') w += 2.6;
+      else if (e === 'sigh' || e === 'relief') w += 1.8;
+    } else if (c.phase === 'sunset') {
+      if (e === 'sigh' || e === 'tired' || e === 'coffee') w += 1.6;
+      else if (e === 'proud' || e === 'relief') w += 1.0;
+    } else if (c.phase === 'dawn') {
+      if (e === 'hype' || e === 'idea') w += 2.0;
+      else if (e === 'focus' || e === 'coffee') w += 1.2;
+    } else if (e === 'focus' || e === 'idea' || e === 'catch') {
+      w += 0.8;
+    }
+    if (c.weather === 'rain') {
+      if (e === 'sigh' || e === 'coffee' || e === 'tired' || e === 'relief') w += 1.4;
+    } else if (c.weather === 'snow') {
+      if (e === 'eyes' || e === 'worry' || e === 'coffee' || e === 'relief') w += 1.2;
+    }
+    if (c.walking && (e === 'hype' || e === 'coffee' || e === 'idea')) w += 1.1;
+    if (c.typing && (e === 'focus' || e === 'hype' || e === 'sigh' || e === 'catch')) w += 1.3;
+    if (c.busy && (e === 'focus' || e === 'tired' || e === 'worry')) w += 0.9;
+    if (!c.busy && (e === 'relief' || e === 'proud' || e === 'coffee')) w += 0.7;
+    return w;
+  }
+
+  /* want — 우선 고를 감정 키 목록(예: 할 일을 끝냈을 때 ['proud','relief']). */
+  function pickMood(partId, want) {
+    var p = PART_MAP[partId];
+    if (!p || !p.moods || !p.moods.length) return null;
+    var pool = p.moods;
+    if (want && want.length) {
+      var hit = pool.filter(function (m) { return want.indexOf(m.e) >= 0; });
+      if (hit.length) pool = hit;
+    }
+    var c = moodContext(partId);
+    var prev = lastMood[partId];
+    var rows = pool.map(function (m) {
+      var w = moodWeight(m, c);
+      if (prev && prev.t === m.t) w *= 0.12;
+      return { m: m, w: w };
+    });
+    var total = rows.reduce(function (a, r) { return a + r.w; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < rows.length; i += 1) {
+      r -= rows[i].w;
+      if (r <= 0) { lastMood[partId] = rows[i].m; return rows[i].m; }
+    }
+    lastMood[partId] = rows[rows.length - 1].m;
+    return rows[rows.length - 1].m;
+  }
+
+  /* 할 일을 마쳤을 때처럼 특정 감정을 골라 머리 위에 잠깐 띄운다. */
+  function showMood(partId, want) {
+    if (!state.motion || document.hidden || ui.sheet) return;
+    if (!PART_MAP[partId]) return;
+    var mood = pickMood(partId, want);
+    if (!mood) return;
+    state.focus = partId;
+    focusHold = Date.now();
+    refreshFocus();
+    placeBubble(partId, true, mood);
   }
 
   /* ---------------------------------------------------------
@@ -423,7 +575,8 @@
         '<span class="tag__name">' + esc(p.name) + '</span></span>';
     }).join('');
 
-    return tags + '<span class="bubble" id="mapBubble" hidden><span class="bubble__txt"></span></span>';
+    return tags + '<span class="bubble" id="mapBubble" hidden><span class="bubble__ico" hidden></span>' +
+      '<span class="bubble__txt"></span></span>';
   }
 
   function spriteHTML(p) {
@@ -449,15 +602,24 @@
     });
   }
 
-  function placeBubble(partId, animate) {
+  /* mood 를 주지 않으면 지금 상태 문구(할 일 안내) 말풍선이 뜨고,
+     mood 를 주면 감정 아이콘과 함께 감정 말풍선이 뜬다. */
+  function placeBubble(partId, animate, mood) {
     var el = $('#mapBubble');
     if (!el) return;
     var p = PART_MAP[partId];
     if (!p) { el.hidden = true; return; }
+    var emo = mood && EMOTIONS[mood.e] ? EMOTIONS[mood.e] : null;
     el.style.left = p.bubble[0] + '%';
     el.style.top = p.bubble[1] + '%';
-    el.className = 'bubble bubble--' + p.tail + (isActive(partId) ? '' : ' is-off');
-    $('.bubble__txt', el).textContent = statusOf(partId);
+    el.className = 'bubble bubble--' + p.tail + (isActive(partId) ? '' : ' is-off') +
+      (emo ? ' bubble--mood m-' + emo.cls : ' bubble--status');
+    var ico = $('.bubble__ico', el);
+    if (ico) {
+      ico.hidden = !emo;
+      ico.textContent = emo ? emo.icon : '';
+    }
+    $('.bubble__txt', el).textContent = emo ? mood.t : statusOf(partId);
     el.hidden = false;
     var stage = $('#mapStage');
     if (stage) {
@@ -500,8 +662,10 @@
       var next = act[(i + 1) % act.length];
       if (next.id === state.focus && act.length > 1) next = act[(i + 2) % act.length];
       state.focus = next.id;
+      bubbleTurn += 1;
+      /* 상태 문구 ↔ 감정 말풍선을 번갈아 띄운다 */
       refreshFocus();
-      placeBubble(state.focus, true);
+      placeBubble(state.focus, true, bubbleTurn % 2 === 0 ? null : pickMood(state.focus));
     }, 5200);
   }
 
@@ -1165,6 +1329,7 @@
         '<div class="agent__id">' +
           '<h3 class="agent__name">' + esc(p.name) + '</h3>' +
           '<p class="agent__role">' + esc(p.room) + ' · ' + esc(p.role) + '</p>' +
+          '<p class="agent__persona">' + esc(p.persona) + '</p>' +
         '</div>' +
         '<button class="switch" type="button" data-action="toggle-active" data-part="' + p.id + '" ' +
           'aria-pressed="' + (st.active ? 'true' : 'false') + '" aria-label="' + esc(p.name) + ' 가동"></button>' +
@@ -1216,8 +1381,11 @@
       var s = card.querySelector('.crew-card__status');
       if (s && id) s.textContent = statusOf(id);
     });
-    var b = $('#mapBubble .bubble__txt');
-    if (b) b.textContent = statusOf(state.focus);
+    var b = $('#mapBubble');
+    if (b && !b.classList.contains('bubble--mood')) {
+      var btxt = $('.bubble__txt', b);
+      if (btxt) btxt.textContent = statusOf(state.focus);
+    }
   }
 
   /* ---------------------------------------------------------
@@ -1265,7 +1433,8 @@
     head.style.setProperty('--c', p.color);
     head.innerHTML = '<div class="sheet__avatar" style="background:' + p.soft + '">' + avatarSVG(p.id) + '</div>' +
       '<div class="sheet__id"><h3 class="sheet__title" id="sheetTitle">' + esc(p.name) + '</h3>' +
-      '<p class="sheet__sub">' + esc(p.room) + ' · ' + esc(p.role) + '</p></div>' +
+      '<p class="sheet__sub">' + esc(p.room) + ' · ' + esc(p.role) + '</p>' +
+      '<p class="sheet__persona"><i aria-hidden="true">“</i>' + esc(p.persona) + '<i aria-hidden="true">”</i></p></div>' +
       '<button class="switch" type="button" data-action="toggle-active" data-part="' + p.id + '" ' +
         'aria-pressed="' + (st.active ? 'true' : 'false') + '" aria-label="' + esc(p.name) + ' 가동"></button>';
 
@@ -1348,6 +1517,7 @@
       if (box) box.focus();
     }
     toast('할 일을 추가했어요');
+    if (!ui.sheet) showMood(partId, ['focus', 'hype']);
   }
 
   function addAgenda(title) {
@@ -1369,6 +1539,9 @@
     renderTeam();
     renderHeader();
     if (ui.sheet) renderSheet();
+    var hit = null;
+    state.tasks.forEach(function (t) { if (t.id === id) hit = t; });
+    if (hit && hit.done) showMood(hit.part, ['proud', 'relief']);
   }
 
   function toggleAgenda(id) {

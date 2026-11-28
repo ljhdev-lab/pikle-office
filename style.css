@@ -779,6 +779,77 @@ body.no-motion .sprite { transition: none; }
 
 .bubble.is-off { opacity: .7; }
 
+/* 감정 말풍선 — 감정마다 작은 아이콘 + 파스텔 톤 한 겹, 테두리·꼬리는 같은 색을 따른다 */
+.bubble--mood {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 138px;
+  padding: 6px 10px 6px 7px;
+  text-align: left;
+  border-radius: 15px;
+  background: var(--mood-bg, #fffdf8);
+  border-color: var(--mood-line, #f0e6d7);
+}
+
+.bubble__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: inset 0 0 0 1px rgba(120, 96, 60, .1);
+  font-size: 10.5px;
+  line-height: 1;
+}
+.bubble__ico[hidden] { display: none; }
+.bubble--mood .bubble__txt { flex: 1; min-width: 0; }
+
+.bubble.m-idea   { --mood-bg: #fffaea; --mood-line: #f4e3b3; }
+.bubble.m-worry  { --mood-bg: #f5f2fc; --mood-line: #e3dcf5; }
+.bubble.m-focus  { --mood-bg: #edf3fc; --mood-line: #d8e4f6; }
+.bubble.m-hype   { --mood-bg: #fff0e8; --mood-line: #ffd9c4; }
+.bubble.m-sigh   { --mood-bg: #f3f2f7; --mood-line: #e2dfee; }
+.bubble.m-coffee { --mood-bg: #faf1e4; --mood-line: #ecdcc2; }
+.bubble.m-tired  { --mood-bg: #f1f0f4; --mood-line: #ddd9e6; }
+.bubble.m-proud  { --mood-bg: #eefaf2; --mood-line: #cfe9db; }
+.bubble.m-eyes   { --mood-bg: #f6f0fb; --mood-line: #e4d7f2; }
+.bubble.m-catch  { --mood-bg: #eef8fa; --mood-line: #d3e9ee; }
+.bubble.m-alarm  { --mood-bg: #fff1f3; --mood-line: #fbd6dd; }
+.bubble.m-relief { --mood-bg: #f0f9f1; --mood-line: #d7ebda; }
+
+/* 감정마다 살짝 다른 모서리 */
+.bubble.m-tired { border-radius: 16px 16px 16px 9px; }
+.bubble.m-hype { border-radius: 15px 15px 7px 15px; }
+.bubble.m-proud { border-radius: 15px 15px 9px 15px; }
+
+.bubble--mood.is-pop { animation: moodPop .42s cubic-bezier(.3, 1.5, .55, 1) both; }
+@keyframes moodPop {
+  from { opacity: 0; scale: .9; }
+  to { opacity: 1; scale: 1; }
+}
+
+/* 상세 패널·비서현황의 성격 한 줄 소개 */
+.sheet__persona {
+  margin-top: 4px;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  word-break: keep-all;
+}
+.sheet__persona i { font-style: normal; color: var(--ink-3); }
+.agent__persona {
+  margin-top: 5px;
+  padding-left: 7px;
+  border-left: 2px solid color-mix(in srgb, var(--c) 40%, transparent);
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  word-break: keep-all;
+}
+
 /* ---------------- crew (4인 현황) ---------------- */
 
 .crew {
@@ -1377,6 +1448,7 @@ body.no-motion .sprite { transition: none; }
   .map-card { padding: 10px 10px 0; }
   .tag { font-size: 11.5px; }
   .bubble { max-width: 170px; font-size: 11.5px; }
+  .bubble--mood { max-width: 190px; }
 }
 
 @media (min-width: 700px) {
