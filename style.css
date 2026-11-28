@@ -716,7 +716,7 @@ body.no-motion .sprite { transition: none; }
 .bubble {
   position: absolute;
   z-index: 30;
-  max-width: 148px;
+  max-width: 122px;
   padding: 7px 10px;
   border-radius: 13px;
   background: rgba(255, 253, 248, .97);

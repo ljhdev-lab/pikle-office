@@ -459,6 +459,15 @@
     el.className = 'bubble bubble--' + p.tail + (isActive(partId) ? '' : ' is-off');
     $('.bubble__txt', el).textContent = statusOf(partId);
     el.hidden = false;
+    var stage = $('#mapStage');
+    if (stage) {
+      var sw = stage.clientWidth;
+      var bw = el.offsetWidth;
+      var cx = sw * p.bubble[0] / 100;
+      var half = bw / 2 + 6;
+      if (cx < half) el.style.left = (half / sw * 100) + '%';
+      else if (cx > sw - half) el.style.left = ((sw - half) / sw * 100) + '%';
+    }
     if (animate) {
       el.classList.remove('is-pop');
       void el.offsetWidth;
