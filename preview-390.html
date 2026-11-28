@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>390×844 검증</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #ddd; }
+  #f { display: block; width: 390px; height: 844px; border: 0; background: #fff; }
+  #out { position: absolute; left: 400px; top: 0; width: 600px; font: 12px/1.5 monospace; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<iframe id="f" src="index.html?v=33&pv=1"></iframe>
+<pre id="out">waiting...</pre>
+<script>
+(function () {
+  var errs = [];
+  var f = document.getElementById('f');
+  var out = document.getElementById('out');
+  var first = true;
+
+  f.addEventListener('load', function () {
+    if (first) {
+      first = false;
+      try {
+        f.contentWindow.addEventListener('error', function ( e ) {
+          errs.push('error: ' + (e.message || e.type));
+        });
+        f.contentWindow.addEventListener('unhandledrejection', function (e) {
+          errs.push('rejection: ' + e.reason);
+        });
+      } catch (e) {}
+      f.src = f.src;             /* 리스너를 건 뒤 한 번 더 로드해 초기화 오류까지 잡는다 */
+      return;
+    }
+
+    window.setTimeout(function () {
+      var w = f.contentWindow, d = w.document;
+      var W = w.innerWidth;
+      var r = {};
+      r.viewport = W + '×' + w.innerHeight;
+      r.docScrollW = d.scrollingElement.scrollWidth;
+      r.hOverflow = d.scrollingElement.scrollWidth > W;
+      r.appW = Math.round(d.getElementById('app').getBoundingClientRect().width);
+
+      var names = [];
+      Array.prototype.forEach.call(d.querySelectorAll('.pm'), function (pm) {
+        var n = pm.querySelector('.pm__name');
+        var bar = pm.querySelector('.pm__bar');
+        var rect = pm.getBoundingClientRect();
+        var nrect = n.getBoundingClientRect();
+        names.push({
+          part: pm.getAttribute('data-part'),
+          state: pm.getAttribute('data-state'),
+          cellW: +rect.width.toFixed(1),
+          cellH: +rect.height.toFixed(1),
+          nameW: +nrect.width.toFixed(1),
+          nameScrollW: n.scrollWidth,
+          nameClipped: n.scrollWidth > Math.ceil(nrect.width) + 0.5,
+          barW: +bar.getBoundingClientRect().width.toFixed(1),
+          text: pm.innerText.replace(/\n/g, '|')
+        });
+      });
+      r.cells = names;
+
+      var row = d.querySelector('.party__row').getBoundingClientRect();
+      var party = d.getElementById('partyBar').getBoundingClientRect();
+      r.rowW = +row.width.toFixed(1);
+      r.partyH = +party.height.toFixed(1);
+      r.partyTop = +party.top.toFixed(1);
+      r.stageTop = +d.getElementById('mapStage').getBoundingClientRect().top.toFixed(1);
+      r.partyText = d.getElementById('partyBar').innerText.replace(/\n/g, ' | ');
+
+      /* 넘치는 요소 찾기 (가로) */
+      var wide = [];
+      Array.prototype.forEach.call(d.querySelectorAll('body *'), function (el) {
+        var b = el.getBoundingClientRect();
+        if (b.width > 0 && (b.right > W + 0.5 || b.left < -0.5)) {
+          wide.push((el.className && el.className.baseVal === undefined ? el.className : el.tagName) + ' ' +
+            b.left.toFixed(0) + '~' + b.right.toFixed(0));
+        }
+      });
+      r.overflowing = wide.slice(0, 12);
+      r.errors = errs.slice();
+      r.ready = !!d.querySelector('.pm');
+      out.textContent = JSON.stringify(r, null, 1);
+      window.__report = r;
+    }, 1200);
+  });
+})();
+</script>
+</body>
+</html>
