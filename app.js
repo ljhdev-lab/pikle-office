@@ -1581,10 +1581,10 @@
      --------------------------------------------------------- */
 
   var PARTY_STATE = {
-    on:      { label: '가동', long: '가동 중' },
-    typing:  { label: '타자', long: '타자 중' },
-    walk:    { label: '이동', long: '이동 중' },
-    meeting: { label: '회의', long: '회의 중' },
+    on:      { label: '가동 중', long: '가동 중' },
+    typing:  { label: '타자 중', long: '타자 중' },
+    walk:    { label: '이동 중', long: '이동 중' },
+    meeting: { label: '회의 중', long: '회의 중' },
     off:     { label: '휴식', long: '휴식 중' }
   };
 
@@ -1600,12 +1600,10 @@
     return 'on';
   }
 
-  /* 오늘 할 일을 얼마나 처리했는지 — 일감이 없으면 가득 찬 게이지 */
+  /* 남은 일이 적을수록 게이지가 차오른다 — 0건이면 가득 */
   function partyGauge(p) {
-    var total = tasksOf(p.id, true).length;
-    if (!total) return 100;
     var open = tasksOf(p.id, false).length;
-    return Math.max(0, Math.min(100, Math.round((total - open) / total * 100)));
+    return Math.max(25, 100 - open * 22);
   }
 
   function partyCellHTML(p) {
