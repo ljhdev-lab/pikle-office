@@ -522,7 +522,7 @@ body.motion .toggle__dot { transform: translateX(16px); }
   transition: opacity 1.6s linear;
 }
 
-.map-overlay { position: absolute; inset: 0; z-index: 9; }
+.map-overlay { position: absolute; inset: 0; z-index: 9; pointer-events: none; }
 
 .map-foot {
   display: flex;
