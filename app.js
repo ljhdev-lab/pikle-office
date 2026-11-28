@@ -779,7 +779,7 @@
       op = clamp(op + 0.14, 0, 0.72);
       cloud = 1;
     } else if (kind === 'snow') {
-      sky = mixRgb(sky, [206, 216, 228], 0.78);
+      sky = mixRgb(sky, [156, 170, 192], 0.72);
       wash = mixRgb(wash, [230, 238, 246], 0.55);
       op = clamp(op + 0.07, 0, 0.68);
       cloud = 1;
@@ -881,9 +881,9 @@
           l: 8 + Math.random() * 8, a: 0.42 + Math.random() * 0.34 });
       }
     } else if (kind === 'snow') {
-      for (var j = 0; j < 54; j += 1) {
-        fxParts.push({ x: Math.random() * w, y: Math.random() * h, s: 16 + Math.random() * 20,
-          r: 1.4 + Math.random() * 1.4, d: Math.random() * Math.PI * 2, a: 0.62 + Math.random() * 0.36 });
+      for (var j = 0; j < 62; j += 1) {
+        fxParts.push({ x: Math.random() * w, y: Math.random() * h, s: 14 + Math.random() * 18,
+          r: 1.8 + Math.random() * 1.6, d: Math.random() * Math.PI * 2, a: 0.7 + Math.random() * 0.3 });
       }
     }
   }
