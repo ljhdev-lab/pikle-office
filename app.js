@@ -302,7 +302,8 @@
         byeol: { status: '오늘 할 일 정리해 두었어요', active: true, boost: false, quota: defaultQuota('byeol') },
         gpt: { status: '새 글 기획안 쓰는 중', active: true, boost: false, quota: defaultQuota('gpt') },
         claude: { status: '자료 조사해서 정리 중', active: true, boost: false, quota: defaultQuota('claude') },
-        gemini: { status: '표지 이미지 다듬는 중', active: true, boost: false, quota: defaultQuota('gemini') }
+        gemini: { status: '표지 이미지 다듬는 중', active: true, boost: false, quota: defaultQuota('gemini') },
+        grok: { status: 'X에서 지금 뜨는 것 훑는 중', active: true, boost: false, quota: defaultQuota('grok') }
       },
       agenda: [],
       tasks: [],

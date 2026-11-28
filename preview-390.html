@@ -11,5 +11,14 @@
 </head>
 <body>
 <iframe class="frame" id="frame" src="./index.html" width="390" height="844" title="비서실 390×844"></iframe>
+<script>
+  window.__errors = [];
+  window.addEventListener('error', function (e) { window.__errors.push(String(e.message)); });
+  document.getElementById('frame').addEventListener('load', function () {
+    var w = this.contentWindow;
+    w.addEventListener('error', function (e) { window.__errors.push('frame: ' + e.message); });
+    w.addEventListener('unhandledrejection', function (e) { window.__errors.push('reject: ' + e.reason); });
+  });
+</script>
 </body>
 </html>
