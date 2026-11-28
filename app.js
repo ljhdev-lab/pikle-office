@@ -739,7 +739,7 @@
   }
 
   function darknessOf(op) {
-    return clamp((op - 0.03) / 0.55, 0, 1);
+    return clamp((op - 0.24) / 0.46, 0, 1);
   }
 
   var lightOn = false;
@@ -803,7 +803,7 @@
           (0.20 * d).toFixed(2) + ') 0%, rgba(255,200,120,0) 100%)');
       });
       lampEl.style.backgroundImage = lights.join(',');
-      lampEl.style.opacity = d > 0.05 ? (0.2 + 0.8 * d).toFixed(2) : '0';
+      lampEl.style.opacity = d > 0.02 ? d.toFixed(2) : '0';
     }
 
     var orb = $('#skyOrb');
