@@ -1329,11 +1329,11 @@
         '<div class="agent__id">' +
           '<h3 class="agent__name">' + esc(p.name) + '</h3>' +
           '<p class="agent__role">' + esc(p.room) + ' · ' + esc(p.role) + '</p>' +
-          '<p class="agent__persona">' + esc(p.persona) + '</p>' +
         '</div>' +
         '<button class="switch" type="button" data-action="toggle-active" data-part="' + p.id + '" ' +
           'aria-pressed="' + (st.active ? 'true' : 'false') + '" aria-label="' + esc(p.name) + ' 가동"></button>' +
       '</div>' +
+      '<p class="agent__persona">' + esc(p.persona) + '</p>' + +
       '<input class="agent__status" data-status="' + p.id + '" maxlength="40" value="' + esc(st.status) +
         '" aria-label="' + esc(p.name) + ' 상태 문구">' +
       '<div class="agent__foot">' +
