@@ -2145,6 +2145,10 @@ body.no-motion .sprite { transition: none; }
 }
 .quota__when { margin: 5px 0 0; font-size: 10px; font-weight: 700; color: var(--ink-3); }
 
+/* 회복 시각 — 오른쪽에 ? 표시 없이도 '추정'이라는 걸 같이 읽히게 */
+.quota__when--reset { color: var(--ink-2); }
+.quota__when--reset::before { content: '↻ '; color: #52b394; font-weight: 900; }
+
 .quota__foot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .quota__btn {
   display: inline-flex;

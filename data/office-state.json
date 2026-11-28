@@ -1,6 +1,12 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-28T15:35:00+09:00",
+  "updatedAt": "2026-11-28T15:42:00+09:00",
+  "tokens": {
+    "byeol": { "pct": 17, "basis": "estimate", "asOf": "2026-11-28T15:37:00+09:00", "reset": "매일 04:00" },
+    "gpt": { "pct": 92, "basis": "estimate", "asOf": "2026-11-28T15:35:00+09:00", "reset": "마지막 사용 5시간 뒤" },
+    "claude": { "pct": 97, "basis": "measured", "asOf": "2026-11-28T15:00:00+09:00", "reset": "매주 토 05:00" },
+    "gemini": { "pct": 90, "basis": "estimate", "asOf": "2026-11-28T15:35:00+09:00", "reset": "매일 00:00" }
+  },
   "claudeTokenPct": 97,
   "claudeCheckedAt": "2026-11-28T15:00:00+09:00",
   "tasks": [

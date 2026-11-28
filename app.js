@@ -92,22 +92,50 @@
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
 
-  /* 각 AI의 토큰(한도) 기본값 — 실제로 확인한 계정 상태를 그대로 옮긴다.
-     Claude(Pro): 2026-11-28 15:00 claude.ai › 설정 › 사용량 에서 주간 3% 사용
-     = 잔여 97% 를 확인해 pct 로 넣었다. 같은 화면의 현재 세션 10% 사용(잔여
-     90%)과 초기화 시각은 시트 안내문에 적는다.
-     ChatGPT(Free)·제미나이(무료)·별이(무료)는 정량 %를 화면에 주지 않아
-     숫자를 지어내지 않고 상태(plenty 여유 / ok 보통 / low 부족)로만 둔다. */
+  /* 각 AI의 토큰(한도) 기본값.
+     Claude(Pro) 만 실제 화면에서 확인한 측정값이다 — 2026-11-28 15:00
+     claude.ai › 설정 › 사용량 에서 주간 3% 사용 = 잔여 97%. 같은 화면의
+     현재 세션(10% 사용, 잔여 90%)과 초기화 시각은 안내문에 적는다.
+     별이·GPT·제미나이는 정량 %를 화면에 주지 않지만, 쓰는 만큼 대략 얼마나
+     줄었는지 보이도록 기준값을 두고 시킨 작업 수로 어림한다. 그 값은
+     측정값이 아니므로 est: true 로 두고 화면에 '~17%' 처럼 표시한다.
+       · 별이: 11.28 15:37 일일 한도 83% 사용 = 잔여 17%
+       · GPT : 오늘 작업량으로 어림한 92%
+       · 제미나이: 오늘 작업량으로 어림한 90% */
   var QUOTA_DEFAULTS = {
-    byeol: { plan: '무료', pct: null, level: 'plenty' },
-    gpt: { plan: '무료', pct: null, level: 'plenty' },
-    claude: { plan: 'Pro', pct: 97, level: 'plenty', checkedAt: Date.parse('2026-11-28T15:00:00+09:00') },
-    gemini: { plan: '무료', pct: null, level: 'plenty' }
+    byeol: { plan: '무료', pct: 17, est: true, level: 'plenty', checkedAt: Date.parse('2026-11-28T15:37:00+09:00') },
+    gpt: { plan: '무료', pct: 92, est: true, level: 'plenty', checkedAt: Date.parse('2026-11-28T15:35:00+09:00') },
+    claude: { plan: 'Pro', pct: 97, est: false, level: 'plenty', checkedAt: Date.parse('2026-11-28T15:00:00+09:00') },
+    gemini: { plan: '무료', pct: 90, est: true, level: 'plenty', checkedAt: Date.parse('2026-11-28T15:35:00+09:00') }
+  };
+
+  /* 한도가 다시 차는 시점 — 별이는 매일 04:00, 클로드는 매주 토요일 05:00,
+     제미나이는 매일 00:00, GPT 는 마지막 사용에서 5시간 뒤(정해진 시각 없음).
+     기기 시간대(한국) 기준으로 계산한다. */
+  var QUOTA_RESET = {
+    byeol: { kind: 'daily', hour: 4 },
+    claude: { kind: 'weekly', dow: 6, hour: 5 },
+    gpt: { kind: 'rolling', hours: 5 },
+    gemini: { kind: 'daily', hour: 0 }
+  };
+
+  /* 작업 1건을 넣거나 끝낼 때 까는 대략치(%). 정확한 사용량이 아니라
+     '이만큼쯤 썃을 것'이라는 추정이다. 클로드는 부스터(Opus)일 때 두 배. */
+  var QUOTA_COST = { byeol: 8, gpt: 10, gemini: 8, claude: 4, claudeBoost: 8 };
+
+  var QUOTA_RECOVER = {
+    byeol: '매일 04:00에 100%로 회복 · 작업 1건당 -8% 추정',
+    gpt: '마지막 사용 5시간 뒤 100%로 회복 · 작업 1건당 -10% 추정',
+    claude: '매주 토 05:00에 100%로 회복 · 작업 1건당 -4%, 부스터 -8% 추정',
+    gemini: '매일 00:00에 100%로 회복 · 작업 1건당 -8% 추정'
   };
 
   function defaultQuota(id) {
     var q = QUOTA_DEFAULTS[id] || QUOTA_DEFAULTS.byeol;
-    return { plan: q.plan, pct: q.pct, level: q.level, checkedAt: q.checkedAt || 0 };
+    return {
+      plan: q.plan, pct: q.pct, level: q.level, checkedAt: q.checkedAt || 0,
+      est: q.est === true, lastResetAt: 0, lastUsedAt: 0
+    };
   }
 
   /* %가 없는 플랜에서 고를 수 있는 한도 상태 — 막대 길이와 색도 여기서 나온다. */
@@ -175,7 +203,7 @@
         '칸을 눌러 토큰을 맞추고 클로드 부스터 모드를 켜요.'
       ],
       routine: '아침에 한마디를 남기고 토큰 잔여부터 확인해요.',
-      note: '체력바는 각 AI의 남은 토큰(한도)이에요. 30% 이하는 주황, 15% 이하는 빨강이고, 클로드 부스터 모드는 Opus로 고난도 작업을 맡길 때 켜요.'
+      note: '체력바는 각 AI의 남은 토큰(한도)이에요. 30% 이하는 주황, 15% 이하는 빨강이고, 클로드 부스터 모드는 Opus로 고난도 작업을 맡길 때 켜요. 측정값이 없는 AI는 시킨 작업 수로 어림한 추정치라 ~17%처럼 물결표를 붙이고, 회복 시각(별이 매일 04:00 · 클로드 매주 토 05:00 · GPT 마지막 사용 5시간 뒤 · 제미나이 매일 00:00)이 지나면 100%로 돌아와요.'
     },
     meeting: {
       title: '회의실',
@@ -208,7 +236,7 @@
         '쉬게 할 비서는 가동 스위치를 꺼요.'
       ],
       routine: '하루를 시작할 때 토큰 잔여와 진행 건수를 봐요.',
-      note: '클로드 카드의 ⚡ 부스터는 Opus 고난도 작업을 맡길 때 켜요.'
+      note: '클로드 카드의 ⚡ 부스터는 Opus 고난도 작업을 맡길 때 켜요. ~17%처럼 물결표가 붙은 값은 시킨 작업 수로 어림한 추정이고, 슬라이더로 직접 맞기면 실측값(추정 표시 없음)이 돼요.'
     },
     memo: {
       title: '메모·백업',
@@ -307,6 +335,10 @@
         else if (q.pct === null) tq.pct = null;
         if (QUOTA_LEVEL[q.level]) tq.level = q.level;
         if (typeof q.checkedAt === 'number' && q.checkedAt > 0) tq.checkedAt = q.checkedAt;
+        if (q.est === true) tq.est = true;
+        else if (q.est === false) tq.est = false;
+        if (typeof q.lastResetAt === 'number' && q.lastResetAt > 0) tq.lastResetAt = q.lastResetAt;
+        if (typeof q.lastUsedAt === 'number' && q.lastUsedAt > 0) tq.lastUsedAt = q.lastUsedAt;
       });
     }
 
@@ -482,19 +514,29 @@
     out.ok = true;
     var remoteAt = Date.parse(data.updatedAt || '') || Date.now();
 
-    /* 클로드 잔여 % — 원격이 로컬에서 마지막으로 맞춘 시각보다
-       최신일 때만 반영한다. 사용자가 방금 손으로 맞춘 값을 원격이
-       덮어쓰지 않게 하는 기준이다. */
-    var pct = data.claudeTokenPct;
-    if (typeof pct === 'number' && isFinite(pct) && state.parts.claude) {
-      var q = state.parts.claude.quota;
-      var nextPct = clamp(Math.round(pct), 0, 100);
-      if (remoteAt > (q.checkedAt || 0) && nextPct !== q.pct) {
-        q.pct = nextPct;
-        q.checkedAt = Date.parse(data.claudeCheckedAt || '') || remoteAt;
-        out.changed = true;
+    /* 토큰 잔여 — 파일의 tokens(또는 예전 형식인 claudeTokenPct)가 로컬에서
+       마지막으로 맞긴 시각보다 최신일 때만 반영한다. 사용자가 방금 손으로
+       맞긴 값을 원격이 덮어쓰지 않게 하는 기준이다. */
+    var tokens = (data.tokens && typeof data.tokens === 'object') ? data.tokens : null;
+    PARTS.forEach(function (p) {
+      var t = tokens ? tokens[p.id] : null;
+      if (!t && p.id === 'claude' && data.claudeTokenPct != null) {
+        t = { pct: data.claudeTokenPct, asOf: data.claudeCheckedAt, basis: 'measured' };
       }
-    }
+      if (!t || typeof t !== 'object') return;
+      if (typeof t.pct !== 'number' || !isFinite(t.pct)) return;
+      if (!state.parts[p.id]) return;
+      var q = state.parts[p.id].quota;
+      var asOf = Date.parse(t.asOf || data.updatedAt || '') || remoteAt;
+      if (asOf <= (q.checkedAt || 0)) return;
+      var nextPct = clamp(Math.round(t.pct), 0, 100);
+      var nextEst = t.basis ? t.basis === 'estimate' : !!q.est;
+      if (nextPct === q.pct && nextEst === !!q.est) return;
+      q.pct = nextPct;
+      q.est = nextEst;
+      q.checkedAt = asOf;
+      out.changed = true;
+    });
 
     if (clearDemoTasks()) out.changed = true;
 
@@ -2009,18 +2051,107 @@
       return { fill: lv.fill, tone: lv.tone, pct: null, text: lv.label };
     }
     var pct = clamp(Math.round(q.pct), 0, 100);
-    return { fill: pct, tone: pct <= 15 ? 'low' : pct <= 30 ? 'mid' : 'high', pct: pct, text: pct + '%' };
+    /* 추정치는 앞에 '~' 를 붙여 실측값과 구분한다 */
+    var txt = (q.est ? '~' : '') + pct + '%';
+    return { fill: pct, tone: pct <= 15 ? 'low' : pct <= 30 ? 'mid' : 'high', pct: pct, text: txt };
   }
 
   function boostOn(id) {
     return !!(state.parts[id] && state.parts[id].boost);
   }
 
-  /* 칸 아래 한 줄 — 'Pro 97%' / '무료 · 여유'
+  /* ---------------------------------------------------------
+     토큰 잔여 어림 + 회복
+     측정값이 없는 AI(별이·GPT·제미나이)는 기준값에서 시작해, 작업을
+     한 건 맡길 때마다 대략치만큼 까는다. 정해진 회복 시각(별이 매일
+     04:00 · 클로드 매주 토 05:00 · 제미나이 매일 00:00)이 지나거나
+     GPT 는 마지막 사용에서 5시간이 지나면 100% 로 돌아온다.
+     --------------------------------------------------------- */
+
+  /* 가장 최근에 지난 회복 시각(일간·주간). 기기 시간대 기준. */
+  function lastResetBoundary(rule, now) {
+    var d = new Date(now);
+    var base = new Date(d.getFullYear(), d.getMonth(), d.getDate(), rule.hour, 0, 0, 0);
+    if (rule.kind === 'daily') {
+      if (base.getTime() > now) base.setDate(base.getDate() - 1);
+      return base.getTime();
+    }
+    var diff = (base.getDay() - rule.dow + 7) % 7;
+    base.setDate(base.getDate() - diff);
+    if (base.getTime() > now) base.setDate(base.getDate() - 7);
+    return base.getTime();
+  }
+
+  /* 회복 시각이 지났으면 100% 로 되돌리고, 안 지났으면 그대로 둔다.
+     lastResetAt 이 비어 있으면 지금 기준선만 기억해(처음 열 때 깎인
+     값을 바로 100% 로 날리지 않으려고). */
+  function refreshQuota(id, now) {
+    var q = quotaOf(id);
+    var rule = QUOTA_RESET[id];
+    if (!rule) return false;
+    now = now || Date.now();
+    if (rule.kind === 'rolling') {
+      if (!q.lastUsedAt) {
+        q.lastUsedAt = q.checkedAt || now;
+        return true;
+      }
+      if (q.pct != null && q.pct < 100 && now - q.lastUsedAt >= rule.hours * 3600000) {
+        q.pct = 100;
+        q.est = true;
+        q.checkedAt = q.lastUsedAt + rule.hours * 3600000;
+        q.lastResetAt = q.checkedAt;
+        return true;
+      }
+      return false;
+    }
+    var b = lastResetBoundary(rule, now);
+    if (!q.lastResetAt) {
+      q.lastResetAt = b;
+      return true;
+    }
+    if (b > q.lastResetAt) {
+      q.lastResetAt = b;
+      if (q.pct != null && q.pct < 100) {
+        q.pct = 100;
+        q.est = true;
+        q.checkedAt = b;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  function refreshAllQuotas() {
+    var changed = false;
+    PARTS.forEach(function (p) {
+      if (refreshQuota(p.id)) changed = true;
+    });
+    return changed;
+  }
+
+  /* 작업 1건을 마칠 때·맡길 때 대략치만큼 깎는다. */
+  function spendQuota(id) {
+    var q = quotaOf(id);
+    if (!q || q.pct == null) return;
+    var cost = QUOTA_COST[id] || 5;
+    if (id === 'claude' && boostOn('claude')) cost = QUOTA_COST.claudeBoost;
+    var now = Date.now();
+    q.pct = clamp(Math.round(q.pct - cost), 0, 100);
+    q.est = true;          /* 깎은 뒤 값은 더 이상 실측이 아니다 */
+    q.checkedAt = now;
+    q.lastUsedAt = now;
+  }
+
+  /* 칸 아래 한 줄 — 'Pro 97%' / '무료 ~17%' / '무료 · 여유'
      부스터 배지가 함께 서면 자리가 좁아 플랜 이름은 빼고 잔여만 남긴다. */
   function quotaLabel(q, v, boost) {
     if (v.pct == null) return q.plan + ' · ' + v.text;
     return (boost ? '' : q.plan + ' ') + v.text;
+  }
+
+  function quotaAria(q, v) {
+    if (v.pct == null) return '무료 ' + v.text;
+    return (q.est ? '추정 ' : '') + v.pct + '% 남음';
   }
 
   function partyCellHTML(p) {
@@ -2031,7 +2162,7 @@
     var v = quotaView(q);
     var boost = boostOn(p.id);
     var aria = p.name + (boost ? ' 부스터 모드' : '') + ' ' + meta.long + ' · 토큰 ' +
-      (v.pct == null ? '무료 ' + v.text : v.text + ' 남음') + ' · 남은 일 ' + open + '건 · 방 열기';
+      quotaAria(q, v) + ' · 남은 일 ' + open + '건 · 방 열기';
     return '<button class="pm' + (boost ? ' is-boost' : '') + '" type="button" data-action="open-room" data-part="' +
       p.id + '" data-state="' + key + '" data-tone="' + v.tone + '"' +
       ' style="--c:' + p.color + ';--soft:' + p.soft + ';--edge:' + p.color + '55;--fill:' + v.fill + '%"' +
@@ -2087,7 +2218,7 @@
       var tk = $('.pm__tk-t', cell);
       if (tk) tk.textContent = quotaLabel(q, v, boost);
       cell.setAttribute('aria-label', p.name + (boost ? ' 부스터 모드' : '') + ' ' + meta.long +
-        ' · 토큰 ' + (v.pct == null ? '무료 ' + v.text : v.text + ' 남음') + ' · 남은 일 ' + open + '건 · 방 열기');
+        ' · 토큰 ' + quotaAria(q, v) + ' · 남은 일 ' + open + '건 · 방 열기');
     });
   }
 
@@ -2098,7 +2229,10 @@
      --------------------------------------------------------- */
 
   var QUOTA_HINT = {
-    claude: '11.28 15:00 claude.ai › 설정 › 사용량 확인: 이번 주 3% 사용(잔여 97%, 12.5 05:00 초기화) · 현재 세션 10% 사용(잔여 90%, 오늘 16:30 초기화). 바뀐 주간 잔여 %로 슬라이더를 맞춰 두세요.',
+    claude: '11.28 15:00 claude.ai › 설정 › 사용량 확인: 이번 주 3% 사용(잔여 97%, 12.5 05:00 초기화) · 현재 세션 10% 사용(잔여 90%, 오늘 16:30 초기화). 위 값은 그렇게 확인한 실측값이고, 작업을 맡기면 1건당 대략 -4%(부스터 -8%)씩 깎여 추정치(~/추정)로 바뀝니다.',
+    byeol: '별이(피클)는 일일 한도를 %로 보여 주지 않아요. 11.28 15:37 확인한 일일 잔여 17%를 기준으로, 맡긴 작업 수만큼 대략 -8%씩 깎은 추정치입니다. 매일 04:00에 100%로 회복합니다.',
+    gpt: 'ChatGPT 무료 플랜은 한도 %를 보여 주지 않아요. 오늘 작업량으로 잰 92%에서 작업 1건당 대략 -10%씩 깎은 추정치이고, 마지막 사용에서 5시간이 지나면 100%로 회복합니다.',
+    gemini: '제미나이 무료 플랜은 한도 %를 보여 주지 않아요. 오늘 작업량으로 잰 90%에서 작업 1건당 대략 -8%씩 깎은 추정치이고, 매일 00:00에 100%로 회복합니다.',
     free: '무료 플랜은 사용량 %를 보여 주지 않아 지어내지 않고 상태로만 표시해요. 실제 한도가 화면에 뜨면 그만큼 여유·보통·부족을 골라 두세요.'
   };
 
@@ -2106,17 +2240,20 @@
     var q = quotaOf(p.id);
     var v = quotaView(q);
     var pctMode = q.pct != null;
-    var when = (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '직접 맞춤') + ' 값 · 주간 기준';
+    var when = (q.est ? '추정 ' : '실측 ') +
+      (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '직접 맞춤') + ' 기준';
     var controls;
     if (pctMode) {
       controls = '<input class="quota__range" type="range" min="0" max="100" step="1" value="' + v.pct +
-          '" data-quota="' + p.id + '" aria-label="' + esc(p.name) + ' 주간 잔여 토큰 %">' +
+          '" data-quota="' + p.id + '" aria-label="' + esc(p.name) + ' 잔여 토큰 %">' +
         (compact ? '' : '<p class="quota__hint">' + esc(QUOTA_HINT[p.id] || QUOTA_HINT.free) + '</p>') +
         '<div class="quota__foot">' +
-          '<a class="quota__btn" href="https://claude.ai/settings/usage" target="_blank" rel="noopener">사용량 열어 확인</a>' +
+          (p.id === 'claude'
+            ? '<a class="quota__btn" href="https://claude.ai/settings/usage" target="_blank" rel="noopener">사용량 열어 확인</a>'
+            : '') +
           (QUOTA_DEFAULTS[p.id] && QUOTA_DEFAULTS[p.id].pct != null
             ? '<button class="quota__btn" type="button" data-action="quota-default" data-part="' + p.id + '">' +
-              '측정값 ' + QUOTA_DEFAULTS[p.id].pct + '%로</button>'
+              (QUOTA_DEFAULTS[p.id].est ? '기준값 ' : '측정값 ') + QUOTA_DEFAULTS[p.id].pct + '%로</button>'
             : '') +
         '</div>';
     } else {
@@ -2138,6 +2275,9 @@
         '<i style="width:' + v.fill + '%"></i></div>' +
       controls +
       (pctMode ? '<p class="quota__when" data-quota-when="' + p.id + '">' + esc(when) + '</p>' : '') +
+      (pctMode && QUOTA_RECOVER[p.id]
+        ? '<p class="quota__when quota__when--reset" data-quota-reset="' + p.id + '">' +
+          esc(QUOTA_RECOVER[p.id]) + '</p>' : '') +
     '</div>';
   }
 
@@ -2506,6 +2646,7 @@
     if (!text) { toast('할 일을 먼저 적어 주세요'); return; }
     if (!PART_MAP[partId]) partId = 'byeol';
     state.tasks.unshift({ id: uid(), title: text.slice(0, 80), part: partId, done: false, at: Date.now() });
+    spendQuota(partId);
     save();
     renderCrew();
     renderTasks();
@@ -2534,15 +2675,19 @@
   }
 
   function toggleTask(id) {
+    var before = null;
+    state.tasks.forEach(function (t) { if (t.id === id) before = t.done; });
     state.tasks.forEach(function (t) { if (t.id === id) t.done = !t.done; });
+    var hit = null;
+    state.tasks.forEach(function (t) { if (t.id === id) hit = t; });
+    /* 끝낼 때 한 번 더 깎는다(되돌려도 돌려받지 않음) */
+    if (hit && hit.done && !before) spendQuota(hit.part);
     save();
     renderCrew();
     renderTasks();
     renderTeam();
     renderHeader();
     if (ui.sheet) renderSheet();
-    var hit = null;
-    state.tasks.forEach(function (t) { if (t.id === id) hit = t; });
     if (hit && hit.done) showMood(hit.part, ['proud', 'relief']);
   }
 
@@ -2611,6 +2756,8 @@
     if (!state.parts[id]) return;
     state.parts[id].quota.pct = clamp(Math.round(pct), 0, 100);
     state.parts[id].quota.checkedAt = Date.now();
+    /* 직접 맞긴 값은 어림이 아니라 확인한 값으로 둔다 */
+    state.parts[id].quota.est = false;
     saveSoon();
     syncQuotaUI(id);
   }
@@ -2628,8 +2775,8 @@
       if (i) i.style.width = v.fill + '%';
     });
     $$('[data-quota-when="' + id + '"]').forEach(function (el) {
-      el.textContent = (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '직접 맞춤') +
-        ' 값 · 주간 기준';
+      el.textContent = (q.est ? '추정 ' : '실측 ') +
+        (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '직접 맞춤') + ' 기준';
     });
     /* 시트와 비서현황에 같은 슬라이더가 둘 있어, 끌고 있지 않은 쪽도 숫자를 맞춘다 */
     if (v.pct != null) $$('input[data-quota="' + id + '"]').forEach(function (el) {
@@ -2713,6 +2860,7 @@
     $('#memo').value = state.memo;
     $('#nickInput').value = state.nick;
     $('#memoHint').textContent = '자동 저장';
+    refreshAllQuotas();
     renderAll();
     setTab(state.tab || 'map', true);
     applyEnv();
@@ -2870,8 +3018,12 @@
           var qid = el.getAttribute('data-part');
           if (QUOTA_DEFAULTS[qid] && QUOTA_DEFAULTS[qid].pct != null) {
             setQuotaPct(qid, QUOTA_DEFAULTS[qid].pct);
+            state.parts[qid].quota.est = QUOTA_DEFAULTS[qid].est === true;
+            state.parts[qid].quota.checkedAt = QUOTA_DEFAULTS[qid].checkedAt || Date.now();
+            save();
+            syncQuotaUI(qid);
             if (ui.sheet) renderSheet();
-            toast('측정한 주간 잔여로 맞췄어요');
+            toast(QUOTA_DEFAULTS[qid].est ? '오늘 기준값으로 맞췄어요' : '측정한 주간 잔여로 맞췄어요');
           }
           break;
         case 'guide-tab':
@@ -2998,11 +3150,21 @@
     $('#nickInput').value = state.nick;
 
     bind();
+    if (refreshAllQuotas()) save();
     renderAll();
     setTab(state.tab || 'map', true);
     startBubbleLoop();
     startMotionLoop();
     syncChatTasks();
+    /* 회복 시각이 지나면 앱을 청 켜 둔 상태에서도 막대가 저절로 찬다 */
+    window.setInterval(function () {
+      if (!refreshAllQuotas()) return;
+      save();
+      renderParty();
+      if (ui.sheet) renderSheet();
+      var ae = document.activeElement;
+      if (!ae || !ae.closest || !ae.closest('#teamList')) renderTeam();
+    }, 60000);
 
     if (!guideSeen()) {
       var dot = $('#helpDot');
