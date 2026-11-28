@@ -1721,14 +1721,12 @@ body.no-motion .sprite { transition: none; }
 .list--compact .item { padding: 9px 10px; }
 .list--compact .item__title { font-size: 12.5px; }
 
-/* 담당 필터 — 여섯 개(전체+5인)가 390px에서 잘리지 않도록 자연스럽게 두 줄로 접는다. */
+/* 담당 필터 — 여섯 개(전체+5인)가 390px에서 잘리지 않도록 3×2 칸으로 고르게 놓는다. */
 .chips {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding: 2px 0 10px;
-  overflow: visible;
-  scrollbar-width: none;
 }
 .chips::-webkit-scrollbar { display: none; }
 
@@ -1736,8 +1734,10 @@ body.no-motion .sprite { transition: none; }
   flex: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 7px 11px;
+  min-width: 0;
+  padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--card);
