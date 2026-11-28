@@ -95,7 +95,7 @@
       color: '#4b5163', deep: '#2c303a', soft: '#eceef3',
       dot: 'conic-gradient(from 200deg, #3a3f4a, #9aa1b1, #3a3f4a)',
       home: [68.6, 89.8], seat: 'L3', w: 13.5, tag: [68.6, 76.2], bubble: [68.6, 73.5], tail: 'down', delay: 2.4,
-      meet: [50, 84, 'up'],
+      meet: [50, 90, 'up'],
       paces: [[73.6, 90.6], [64.2, 90.0]], emoji: ['⚡', '📈', '🔥'],
       persona: '직설과 유쾌함으로 실시간 트렌드를 긁어 오는 트렌드 담당 · X에서 지금 뜨는 걸 제일 먼저 캐치',
       moods: [
