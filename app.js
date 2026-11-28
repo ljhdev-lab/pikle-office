@@ -765,9 +765,9 @@
       op = clamp(op + 0.07, 0, 0.66);
       cloud = 0.8;
     } else if (kind === 'rain') {
-      sky = mixRgb(sky, [140, 150, 164], 0.74);
+      sky = mixRgb(sky, [112, 124, 144], 0.80);
       wash = mixRgb(wash, [206, 215, 226], 0.5);
-      op = clamp(op + 0.11, 0, 0.7);
+      op = clamp(op + 0.14, 0, 0.72);
       cloud = 1;
     } else if (kind === 'snow') {
       sky = mixRgb(sky, [206, 216, 228], 0.78);
@@ -889,8 +889,8 @@
     fxCtx.clearRect(0, 0, w, h);
 
     if (fxKind === 'rain') {
-      fxCtx.strokeStyle = 'rgba(226,242,255,.85)';
-      fxCtx.lineWidth = 1;
+      fxCtx.strokeStyle = 'rgba(240,250,255,.95)';
+      fxCtx.lineWidth = 1.3;
       for (var i = 0; i < fxParts.length; i += 1) {
         var p = fxParts[i];
         p.y += p.s * dt;
