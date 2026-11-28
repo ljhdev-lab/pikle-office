@@ -9,23 +9,27 @@
   var LEGACY_KEY = 'byeol-office-v1';
   var WEEK = ['일', '월', '화', '수', '목', '금', '토'];
 
-  /* 좌표는 assets/office-map-v3.webp (864×1152, 3:4) 안의 위치를 % 로 적은 값.
-     캐릭터 중심(spot)·머리 위 이름표(tag)·말풍선 기준점(bubble)을 실측해 둔 것이다.
-     이미지를 바꾸면 이 값만 다시 맞추면 된다. */
+  /* 좌표는 assets/office-map-v4.webp (864×1152, 3:4) 안의 위치를 % 로 적은 값.
+     home 은 캐릭터 **발바닥 중앙**, tag·bubble 은 머리 위 라벨/말풍선 기준점이다.
+     w 는 무대 가로 대비 캐릭터 폭. 이미지를 바꾸면 이 값만 다시 맞추면 된다. */
   var PARTS = [
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
       color: '#6790d0', deep: '#4a68a6', soft: '#eaf1fb',
-      spot: [50.0, 39.9], tag: [50.0, 30.0], bubble: [50.0, 50.5], tail: 'up', delay: 0 },
+      home: [47.5, 46.4], w: 14.6, tag: [47.5, 32.2], bubble: [47.5, 30.6], tail: 'down', delay: 0,
+      paces: [[42.6, 48.8], [53.0, 49.6]], emoji: ['🗂', '✨', '☕'] },
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
       color: '#52b394', deep: '#2f8a6e', soft: '#e6f7f0',
-      spot: [24.1, 56.0], tag: [24.1, 46.0], bubble: [24.1, 39.0], tail: 'down', delay: 0.6 },
+      home: [20.4, 60.2], w: 13.4, tag: [20.4, 47.2], bubble: [20.4, 45.4], tail: 'down', delay: 0.6,
+      paces: [[24.6, 62.8], [15.8, 62.4]], emoji: ['💡', '✍', '✨'] },
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
       color: '#e27f5f', deep: '#b25a3a', soft: '#fdeee7',
-      spot: [76.0, 56.9], tag: [76.0, 46.0], bubble: [76.0, 39.5], tail: 'down', delay: 1.2 },
+      home: [76.6, 60.2], w: 13.0, tag: [76.6, 47.4], bubble: [76.6, 45.6], tail: 'down', delay: 1.2,
+      paces: [[71.8, 62.8], [81.4, 62.4]], emoji: ['🔎', '📄', '🧩'] },
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
       color: '#6f8fe0', deep: '#5a6bb8', soft: '#eef1fb',
       dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
-      spot: [26.6, 84.3], tag: [26.6, 74.8], bubble: [26.6, 90.4], tail: 'up', delay: 1.8 }
+      home: [18.6, 88.4], w: 13.0, tag: [18.6, 75.4], bubble: [18.6, 73.6], tail: 'down', delay: 1.8,
+      paces: [[24.8, 90.6], [12.2, 90.2]], emoji: ['🎨', '🖼', '✨'] }
   ];
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
@@ -47,6 +51,8 @@
       v: 2,
       nick: '대표님',
       motion: true,
+      envTime: 'auto',
+      envWeather: 'auto',
       today: '오늘은 콘텐츠 한 편이랑 예약 확인 하나만 끝내면 돼요.',
       tab: 'map',
       focus: 'byeol',
@@ -92,6 +98,8 @@
     if (typeof raw.today === 'string') base.today = raw.today.slice(0, 120);
     if (typeof raw.memo === 'string') base.memo = raw.memo.slice(0, 4000);
     base.motion = raw.motion !== false;
+    if (['auto', 'morning', 'day', 'sunset', 'night'].indexOf(raw.envTime) >= 0) base.envTime = raw.envTime;
+    if (['auto', 'clear', 'cloudy', 'rain', 'snow'].indexOf(raw.envWeather) >= 0) base.envWeather = raw.envWeather;
     if (['map', 'meeting', 'work', 'team', 'memo'].indexOf(raw.tab) >= 0) base.tab = raw.tab;
     if (PART_MAP[raw.focus]) base.focus = raw.focus;
 
@@ -415,13 +423,30 @@
         '<span class="tag__name">' + esc(p.name) + '</span></span>';
     }).join('');
 
-    var spots = PARTS.map(function (p) {
-      return '<button class="spot" type="button" data-action="open-room" data-part="' + p.id + '" ' +
-        'style="left:' + p.spot[0] + '%;top:' + p.spot[1] + '%;--c:' + p.color + '" ' +
-        'aria-label="' + esc(p.room) + ' · ' + esc(p.name) + ' 열기"><span class="spot__ring"></span></button>';
-    }).join('');
+    return tags + '<span class="bubble" id="mapBubble" hidden><span class="bubble__txt"></span></span>';
+  }
 
-    return tags + spots + '<span class="bubble" id="mapBubble" hidden><span class="bubble__txt"></span></span>';
+  function spriteHTML(p) {
+    return '<button class="sprite' + (isActive(p.id) ? '' : ' is-off') + '" type="button" ' +
+      'data-part="' + p.id + '" data-action="open-room" ' +
+      'style="left:' + p.home[0] + '%;top:' + p.home[1] + '%;--w:' + p.w + '%;z-index:' +
+        Math.round(p.home[1] * 10) + '" ' +
+      'aria-label="' + esc(p.room) + ' · ' + esc(p.name) + ' 열기">' +
+      '<span class="sprite__shadow"></span>' +
+      '<span class="sprite__inner">' + avatarSVG(p.id) + '</span>' +
+      '</button>';
+  }
+
+  var spriteEls = {};
+
+  function renderSprites() {
+    var layer = $('#spriteLayer');
+    if (!layer) return;
+    layer.innerHTML = PARTS.map(spriteHTML).join('');
+    spriteEls = {};
+    $$('.sprite', layer).forEach(function (el) {
+      spriteEls[el.getAttribute('data-part')] = el;
+    });
   }
 
   function placeBubble(partId, animate) {
@@ -450,8 +475,8 @@
     $$('.tag').forEach(function (tag, i) {
       tag.classList.toggle('is-focus', PARTS[i] && PARTS[i].id === state.focus);
     });
-    $$('.spot').forEach(function (s) {
-      s.classList.toggle('is-focus', s.getAttribute('data-part') === state.focus);
+    Object.keys(spriteEls).forEach(function (id) {
+      spriteEls[id].classList.toggle('is-focus', id === state.focus);
     });
   }
 
@@ -470,6 +495,542 @@
       placeBubble(state.focus, true);
     }, 5200);
   }
+
+  /* ---------------------------------------------------------
+     캐릭터 모션 — 한 번에 한 명만 걷고, 나머지는 자리에서 일한다
+     --------------------------------------------------------- */
+
+  var walkGen = 0;
+  var walker = null;
+  var motionTimer = null;
+
+  function moveSprite(id, point, dur) {
+    var el = spriteEls[id];
+    if (!el) return;
+    el.style.transitionDuration = dur + 's';
+    el.style.left = point[0] + '%';
+    el.style.top = point[1] + '%';
+    el.style.zIndex = Math.round(point[1] * 10);
+  }
+
+  function popEmoji(id) {
+    var el = spriteEls[id];
+    var p = PART_MAP[id];
+    if (!el || !p || !p.emoji || !state.motion) return;
+    if (el.querySelector('.sprite__emoji')) return;
+    var span = document.createElement('span');
+    span.className = 'sprite__emoji';
+    span.textContent = p.emoji[Math.floor(Math.random() * p.emoji.length)];
+    el.appendChild(span);
+    window.setTimeout(function () {
+      if (span.parentNode) span.parentNode.removeChild(span);
+    }, 2300);
+  }
+
+  function setTyping(id, on) {
+    var el = spriteEls[id];
+    if (!el) return;
+    el.classList.toggle('is-typing', !!on);
+  }
+
+  function startWalk(id) {
+    var p = PART_MAP[id];
+    var el = spriteEls[id];
+    if (!p || !el || walker) return;
+    var gen = ++walkGen;
+    walker = id;
+    var out = p.paces[Math.floor(Math.random() * p.paces.length)];
+    setTyping(id, false);
+    el.classList.add('is-walk');
+    moveSprite(id, out, 1.3);
+    window.setTimeout(function () {
+      if (gen !== walkGen) return;
+      el.classList.remove('is-walk');
+      popEmoji(id);
+    }, 1360);
+    window.setTimeout(function () {
+      if (gen !== walkGen) return;
+      el.classList.add('is-walk');
+      moveSprite(id, p.home, 1.35);
+    }, 3600);
+    window.setTimeout(function () {
+      if (gen !== walkGen) return;
+      el.classList.remove('is-walk');
+      setTyping(id, true);
+      window.setTimeout(function () { if (gen === walkGen) setTyping(id, false); }, 2400);
+    }, 5000);
+    window.setTimeout(function () {
+      if (gen !== walkGen) return;
+      walker = null;
+    }, 5200);
+  }
+
+  function motionTick() {
+    if (!state.motion || document.hidden || ui.sheet) return;
+    var act = activeParts();
+    if (!act.length) return;
+
+    if (!walker && Math.random() < 0.5) {
+      var pick = act[Math.floor(Math.random() * act.length)];
+      if (pick.id !== state.focus || Math.random() < 0.4) startWalk(pick.id);
+    }
+
+    if (Math.random() < 0.42) {
+      popEmoji(act[Math.floor(Math.random() * act.length)].id);
+    }
+
+    if (!walker && Math.random() < 0.55) {
+      var t = act[Math.floor(Math.random() * act.length)].id;
+      setTyping(t, true);
+      window.setTimeout(function () { setTyping(t, false); }, 1800 + Math.random() * 2200);
+    }
+  }
+
+  function startMotionLoop() {
+    window.clearInterval(motionTimer);
+    motionTimer = window.setInterval(motionTick, 2600);
+  }
+
+  function resetMotion() {
+    walkGen += 1;
+    walker = null;
+    Object.keys(spriteEls).forEach(function (id) {
+      var p = PART_MAP[id];
+      var el = spriteEls[id];
+      if (!p || !el) return;
+      el.classList.remove('is-walk', 'is-typing');
+      el.style.transitionDuration = '0s';
+      el.style.left = p.home[0] + '%';
+      el.style.top = p.home[1] + '%';
+    });
+  }
+
+  /* ---------------------------------------------------------
+     시간대 · 날씨 — 하늘(창문 뒤), 조명 세척, 모니터·스탠드 불빛, 비·눈
+     --------------------------------------------------------- */
+
+  var WEATHER_KEY = 'byeol-office-weather';
+  var HOME_LAT = 37.3948;   // 경기 안양시 동안구 (기본 위치)
+  var HOME_LON = 126.9568;
+  var DEFAULT_SUNRISE = 7.0;
+  var DEFAULT_SUNSET = 17.3;
+
+  var env = {
+    sunrise: DEFAULT_SUNRISE,
+    sunset: DEFAULT_SUNSET,
+    temp: null,
+    code: null,
+    cloud: null,
+    fetchedAt: 0,
+    weatherSource: 'estimate'
+  };
+
+  var TIME_OPTIONS = [
+    { id: 'auto', label: '실시간' },
+    { id: 'morning', label: '아침' },
+    { id: 'day', label: '낮' },
+    { id: 'sunset', label: '노을' },
+    { id: 'night', label: '밤' }
+  ];
+  var WEATHER_OPTIONS = [
+    { id: 'auto', label: '실시간' },
+    { id: 'clear', label: '맑음' },
+    { id: 'cloudy', label: '흐림' },
+    { id: 'rain', label: '비' },
+    { id: 'snow', label: '눈' }
+  ];
+  var WEATHER_LABEL = { clear: '맑음', cloudy: '흐림', rain: '비', snow: '눈' };
+  var WEATHER_ICON = { clear: '☀', cloudy: '☁', rain: '☂', snow: '❄' };
+  var PHASE_LABEL = { dawn: '아침', day: '낮', sunset: '노을', night: '밤' };
+
+  function hexToRgb(hex) {
+    var h = hex.replace('#', '');
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+  }
+
+  function rgbStr(c) {
+    return 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')';
+  }
+
+  function mixRgb(a, b, t) {
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  }
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+  function envKeys() {
+    var sr = env.sunrise;
+    var ss = env.sunset;
+    var raw = [
+      { t: sr - 2.2, sky: [18, 26, 50], wash: '#1d2748', op: 0.62 },
+      { t: sr - 0.7, sky: [56, 56, 92], wash: '#4a4472', op: 0.48 },
+      { t: sr + 0.1, sky: [198, 134, 124], wash: '#ffbf94', op: 0.30 },
+      { t: sr + 0.9, sky: [250, 198, 152], wash: '#ffd6a8', op: 0.18 },
+      { t: sr + 2.6, sky: [190, 218, 240], wash: '#fff4e4', op: 0.07 },
+      { t: (sr + ss) / 2, sky: [179, 214, 242], wash: '#ffffff', op: 0.02 },
+      { t: ss - 2.2, sky: [196, 222, 242], wash: '#ffffff', op: 0.04 },
+      { t: ss - 0.5, sky: [252, 182, 120], wash: '#ffb27a', op: 0.22 },
+      { t: ss + 0.4, sky: [214, 124, 112], wash: '#ff9a72', op: 0.30 },
+      { t: ss + 1.4, sky: [70, 66, 110], wash: '#6a5a86', op: 0.44 },
+      { t: ss + 2.6, sky: [24, 32, 60], wash: '#232c4e', op: 0.58 },
+      { t: ss + 4.0, sky: [18, 26, 50], wash: '#1d2748', op: 0.62 }
+    ];
+    raw.sort(function (a, b) { return a.t - b.t; });
+    var out = [];
+    raw.forEach(function (k) {
+      var t = clamp(k.t, -6, 30);
+      if (out.length && t <= out[out.length - 1].t + 0.01) return;
+      out.push({ t: t, sky: k.sky, wash: hexToRgb(k.wash), op: k.op });
+    });
+    return out;
+  }
+
+  function sampleEnv(keys, h) {
+    var n = keys.length;
+    var x = ((h % 24) + 24) % 24;
+    for (var i = 0; i < n; i += 1) {
+      var a = keys[i];
+      var b = keys[(i + 1) % n];
+      var at = a.t;
+      var bt = (i + 1 === n) ? b.t + 24 : b.t;
+      var xt = x;
+      if (xt < at) { xt += 24; }
+      if (xt >= at && xt <= bt) {
+        var f = bt === at ? 0 : (xt - at) / (bt - at);
+        return {
+          sky: mixRgb(a.sky, b.sky, f),
+          wash: mixRgb(a.wash, b.wash, f),
+          op: a.op + (b.op - a.op) * f
+        };
+      }
+    }
+    return { sky: keys[0].sky, wash: keys[0].wash, op: keys[0].op };
+  }
+
+  function weatherKind() {
+    if (state.envWeather !== 'auto') return state.envWeather;
+    var c = env.code;
+    if (c == null) return 'clear';
+    if (c === 0 || c === 1) return 'clear';
+    if ((c >= 71 && c <= 77) || c === 85 || c === 86) return 'snow';
+    if ((c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95) return 'rain';
+    return 'cloudy';
+  }
+
+  function baseHour() {
+    var now = new Date();
+    var h = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+    if (state.envTime === 'morning') return env.sunrise + 0.8;
+    if (state.envTime === 'day') return clamp((env.sunrise + env.sunset) / 2, 11, 14);
+    if (state.envTime === 'sunset') return env.sunset - 0.2;
+    if (state.envTime === 'night') return 22.5;
+    return h;
+  }
+
+  function phaseOf(h) {
+    var sr = env.sunrise;
+    var ss = env.sunset;
+    if (h < sr - 0.6 || h >= ss + 2.6) return 'night';
+    if (h < sr + 1.6) return 'dawn';
+    if (h < ss - 1.6) return 'day';
+    if (h < ss + 0.8) return 'sunset';
+    return 'night';
+  }
+
+  function darknessOf(op) {
+    return clamp((op - 0.03) / 0.55, 0, 1);
+  }
+
+  var lightOn = false;
+
+  function applyEnv() {
+    var stage = $('#mapStage');
+    if (!stage) return;
+
+    var h = baseHour();
+    var keys = envKeys();
+    var s = sampleEnv(keys, h);
+    var kind = weatherKind();
+    var phase = phaseOf(h);
+
+    var sky = s.sky;
+    var wash = s.wash;
+    var op = s.op;
+    var cloud = 0;
+
+    if (kind === 'cloudy') {
+      sky = mixRgb(sky, [192, 198, 208], 0.68);
+      wash = mixRgb(wash, [226, 233, 240], 0.45);
+      op = clamp(op + 0.07, 0, 0.66);
+      cloud = 0.8;
+    } else if (kind === 'rain') {
+      sky = mixRgb(sky, [140, 150, 164], 0.74);
+      wash = mixRgb(wash, [206, 215, 226], 0.5);
+      op = clamp(op + 0.11, 0, 0.7);
+      cloud = 1;
+    } else if (kind === 'snow') {
+      sky = mixRgb(sky, [206, 216, 228], 0.78);
+      wash = mixRgb(wash, [230, 238, 246], 0.55);
+      op = clamp(op + 0.07, 0, 0.68);
+      cloud = 1;
+    }
+
+    var skyEl = $('#sky');
+    if (skyEl) {
+      skyEl.style.background = 'linear-gradient(180deg, ' + rgbStr(mixRgb(sky, [255, 255, 255], 0.18)) +
+        ' 0%, ' + rgbStr(sky) + ' 62%, ' + rgbStr(mixRgb(sky, [255, 255, 255], 0.12)) + ' 100%)';
+    }
+
+    var washEl = $('#lightWash');
+    if (washEl) {
+      washEl.style.backgroundColor = rgbStr(wash);
+      washEl.style.opacity = op.toFixed(3);
+    }
+
+    var d = darknessOf(op);
+    var lampEl = $('#lampLayer');
+    if (lampEl) {
+      var monitors = [[50, 26.5], [14.2, 45.4], [85.2, 45.6], [13.4, 73.4]];
+      var lights = [];
+      monitors.forEach(function (m) {
+        lights.push('radial-gradient(circle at ' + m[0] + '% ' + m[1] + '%, rgba(150,205,255,' +
+          (0.55 * d + 0.06).toFixed(2) + ') 0%, rgba(120,180,240,' + (0.22 * d).toFixed(2) + ') 22%, rgba(90,140,210,0) 46%)');
+      });
+      PARTS.forEach(function (p) {
+        if (!isActive(p.id)) return;
+        lights.push('radial-gradient(circle at ' + p.home[0] + '% ' + (p.home[1] - 3) + '%, rgba(255,214,150,' +
+          (0.30 * d).toFixed(2) + ') 0%, rgba(255,200,120,0) 26%)');
+      });
+      lampEl.style.backgroundImage = lights.join(',');
+      lampEl.style.opacity = d > 0.05 ? (0.35 + 0.65 * d).toFixed(2) : '0';
+    }
+
+    var orb = $('#skyOrb');
+    if (orb) {
+      var isNight = phase === 'night';
+      var arc;
+      var t;
+      if (!isNight) {
+        t = clamp((h - env.sunrise) / Math.max(0.5, env.sunset - env.sunrise), 0, 1);
+        arc = 8 + t * 84;
+        orb.style.background = 'radial-gradient(circle at 50% 50%, #fff8e2 0%, #ffe9a8 55%, rgba(255,226,140,0) 72%)';
+        orb.style.width = '44px'; orb.style.height = '44px';
+      } else {
+        var nightLen = 24 - (env.sunset - env.sunrise);
+        var hn = h > env.sunset ? h : h + 24;
+        t = clamp((hn - env.sunset) / Math.max(0.5, nightLen), 0, 1);
+        arc = 10 + t * 80;
+        orb.style.background = 'radial-gradient(circle at 50% 50%, #ffffff 0%, #e8eeff 55%, rgba(230,238,255,0) 72%)';
+        orb.style.width = '26px'; orb.style.height = '26px';
+      }
+      orb.style.left = arc.toFixed(1) + '%';
+      orb.style.top = isNight ? (26 - Math.sin(t * Math.PI) * 20).toFixed(1) + '%'
+        : (24 - Math.sin(t * Math.PI) * 21).toFixed(1) + '%';
+      orb.style.opacity = cloud > 0.5 ? '0.12' : '.92';
+    }
+
+    stage.setAttribute('data-phase', phase);
+    stage.setAttribute('data-weather', kind);
+
+    var label = (state.envTime === 'auto' ? '' : '미리보기 ') + PHASE_LABEL[phase] +
+      ' · ' + WEATHER_LABEL[kind];
+    var tempTxt = (state.envWeather === 'auto' && env.temp != null) ? ' ' + Math.round(env.temp) + '°' : '';
+    var txt = $('#envText');
+    if (txt) txt.textContent = label + tempTxt;
+    var ico = $('#envIcon');
+    if (ico) ico.textContent = WEATHER_ICON[kind];
+
+    setFx(kind);
+  }
+
+  /* 비·눈 파티클 (캔버스는 배경 이미지 뒤에 있어 창문으로만 보인다) */
+  var fxCtx = null;
+  var fxKind = 'clear';
+  var fxParts = [];
+  var fxRaf = null;
+  var fxLast = 0;
+
+  function fxResize() {
+    var c = $('#fxCanvas');
+    if (!c) return;
+    var r = c.getBoundingClientRect();
+    c.width = Math.max(1, Math.round(r.width));
+    c.height = Math.max(1, Math.round(r.height));
+    fxCtx = c.getContext('2d');
+  }
+
+  function seedFx(kind) {
+    var c = $('#fxCanvas');
+    if (!c) return;
+    var w = c.width;
+    var h = c.height;
+    fxParts = [];
+    if (kind === 'rain') {
+      for (var i = 0; i < 64; i += 1) {
+        fxParts.push({ x: Math.random() * w, y: Math.random() * h, s: 210 + Math.random() * 160,
+          l: 7 + Math.random() * 7, a: 0.28 + Math.random() * 0.3 });
+      }
+    } else if (kind === 'snow') {
+      for (var j = 0; j < 46; j += 1) {
+        fxParts.push({ x: Math.random() * w, y: Math.random() * h, s: 18 + Math.random() * 22,
+          r: 1 + Math.random() * 1.1, d: Math.random() * Math.PI * 2, a: 0.5 + Math.random() * 0.4 });
+      }
+    }
+  }
+
+  function fxFrame(ts) {
+    if (!fxCtx) return;
+    var dt = Math.min(50, ts - fxLast || 16) / 1000;
+    fxLast = ts;
+    var c = fxCtx.canvas;
+    var w = c.width;
+    var h = c.height;
+    fxCtx.clearRect(0, 0, w, h);
+
+    if (fxKind === 'rain') {
+      fxCtx.strokeStyle = 'rgba(214,234,255,.6)';
+      fxCtx.lineWidth = 1;
+      for (var i = 0; i < fxParts.length; i += 1) {
+        var p = fxParts[i];
+        p.y += p.s * dt;
+        p.x -= 26 * dt;
+        if (p.y > h) { p.y = -10; p.x = Math.random() * w; }
+        if (p.x < -4) p.x = w + 2;
+        fxCtx.globalAlpha = p.a;
+        fxCtx.beginPath();
+        fxCtx.moveTo(Math.round(p.x), Math.round(p.y));
+        fxCtx.lineTo(Math.round(p.x - 1), Math.round(p.y + p.l));
+        fxCtx.stroke();
+      }
+    } else if (fxKind === 'snow') {
+      fxCtx.fillStyle = 'rgba(255,255,255,.95)';
+      for (var k = 0; k < fxParts.length; k += 1) {
+        var f = fxParts[k];
+        f.y += f.s * dt;
+        f.d += dt * 1.6;
+        f.x += Math.sin(f.d) * 10 * dt;
+        if (f.y > h + 3) { f.y = -4; f.x = Math.random() * w; }
+        if (f.x < -3) f.x = w; else if (f.x > w + 3) f.x = 0;
+        fxCtx.globalAlpha = f.a;
+        fxCtx.fillRect(Math.round(f.x), Math.round(f.y), Math.round(f.r + 0.6), Math.round(f.r + 0.6));
+      }
+    }
+    fxCtx.globalAlpha = 1;
+    fxRaf = window.requestAnimationFrame(fxFrame);
+  }
+
+  function setFx(kind) {
+    if (kind === fxKind) return;
+    fxKind = kind;
+    seedFx(kind);
+    window.cancelAnimationFrame(fxRaf);
+    fxRaf = null;
+    var animated = (kind === 'rain' || kind === 'snow') && !document.hidden && state.motion;
+    if (animated) {
+      fxLast = 0;
+      fxRaf = window.requestAnimationFrame(fxFrame);
+    } else if (fxCtx) {
+      fxCtx.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height);
+    }
+  }
+
+  function refreshFxRun() {
+    window.cancelAnimationFrame(fxRaf);
+    fxRaf = null;
+    if (fxCtx) fxCtx.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height);
+    if ((fxKind === 'rain' || fxKind === 'snow') && !document.hidden && state.motion) {
+      fxLast = 0;
+      fxRaf = window.requestAnimationFrame(fxFrame);
+    }
+  }
+
+  /* Open-Meteo (키 없이 호출) — 30분 캐시 */
+  function applyWeatherData(d) {
+    if (!d) return;
+    env.code = typeof d.code === 'number' ? d.code : env.code;
+    env.temp = typeof d.temp === 'number' ? d.temp : env.temp;
+    env.cloud = typeof d.cloud === 'number' ? d.cloud : env.cloud;
+    if (d.sunrise) { var a = d.sunrise.split('T'); if (a[1]) env.sunrise = parseFloat(a[1].slice(0, 2)) + parseFloat(a[1].slice(3, 5)) / 60; }
+    if (d.sunset) { var b = d.sunset.split('T'); if (b[1]) env.sunset = parseFloat(b[1].slice(0, 2)) + parseFloat(b[1].slice(3, 5)) / 60; }
+    env.fetchedAt = d.at || Date.now();
+    env.weatherSource = 'open-meteo';
+  }
+
+  function loadWeather() {
+    var cached = readJSON(WEATHER_KEY);
+    if (cached && cached.at && Date.now() - cached.at < 30 * 60 * 1000) {
+      applyWeatherData(cached);
+      applyEnv();
+      return;
+    }
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + HOME_LAT + '&longitude=' + HOME_LON +
+      '&current=temperature_2m,weather_code,cloud_cover' +
+      '&daily=sunrise,sunset&timezone=auto&forecast_days=1';
+
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = window.setTimeout(function () { if (ctrl) ctrl.abort(); }, 7000);
+
+    fetch(url, ctrl ? { signal: ctrl.signal } : undefined).then(function (res) {
+      return res.json();
+    }).then(function (json) {
+      window.clearTimeout(timer);
+      var cur = json && json.current;
+      var daily = json && json.daily;
+      if (!cur) return;
+      var d = {
+        at: Date.now(),
+        temp: cur.temperature_2m,
+        code: cur.weather_code,
+        cloud: cur.cloud_cover,
+        sunrise: daily && daily.sunrise && daily.sunrise[0],
+        sunset: daily && daily.sunset && daily.sunset[0]
+      };
+      try { window.localStorage.setItem(WEATHER_KEY, JSON.stringify(d)); } catch (e) {}
+      applyWeatherData(d);
+      applyEnv();
+    }).catch(function () {
+      window.clearTimeout(timer);
+      applyEnv();
+    });
+  }
+
+  function renderEnvPanel() {
+    var tRow = $('#envTimeRow');
+    var wRow = $('#envWeatherRow');
+    if (!tRow || !wRow) return;
+    tRow.innerHTML = TIME_OPTIONS.map(function (o) {
+      return '<button class="env-opt' + (state.envTime === o.id ? ' is-on' : '') +
+        '" type="button" data-action="env-time" data-env="' + o.id + '">' + o.label + '</button>';
+    }).join('');
+    wRow.innerHTML = WEATHER_OPTIONS.map(function (o) {
+      return '<button class="env-opt' + (state.envWeather === o.id ? ' is-on' : '') +
+        '" type="button" data-action="env-weather" data-env="' + o.id + '">' + o.label + '</button>';
+    }).join('');
+    var foot = $('#envFoot');
+    if (foot) {
+      foot.textContent = (state.envTime === 'auto' && state.envWeather === 'auto')
+        ? '지금은 실시간 시각과 날씨를 따르고 있어요.'
+        : '미리보기 중이에요. ‘실시간’을 고르면 실제 시간·날씨로 돌아갑니다.';
+    }
+  }
+
+  function openEnvPanel(open) {
+    var panel = $('#envPanel');
+    var chip = $('#envChip');
+    if (!panel || !chip) return;
+    panel.hidden = !open;
+    chip.setAttribute('aria-expanded', open ? 'true' : 'false');
+    chip.style.visibility = open ? 'hidden' : '';
+    if (open) renderEnvPanel();
+  }
+
+  function setEnv(kind, value) {
+    if (kind === 'time') state.envTime = value; else state.envWeather = value;
+    save();
+    applyEnv();
+    renderEnvPanel();
+  }
+
 
   /* ---------------------------------------------------------
      renderers
@@ -501,6 +1062,7 @@
   function renderMap() {
     var overlay = $('#mapOverlay');
     if (!overlay) return;
+    renderSprites();
     overlay.innerHTML = overlayHTML();
     refreshFocus();
     syncBubble();
@@ -745,7 +1307,17 @@
     $('#motionBtn').setAttribute('aria-checked', state.motion ? 'true' : 'false');
     $('#motionState').textContent = state.motion ? 'ON' : 'OFF';
     save();
-    syncBubble();
+    if (state.motion) {
+      syncBubble();
+    } else {
+      resetMotion();
+      setTypingAllOff();
+    }
+    refreshFxRun();
+  }
+
+  function setTypingAllOff() {
+    Object.keys(spriteEls).forEach(function (id) { setTyping(id, false); });
   }
 
   function addTask(partId, title) {
@@ -892,6 +1464,7 @@
     $('#memoHint').textContent = '자동 저장';
     renderAll();
     setTab(state.tab || 'map', true);
+    applyEnv();
   }
 
   /* ---------------------------------------------------------
@@ -994,6 +1567,12 @@
         case 'close-sheet':
           closeSheet();
           break;
+        case 'env-time':
+          setEnv('time', el.getAttribute('data-env'));
+          break;
+        case 'env-weather':
+          setEnv('weather', el.getAttribute('data-env'));
+          break;
         case 'toggle-task':
           toggleTask(el.getAttribute('data-id'));
           break;
@@ -1059,10 +1638,37 @@
       if (e.key === 'Escape' && ui.sheet) closeSheet();
     });
 
-    window.addEventListener('resize', function () { autosize($('#todayLine')); });
+    window.addEventListener('resize', function () {
+      autosize($('#todayLine'));
+      fxResize();
+      seedFx(fxKind);
+      refreshFxRun();
+    });
 
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden && state.motion) placeBubble(state.focus, false);
+      refreshFxRun();
+    });
+
+    var envChip = $('#envChip');
+    if (envChip) {
+      envChip.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openEnvPanel($('#envPanel').hidden);
+      });
+    }
+    var envClose = $('#envClose');
+    if (envClose) {
+      envClose.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openEnvPanel(false);
+      });
+    }
+    document.addEventListener('click', function (e) {
+      var panel = $('#envPanel');
+      if (!panel || panel.hidden) return;
+      if (panel.contains(e.target) || e.target === $('#envChip')) return;
+      openEnvPanel(false);
     });
 
     window.addEventListener('beforeunload', function () {
@@ -1096,6 +1702,13 @@
     renderAll();
     setTab(state.tab || 'map', true);
     startBubbleLoop();
+    startMotionLoop();
+
+    fxResize();
+    applyEnv();
+    loadWeather();
+    window.setInterval(applyEnv, 60000);
+    window.setInterval(loadWeather, 30 * 60 * 1000);
 
     var img = $('#mapImg');
     if (img && img.complete && img.naturalWidth) {

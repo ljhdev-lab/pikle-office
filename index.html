@@ -14,8 +14,8 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
-<link rel="preload" as="image" href="assets/office-map-v3.webp" type="image/webp">
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="preload" as="image" href="assets/office-map-v4.webp" type="image/webp">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 <div class="app" id="app">
@@ -100,8 +100,8 @@
                   aria-label="오늘의 한마디" placeholder="오늘의 한마디를 적어 두세요"></textarea>
         <div class="today__foot">
           <div class="toggle-wrap">
-            <span class="toggle__cap">말풍선</span>
-            <button class="toggle" id="motionBtn" role="switch" aria-checked="true" aria-label="캐릭터 말풍선 움직임">
+            <span class="toggle__cap">모션</span>
+            <button class="toggle" id="motionBtn" role="switch" aria-checked="true" aria-label="캐릭터 움직임과 말풍선">
               <span class="toggle__track"><span class="toggle__dot"></span></span>
             </button>
             <span class="toggle__state" id="motionState">ON</span>
@@ -111,10 +111,38 @@
       </div>
 
       <div class="map-card">
-        <div class="map-stage" id="mapStage">
-          <img class="map-img" id="mapImg" src="assets/office-map-v3.webp" width="864" height="1152"
-               alt="넓은 픽셀아트 사무실에서 별이·GPT·클로드·제미나이가 각자 자리에서 일하는 2.5D 아이소메트릭 비서실" decoding="async" fetchpriority="high">
-          <div class="map-overlay" id="mapOverlay"></div>
+        <div class="map-stage" id="mapStage" data-phase="day" data-weather="clear">
+          <div class="scene" id="scene">
+            <div class="sky" id="sky" aria-hidden="true">
+              <span class="sky__orb" id="skyOrb"></span>
+              <span class="sky__cloud sky__cloud--a"></span>
+              <span class="sky__cloud sky__cloud--b"></span>
+            </div>
+            <canvas class="fx-canvas" id="fxCanvas" width="390" height="520" aria-hidden="true"></canvas>
+            <img class="map-img" id="mapImg" src="assets/office-map-v4.webp" width="864" height="1152"
+                 alt="대형 창문과 책상 네 개, 회의 테이블과 소파가 놓인 픽셀아트 아이소메트릭 비서실" decoding="async" fetchpriority="high">
+            <div class="sprite-layer" id="spriteLayer"></div>
+            <div class="light-wash" id="lightWash" aria-hidden="true"></div>
+            <div class="lamp-layer" id="lampLayer" aria-hidden="true"></div>
+            <div class="map-overlay" id="mapOverlay"></div>
+          </div>
+
+          <button class="env-chip" id="envChip" type="button" aria-expanded="false" aria-controls="envPanel">
+            <span class="env-chip__ico" id="envIcon" aria-hidden="true">☀</span>
+            <span class="env-chip__txt" id="envText">낮 · 맑음</span>
+          </button>
+
+          <div class="env-panel" id="envPanel" hidden>
+            <div class="env-panel__head">
+              <b>시간·날씨 미리보기</b>
+              <button class="env-panel__close" id="envClose" type="button" aria-label="닫기">✕</button>
+            </div>
+            <p class="env-panel__cap">시간대</p>
+            <div class="env-row" id="envTimeRow"></div>
+            <p class="env-panel__cap">날씨</p>
+            <div class="env-row" id="envWeatherRow"></div>
+            <p class="env-panel__foot" id="envFoot">실시간으로 돌아가려면 ‘실시간’을 골라 주세요.</p>
+          </div>
         </div>
         <div class="map-foot">
           <span class="map-foot__hint">캐릭터를 누르면 그 비서의 오늘 일정이 열려요</span>
@@ -251,6 +279,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <noscript><p style="padding:24px;text-align:center">이 앱을 쓰려면 자바스크립트를 켜 주세요.</p></noscript>
-<script src="app.js?v=17"></script>
+<script src="app.js?v=20"></script>
 </body>
 </html>
