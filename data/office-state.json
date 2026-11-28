@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-28T19:40:00+09:00",
+  "updatedAt": "2026-11-28T21:15:00+09:00",
   "brief": "오늘은 비서실 모니터링 화면을 정리하고, 남은 일감과 토큰 잔여를 한 번 훑어요.",
   "boost": { "claude": false },
   "tokens": {
@@ -180,6 +180,14 @@
       "date": "12.01",
       "runAt": "2026-12-01T09:00:00+09:00",
       "every": "매월 1일",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-order-confirm",
+      "title": "쇼핑 구매확정 및 적립 리뷰 확인",
+      "owner": "pickle",
+      "done": true,
+      "date": "11.28",
       "source": "chat"
     }
   ]
