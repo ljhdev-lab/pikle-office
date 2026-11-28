@@ -91,18 +91,18 @@
      통로를 따라 꺾어 가고, 마지막에 자기 좌석으로 붙는다. */
   var ROOM = {
     seats: {
-      L1: [37.6, 57.6],   // 왼쪽 먼 자리 (별이)
-      R1: [57.2, 57.0],   // 오른쪽 먼 자리 (클로드)
-      L2: [38.8, 65.2],   // 왼쪽 가까운 자리 (GPT)
-      R2: [60.6, 65.8]    // 오른쪽 가까운 자리 (제미나이)
+      L1: [36.6, 58.4],   // 왼쪽 먼 자리 (별이)
+      R1: [59.6, 57.8],   // 오른쪽 먼 자리 (클로드)
+      L2: [40.6, 66.2],   // 왼쪽 가까운 자리 (GPT)
+      R2: [61.0, 65.6]    // 오른쪽 가까운 자리 (제미나이)
     },
-    /* home → 회의실 입구까지. 좌석은 이 뒤에 이어 붙인다. */
+    /* home → 회의실 입구까지. 넷이 서로 다른 입구(왼쪽·왼앞·오른쪽·아래)로 들어간다. */
     route: {
-      byeol: [[47.5, 42.2], [43.0, 45.8], [38.6, 50.6], [35.2, 55.0]],
-      gpt: [[20.4, 60.2], [24.6, 63.4], [29.4, 64.6], [33.4, 65.6]],
-      claude: [[76.6, 60.2], [73.0, 55.6], [67.8, 54.4], [62.6, 56.0]],
+      byeol: [[47.5, 42.2], [41.0, 45.0], [33.0, 49.0], [27.2, 53.0], [31.8, 56.6]],
+      gpt: [[20.4, 60.2], [24.2, 63.6], [29.0, 65.4], [33.6, 66.4], [36.4, 69.0]],
+      claude: [[76.6, 60.2], [75.6, 55.4], [74.0, 52.8], [69.4, 54.2], [64.6, 55.8]],
       gemini: [[18.6, 88.4], [26.6, 90.4], [35.6, 89.4], [44.0, 88.2],
-        [48.6, 83.6], [50.4, 79.0], [54.4, 71.6], [58.6, 68.6]]
+        [48.6, 83.4], [50.8, 79.2], [52.4, 72.6], [56.0, 69.6], [59.0, 67.4]]
     }
   };
 
@@ -641,12 +641,14 @@
   }
 
   /* 책상 앞(home)에서 머리 위 라벨까지의 높이 차이를 그대로 유지하며,
-     지금 발 위치 위로 올린다. */
+     지금 발 위치 위로 올린다. 회의실에 앉았을 때는 작아진 만큼 덜 띄운다. */
   function anchorOf(partId, which) {
     var p = PART_MAP[partId];
     if (!p) return [50, 50];
     var pt = pointOf(partId);
-    return [pt[0], pt[1] - (p.home[1] - p[which][1])];
+    var el = spriteEls[partId];
+    var k = el && el.classList.contains('is-seated') ? 0.72 : 1;
+    return [pt[0], pt[1] - (p.home[1] - p[which][1]) * k];
   }
 
   function clampBubble(el, x, y) {
@@ -1179,6 +1181,13 @@
     return h;
   }
 
+  /* 칩에 쓰는 시계 — 요일 + 시:분 (실시간이면 지금 시각, 미리보기면 그 시간대) */
+  function clockLabel(h) {
+    var hh = Math.floor(((h % 24) + 24) % 24);
+    var mm = Math.min(59, Math.round(((h % 1) + 1) % 1 * 60));
+    return WEEK[new Date().getDay()] + ' ' + pad2(hh) + ':' + pad2(mm);
+  }
+
   function phaseOf(h) {
     var sr = env.sunrise;
     var ss = env.sunset;
@@ -1284,11 +1293,13 @@
     stage.setAttribute('data-phase', phase);
     stage.setAttribute('data-weather', kind);
 
-    var label = (state.envTime === 'auto' ? '' : '미리보기 ') + PHASE_LABEL[phase] +
+    var label = (state.envTime === 'auto' ? '' : '미리보기 ') + clockLabel(h) +
       ' · ' + WEATHER_LABEL[kind];
     var tempTxt = (state.envWeather === 'auto' && env.temp != null) ? ' ' + Math.round(env.temp) + '°' : '';
     var txt = $('#envText');
     if (txt) txt.textContent = label + tempTxt;
+    var chipEl = $('#envChip');
+    if (chipEl) chipEl.setAttribute('aria-label', label + tempTxt + ' · 시간·날씨 미리보기 열기');
     var ico = $('#envIcon');
     if (ico) ico.textContent = (phase === 'night' ? NIGHT_ICON : WEATHER_ICON)[kind];
 
@@ -2185,7 +2196,7 @@
     applyEnv();
     loadWeather();
     syncMeetChip();
-    window.setInterval(applyEnv, 60000);
+    window.setInterval(applyEnv, 30000);
     window.setInterval(loadWeather, 30 * 60 * 1000);
 
     var img = $('#mapImg');
