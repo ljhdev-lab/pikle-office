@@ -1529,6 +1529,66 @@ body.no-motion .sprite { transition: none; }
   font-weight: 800;
 }
 
+/* 채팅에서 맡긴 일 — 폰에서 직접 넣은 할 일과 구분하는 작은 배지 */
+.chat-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: -.2px;
+}
+
+/* 작업실 위 채팅 동기화 줄 */
+.syncbar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 10px;
+  padding: 6px 7px 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card-2);
+  font-size: 11px;
+  color: var(--ink-2);
+}
+.syncbar__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #52b394;
+  box-shadow: 0 0 0 3px rgba(82, 179, 148, .16);
+}
+.syncbar.is-busy .syncbar__dot {
+  background: #dda13e;
+  box-shadow: 0 0 0 3px rgba(221, 161, 62, .18);
+  animation: syncPulse .9s ease-in-out infinite;
+}
+@keyframes syncPulse { 50% { opacity: .35; } }
+.syncbar__txt { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.syncbar__count {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.syncbar__btn {
+  flex: none;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink-2);
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.syncbar__btn:disabled { opacity: .5; cursor: default; }
+
 .item--done { opacity: .55; }
 .item--done .item__title { text-decoration: line-through; }
 

@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-28T15:35:00+09:00",
+  "claudeTokenPct": 97,
+  "claudeCheckedAt": "2026-11-28T15:00:00+09:00",
+  "tasks": [
+    {
+      "id": "chat-1128-bubbles",
+      "title": "비서실 4명 동시 말풍선 표시 수정",
+      "owner": "gemini",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-guide",
+      "title": "비서실 탭별 물음표(?) 사용 가이드 추가",
+      "owner": "gpt",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-token",
+      "title": "비서실 상단 토큰 체력바·부스터 모드 구현",
+      "owner": "claude",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-motion",
+      "title": "비서실 회의실 이동·타자 치는 모션 추가",
+      "owner": "gemini",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-pay",
+      "title": "결제 계정 확인 절차 마무리",
+      "owner": "byeol",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1127-map",
+      "title": "비서실 오피스 맵 3D 캐릭터 리서치·적용",
+      "owner": "claude",
+      "done": true,
+      "date": "11.27",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1127-review",
+      "title": "육아용품 후기 글 3사 협업 수정",
+      "owner": "gpt",
+      "done": true,
+      "date": "11.27",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-sync",
+      "title": "비서실 채팅 작업 동기화 구조 정리",
+      "owner": "byeol",
+      "done": false,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-tokencheck",
+      "title": "주간 AI 토큰 잔여 점검 루틴 만들기",
+      "owner": "byeol",
+      "done": false,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1129-comments",
+      "title": "블로그 새 글·댓글 정기 점검",
+      "owner": "gpt",
+      "done": false,
+      "date": "11.29",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1130-browser",
+      "title": "브라우저 램 절약 설정 안내",
+      "owner": "claude",
+      "done": false,
+      "date": "11.30",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1201-mail",
+      "title": "메일함 정리 루틴 다음 달 준비",
+      "owner": "claude",
+      "done": false,
+      "date": "12.01",
+      "source": "chat"
+    }
+  ]
+}

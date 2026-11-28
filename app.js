@@ -197,7 +197,7 @@
         '끝나면 완료, 필요 없으면 삭제해요.'
       ],
       routine: '아침에 할 일을 넣고 저녁에 진행률을 봐요.',
-      note: '모션이 켜져 있으면 할 일을 추가할 때 네 사람이 회의실로 모여요.'
+      note: '모션이 켜져 있으면 할 일을 추가할 때 네 사람이 회의실로 모여요. 채팅에서 맡긴 일은 💬 채팅 배지로 함께 올라와요.'
     },
     team: {
       title: '비서현황',
@@ -260,6 +260,10 @@
         { id: 't5', title: '다음 주 일정 한 번에 훑기', part: 'byeol', done: true, at: now - 900000 }
       ],
       memo: '',
+      chatSyncedAt: 0,
+      chatSyncedLabel: '',
+      dismissedChatIds: [],
+      demoCleared: false,
       updatedAt: now
     };
   }
@@ -320,6 +324,8 @@
         };
         if (hasPart) {
           row.part = PART_MAP[item.part] ? item.part : (LEGACY_PARTS[item.part] || 'byeol');
+          if (item.chat) row.chat = true;
+          if (typeof item.date === 'string' && item.date) row.date = item.date.slice(0, 5);
         }
         out.push(row);
       });
@@ -328,6 +334,14 @@
 
     if (Array.isArray(raw.agenda)) base.agenda = clean(raw.agenda, false);
     if (Array.isArray(raw.tasks)) base.tasks = clean(raw.tasks, true);
+    if (typeof raw.chatSyncedAt === 'number' && raw.chatSyncedAt > 0) base.chatSyncedAt = raw.chatSyncedAt;
+    if (typeof raw.chatSyncedLabel === 'string') base.chatSyncedLabel = raw.chatSyncedLabel.slice(0, 16);
+    if (raw.demoCleared === true) base.demoCleared = true;
+    if (Array.isArray(raw.dismissedChatIds)) {
+      base.dismissedChatIds = raw.dismissedChatIds.filter(function (id) {
+        return typeof id === 'string' && !!id;
+      }).slice(0, 300);
+    }
 
     return base;
   }
@@ -400,6 +414,188 @@
       save();
       if (cb) cb();
     }, 400);
+  }
+
+  /* ---------------------------------------------------------
+     채팅 작업 동기화 — 공개 JSON(data/office-state.json)
+     채팅에서 맡긴 일은 저장소의 이 파일에 일반 작업명으로만 적힌다.
+     앱은 열릴 때 한 번 읽어서 작업실 목록에 💬 채팅 배지로 합치고,
+     작업실 위 새로고침으로 다시 읽는다. 파일이 없거나 네트워크가
+     막히면 조용히 로컬 상태만 쓰고 앱은 그대로 동작한다.
+     --------------------------------------------------------- */
+
+  var CHAT_URL = './data/office-state.json';
+  /* 처음 설치할 때 들어 있는 예시 할 일 — 사용자가 손대지 않았을 때만 걷어 낸다. */
+  var DEMO_TASK_IDS = { t1: 1, t2: 1, t3: 1, t4: 1, t5: 1 };
+  var chatBusy = false;
+
+  function hhmm(ts) {
+    var d = new Date(ts || Date.now());
+    return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+
+  /* '11.28 15:35' — JSON 에 적힌 시각을 그대로 보여 준다(보는 기기의
+     시간대에 따라 달라지지 않게). */
+  function isoLabel(iso) {
+    var m = /^\d{4}-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso || '');
+    if (!m) return '';
+    return Number(m[1]) + '.' + Number(m[2]) + ' ' + m[3] + ':' + m[4];
+  }
+
+  /* '11.28' 같은 날짜를 그날 09:00 으로 옮긴다. 오늘보다 한참 앞선
+     날짜면 지난해 일로 본다(연말에 연초 기록이 섞일 때). */
+  function chatTaskAt(dateStr, fallback, idx) {
+    var m = /^(\d{1,2})\.(\d{1,2})$/.exec(dateStr || '');
+    if (m) {
+      var now = new Date();
+      var d = new Date(now.getFullYear(), Number(m[1]) - 1, Number(m[2]), 9, 0, 0, 0);
+      if (d.getTime() - now.getTime() > 172800000) d.setFullYear(d.getFullYear() - 1);
+      return d.getTime();
+    }
+    return (fallback || Date.now()) - idx * 60000;
+  }
+
+  function onlyDemoTasksLeft() {
+    if (!state.tasks.length) return false;
+    return state.tasks.every(function (t) { return DEMO_TASK_IDS[t.id] === 1; });
+  }
+
+  /* 예시 할 일만 남은 상태면 한 번만 비운다. 사용자가 직접 넣은
+     할 일(id x…)이 하나라도 있으면 아무것도 지우지 않는다. */
+  function clearDemoTasks() {
+    if (state.demoCleared) return false;
+    state.demoCleared = true;
+    if (!onlyDemoTasksLeft()) return false;
+    state.tasks = [];
+    return true;
+  }
+
+  function mergeRemote(data) {
+    var out = { ok: false, added: 0, changed: false };
+    if (!data || typeof data !== 'object') return out;
+    out.ok = true;
+    var remoteAt = Date.parse(data.updatedAt || '') || Date.now();
+
+    /* 클로드 잔여 % — 원격이 로컬에서 마지막으로 맞춘 시각보다
+       최신일 때만 반영한다. 사용자가 방금 손으로 맞춘 값을 원격이
+       덮어쓰지 않게 하는 기준이다. */
+    var pct = data.claudeTokenPct;
+    if (typeof pct === 'number' && isFinite(pct) && state.parts.claude) {
+      var q = state.parts.claude.quota;
+      var nextPct = clamp(Math.round(pct), 0, 100);
+      if (remoteAt > (q.checkedAt || 0) && nextPct !== q.pct) {
+        q.pct = nextPct;
+        q.checkedAt = Date.parse(data.claudeCheckedAt || '') || remoteAt;
+        out.changed = true;
+      }
+    }
+
+    if (clearDemoTasks()) out.changed = true;
+
+    var rows = Array.isArray(data.tasks) ? data.tasks : [];
+    rows.forEach(function (row, i) {
+      if (!row || typeof row !== 'object') return;
+      if (row.source && row.source !== 'chat') return;
+      if (typeof row.id !== 'string' || !row.id) return;
+      if (state.dismissedChatIds.indexOf(row.id) >= 0) return;
+      var title = typeof row.title === 'string' ? row.title.trim().slice(0, 80) : '';
+      if (!title) return;
+      var part = PART_MAP[row.owner] ? row.owner : 'byeol';
+      var done = row.done === true;
+      var date = typeof row.date === 'string' ? row.date.slice(0, 5) : '';
+
+      var hit = null;
+      state.tasks.forEach(function (t) { if (t.id === row.id) hit = t; });
+      if (hit) {
+        /* 이미 있는 항목은 완료 쪽으로만 맞춘다 — 로컬에서 체크한 것을
+           원격이 되돌리지 않는다. */
+        if (!hit.chat) { hit.chat = true; out.changed = true; }
+        if (hit.title !== title) { hit.title = title; out.changed = true; }
+        if (done && !hit.done) { hit.done = true; out.changed = true; }
+        if (date && hit.date !== date) { hit.date = date; out.changed = true; }
+        return;
+      }
+
+      state.tasks.push({
+        id: row.id,
+        title: title,
+        part: part,
+        done: done,
+        at: chatTaskAt(date, remoteAt, i),
+        date: date,
+        chat: true
+      });
+      out.added += 1;
+      out.changed = true;
+    });
+
+    if (remoteAt > state.chatSyncedAt) {
+      state.chatSyncedAt = remoteAt;
+      state.chatSyncedLabel = isoLabel(data.updatedAt) || (shortDate(remoteAt) + ' ' + hhmm(remoteAt));
+      out.changed = true;
+    }
+    return out;
+  }
+
+  function chatSyncText() {
+    var el = $('#syncText');
+    if (!el) return;
+    var label = state.chatSyncedLabel
+      || (state.chatSyncedAt ? shortDate(state.chatSyncedAt) + ' ' + hhmm(state.chatSyncedAt) : '');
+    el.textContent = label ? '채팅 동기화 · ' + label : '채팅 동기화 · 대기 중';
+    var n = state.tasks.filter(function (t) { return t.chat && !t.done; }).length;
+    var cnt = $('#syncCount');
+    if (cnt) cnt.textContent = n ? n + '건 진행' : '모두 완료';
+  }
+
+  function setChatBusy(on) {
+    chatBusy = !!on;
+    var bar = $('#syncBar');
+    if (bar) bar.classList.toggle('is-busy', chatBusy);
+    var btn = $('#syncBtn');
+    if (btn) {
+      btn.disabled = chatBusy;
+      btn.textContent = chatBusy ? '불러오는 중' : '새로고침';
+    }
+  }
+
+  function renderAfterSync() {
+    renderHeader();
+    renderCrew();
+    renderTasks();
+    renderTeam();
+    renderSettings();
+    if (ui.sheet) renderSheet();
+  }
+
+  function syncChatTasks(manual) {
+    if (chatBusy || typeof window.fetch !== 'function') return;
+    setChatBusy(true);
+    var finish = function (msg) {
+      setChatBusy(false);
+      if (manual && msg) toast(msg);
+    };
+    window.fetch(CHAT_URL + '?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        var out = mergeRemote(data);
+        if (out.changed) {
+          save();
+          renderAfterSync();
+        } else {
+          chatSyncText();
+        }
+        finish(manual
+          ? (out.added ? '채팅 작업 ' + out.added + '건을 새로 받았어요' : '이미 최신 목록이에요')
+          : '');
+      })
+      .catch(function () {
+        /* 파일이 없거나 오프라인이면 조용히 로컬 상태로 둔다 */
+        finish('채팅 목록을 못 불러왔어요 · 저장된 목록으로 보여드릴게요');
+      });
   }
 
   /* ---------------------------------------------------------
@@ -1958,12 +2154,14 @@
 
   function taskItemHTML(t) {
     var p = PART_MAP[t.part] || PARTS[0];
-    return '<li class="item' + (t.done ? ' item--done' : '') + '">' +
+    return '<li class="item' + (t.done ? ' item--done' : '') + (t.chat ? ' item--chat' : '') + '">' +
       '<button class="check" type="button" role="checkbox" aria-checked="' + (t.done ? 'true' : 'false') +
         '" data-action="toggle-task" data-id="' + t.id + '" aria-label="완료 표시"></button>' +
       '<div class="item__body">' +
         '<p class="item__title">' + esc(t.title) + '</p>' +
-        '<p class="item__meta"><span class="tag-chip" style="background:' + p.soft + ';color:' + p.deep + '">' +
+        '<p class="item__meta">' +
+          (t.chat ? '<span class="chat-badge">💬 채팅</span>' : '') +
+          '<span class="tag-chip" style="background:' + p.soft + ';color:' + p.deep + '">' +
           esc(p.name) + '</span>' + shortDate(t.at) + '</p>' +
       '</div>' +
       '<button class="icon-btn" type="button" data-action="del-task" data-id="' + t.id + '" ' +
@@ -2012,6 +2210,8 @@
       return '<button class="chip' + (ui.filter === f.id ? ' is-on' : '') + '" type="button" ' +
         'data-action="filter" data-filter="' + f.id + '">' + esc(f.label) + '<small>' + n + '</small></button>';
     }).join('');
+
+    chatSyncText();
   }
 
   function agentHTML(p) {
@@ -2352,7 +2552,13 @@
   }
 
   function removeTask(id) {
+    var hit = null;
+    state.tasks.forEach(function (t) { if (t.id === id) hit = t; });
     state.tasks = state.tasks.filter(function (t) { return t.id !== id; });
+    /* 채팅에서 온 항목을 지우면 새로고침 때 다시 올라오지 않게 기억한다 */
+    if (hit && hit.chat && state.dismissedChatIds.indexOf(id) < 0) {
+      state.dismissedChatIds.push(id);
+    }
     save();
     renderCrew();
     renderTasks();
@@ -2486,6 +2692,7 @@
     state = defaultState();
     save();
     applyState();
+    syncChatTasks();
     toast('처음 상태로 돌아왔어요');
   }
 
@@ -2634,6 +2841,9 @@
           break;
         case 'del-task':
           removeTask(el.getAttribute('data-id'));
+          break;
+        case 'sync-chat':
+          syncChatTasks(true);
           break;
         case 'toggle-agenda':
           toggleAgenda(el.getAttribute('data-id'));
@@ -2786,6 +2996,7 @@
     setTab(state.tab || 'map', true);
     startBubbleLoop();
     startMotionLoop();
+    syncChatTasks();
 
     if (!guideSeen()) {
       var dot = $('#helpDot');

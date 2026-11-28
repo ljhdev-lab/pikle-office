@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <link rel="preload" as="image" href="assets/office-map-v5.webp" type="image/webp">
-<link rel="stylesheet" href="style.css?v=43">
+<link rel="stylesheet" href="style.css?v=44">
 </head>
 <body>
 <div class="app" id="app">
@@ -204,6 +204,12 @@
         <h2 class="view__title">작업실</h2>
         <p class="view__sub">네 사람의 할 일을 한 곳에서 체크해요.</p>
       </div>
+      <div class="syncbar" id="syncBar">
+        <span class="syncbar__dot" aria-hidden="true"></span>
+        <span class="syncbar__txt" id="syncText">채팅 동기화 · 대기 중</span>
+        <span class="syncbar__count" id="syncCount"></span>
+        <button class="syncbar__btn" type="button" id="syncBtn" data-action="sync-chat">새로고침</button>
+      </div>
       <form class="addbar addbar--task" id="taskForm" autocomplete="off">
         <select class="input select" id="taskPart" aria-label="추가할 담당"></select>
         <input class="input" id="taskInput" maxlength="80" placeholder="할 일을 적어 주세요" aria-label="새 할 일">
@@ -290,6 +296,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <noscript><p style="padding:24px;text-align:center">이 앱을 쓰려면 자바스크립트를 켜 주세요.</p></noscript>
-<script src="app.js?v=43"></script>
+<script src="app.js?v=44"></script>
 </body>
 </html>
