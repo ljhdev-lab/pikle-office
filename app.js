@@ -1814,9 +1814,11 @@
     return !!(state.parts[id] && state.parts[id].boost);
   }
 
-  /* 칸 아래 한 줄 — 'Pro 97%' / '무료 · 여유' */
-  function quotaLabel(q, v) {
-    return v.pct == null ? q.plan + ' · ' + v.text : q.plan + ' ' + v.text;
+  /* 칸 아래 한 줄 — 'Pro 97%' / '무료 · 여유'
+     부스터 배지가 함께 서면 자리가 좁아 플랜 이름은 빼고 잔여만 남긴다. */
+  function quotaLabel(q, v, boost) {
+    if (v.pct == null) return q.plan + ' · ' + v.text;
+    return (boost ? '' : q.plan + ' ') + v.text;
   }
 
   function partyCellHTML(p) {
@@ -1840,7 +1842,7 @@
       '<span class="pm__meta"><span class="pm__st">' + meta.label + '</span>' +
         '<span class="pm__n">' + open + '건</span></span>' +
       '<span class="pm__bar"><i></i></span>' +
-      '<span class="pm__tk"><span class="pm__tk-t">' + esc(quotaLabel(q, v)) + '</span>' +
+      '<span class="pm__tk"><span class="pm__tk-t">' + esc(quotaLabel(q, v, boost)) + '</span>' +
         (boost ? '<i class="pm__boost" aria-hidden="true">⚡ 부스터</i>' : '') + '</span>' +
     '</button>';
   }
@@ -1881,7 +1883,7 @@
       var n = $('.pm__n', cell);
       if (n) n.textContent = open + '건';
       var tk = $('.pm__tk-t', cell);
-      if (tk) tk.textContent = quotaLabel(q, v);
+      if (tk) tk.textContent = quotaLabel(q, v, boost);
       cell.setAttribute('aria-label', p.name + (boost ? ' 부스터 모드' : '') + ' ' + meta.long +
         ' · 토큰 ' + (v.pct == null ? '무료 ' + v.text : v.text + ' 남음') + ' · 남은 일 ' + open + '건 · 방 열기');
     });
