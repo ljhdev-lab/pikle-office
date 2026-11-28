@@ -839,6 +839,18 @@
     setTyping(id, true);
     window.clearTimeout(typeTimer[id]);
     typeTimer[id] = window.setTimeout(function () { setTyping(id, false); }, ms || 3400);
+    /* 가끔 작은 '타닥' 글자를 띄워 자리에서 일하는 느낌을 더한다 */
+    if (Math.random() < 0.5) {
+      window.setTimeout(function () {
+        if (!el.classList.contains('is-typing') || !state.motion) return;
+        if (el.querySelector('.sprite__word')) return;
+        var w = document.createElement('span');
+        w.className = 'sprite__word';
+        w.textContent = '타닥';
+        el.appendChild(w);
+        window.setTimeout(function () { if (w.parentNode) w.parentNode.removeChild(w); }, 1400);
+      }, 700 + Math.random() * 1800);
+    }
   }
 
   function stopTyping(id) {
