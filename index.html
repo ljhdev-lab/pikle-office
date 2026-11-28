@@ -14,8 +14,8 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
-<link rel="preload" as="image" href="assets/office-map-v4.webp" type="image/webp">
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="preload" as="image" href="assets/office-map-v5.webp" type="image/webp">
+<link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
 <div class="app" id="app">
@@ -119,13 +119,18 @@
               <span class="sky__cloud sky__cloud--b"></span>
             </div>
             <canvas class="fx-canvas" id="fxCanvas" width="390" height="520" aria-hidden="true"></canvas>
-            <img class="map-img" id="mapImg" src="assets/office-map-v4.webp" width="864" height="1152"
-                 alt="대형 창문과 책상 네 개, 회의 테이블과 소파가 놓인 픽셀아트 아이소메트릭 비서실" decoding="async" fetchpriority="high">
+            <img class="map-img" id="mapImg" src="assets/office-map-v5.webp" width="864" height="1152"
+                 alt="대형 창문과 책상 네 개, 유리벽 회의실과 소파가 놓인 픽셀아트 아이소메트릭 비서실" decoding="async" fetchpriority="high">
             <div class="sprite-layer" id="spriteLayer"></div>
             <div class="light-wash" id="lightWash" aria-hidden="true"></div>
             <div class="lamp-layer" id="lampLayer" aria-hidden="true"></div>
             <div class="map-overlay" id="mapOverlay"></div>
           </div>
+
+          <button class="meet-chip" id="meetChip" type="button" aria-pressed="false" aria-label="회의실 모이기">
+            <span class="meet-chip__ico" aria-hidden="true">👥</span>
+            <span id="meetChipText">회의 소집</span>
+          </button>
 
           <button class="env-chip" id="envChip" type="button" aria-expanded="false" aria-controls="envPanel">
             <span class="env-chip__ico" id="envIcon" aria-hidden="true">☀</span>
@@ -145,7 +150,7 @@
           </div>
         </div>
         <div class="map-foot">
-          <span class="map-foot__hint">캐릭터를 누르면 그 비서의 오늘 일정이 열려요</span>
+          <span class="map-foot__hint" id="mapFootHint">캐릭터를 누르면 그 비서의 오늘 일정이 열려요</span>
         </div>
       </div>
 
@@ -279,6 +284,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <noscript><p style="padding:24px;text-align:center">이 앱을 쓰려면 자바스크립트를 켜 주세요.</p></noscript>
-<script src="app.js?v=31"></script>
+<script src="app.js?v=32"></script>
 </body>
 </html>

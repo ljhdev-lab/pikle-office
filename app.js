@@ -9,14 +9,15 @@
   var LEGACY_KEY = 'byeol-office-v1';
   var WEEK = ['일', '월', '화', '수', '목', '금', '토'];
 
-  /* 좌표는 assets/office-map-v4.webp (864×1152, 3:4) 안의 위치를 % 로 적은 값.
+  /* 좌표는 assets/office-map-v5.webp (864×1152, 3:4) 안의 위치를 % 로 적은 값.
      home 은 캐릭터 **발바닥 중앙**, tag·bubble 은 머리 위 라벨/말풍선 기준점이다.
-     w 는 무대 가로 대비 캐릭터 폭. 이미지를 바꾸면 이 값만 다시 맞추면 된다. */
+     w 는 무대 가로 대비 캐릭터 폭. seat 은 회의실에서 앉는 자리 키다.
+     이미지를 바꾸면 이 값만 다시 맞추면 된다. */
   var PARTS = [
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
       color: '#6790d0', deep: '#4a68a6', soft: '#eaf1fb',
-      home: [47.5, 46.4], w: 17.0, tag: [47.5, 31.6], bubble: [47.5, 29.2], tail: 'down', delay: 0,
-      paces: [[42.6, 48.8], [53.0, 49.6]], emoji: ['🗂', '✨', '☕'],
+      home: [47.5, 42.2], seat: 'L1', w: 17.0, tag: [47.5, 27.8], bubble: [47.5, 25.4], tail: 'down', delay: 0,
+      paces: [[43.2, 43.2], [52.4, 43.4]], emoji: ['🗂', '✨', '☕'],
       persona: '당차고 야무진 주디 홉스 스타일 — 오늘 할 일부터 챙기는 비서실장',
       moods: [
         { e: 'hype', t: '오늘도 야무지게!' },
@@ -32,7 +33,7 @@
       ] },
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
       color: '#52b394', deep: '#2f8a6e', soft: '#e6f7f0',
-      home: [20.4, 60.2], w: 15.4, tag: [20.4, 46.6], bubble: [20.4, 43.9], tail: 'down', delay: 0.6,
+      home: [20.4, 60.2], seat: 'L2', w: 15.4, tag: [20.4, 46.6], bubble: [20.4, 43.9], tail: 'down', delay: 0.6,
       paces: [[24.6, 62.8], [15.8, 62.4]], emoji: ['💡', '✍', '✨'],
       persona: '아이디어가 샘솟는 텐션 높은 기획자 · 숫자로 기획안을 다듬는 열정 만렙',
       moods: [
@@ -49,7 +50,7 @@
       ] },
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
       color: '#e27f5f', deep: '#b25a3a', soft: '#fdeee7',
-      home: [76.6, 60.2], w: 15.0, tag: [76.6, 46.8], bubble: [76.6, 44.1], tail: 'down', delay: 1.2,
+      home: [76.6, 60.2], seat: 'R1', w: 15.0, tag: [76.6, 46.8], bubble: [76.6, 44.1], tail: 'down', delay: 1.2,
       paces: [[71.8, 62.8], [81.4, 62.4]], emoji: ['🔎', '📄', '🧩'],
       persona: '차분하고 꼼꼼한 분석가 · 근거 없으면 작게 한숨 쉬고 끝까지 확인',
       moods: [
@@ -67,7 +68,7 @@
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
       color: '#6f8fe0', deep: '#5a6bb8', soft: '#eef1fb',
       dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
-      home: [18.6, 88.4], w: 15.0, tag: [18.6, 74.8], bubble: [18.6, 72.1], tail: 'down', delay: 1.8,
+      home: [18.6, 88.4], seat: 'R2', w: 15.0, tag: [18.6, 74.8], bubble: [18.6, 72.1], tail: 'down', delay: 1.8,
       paces: [[24.8, 90.6], [12.2, 90.2]], emoji: ['🎨', '🖼', '✨'],
       persona: '1px도 놓치지 않는 감각적인 아트 디렉터 겸 깐깐한 최종 검수자',
       moods: [
@@ -84,6 +85,26 @@
   ];
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
+
+  /* 회의실 — v5 배경 가운데 유리 파티션 안의 좌석 4곳과, 각자 책상 앞에서
+     그 좌석까지 걷는 경유점(발바닥 좌표 %). 가구와 유리벽을 뚫지 않도록
+     통로를 따라 꺾어 가고, 마지막에 자기 좌석으로 붙는다. */
+  var ROOM = {
+    seats: {
+      L1: [37.6, 57.6],   // 왼쪽 먼 자리 (별이)
+      R1: [57.2, 57.0],   // 오른쪽 먼 자리 (클로드)
+      L2: [38.8, 65.2],   // 왼쪽 가까운 자리 (GPT)
+      R2: [60.6, 65.8]    // 오른쪽 가까운 자리 (제미나이)
+    },
+    /* home → 회의실 입구까지. 좌석은 이 뒤에 이어 붙인다. */
+    route: {
+      byeol: [[47.5, 42.2], [43.0, 45.8], [38.6, 50.6], [35.2, 55.0]],
+      gpt: [[20.4, 60.2], [24.6, 63.4], [29.4, 64.6], [33.4, 65.6]],
+      claude: [[76.6, 60.2], [73.0, 55.6], [67.8, 54.4], [62.6, 56.0]],
+      gemini: [[18.6, 88.4], [26.6, 90.4], [35.6, 89.4], [44.0, 88.2],
+        [48.6, 83.6], [50.4, 79.0], [54.4, 71.6], [58.6, 68.6]]
+    }
+  };
 
   /* 감정 말풍선 — 감정마다 작은 아이콘과 파스텔 톤을 하나씩.
      e 는 moods 의 감정 키, cls 는 CSS 톤 클래스 접미사다. */
@@ -423,7 +444,7 @@
 
   /* 할 일을 마쳤을 때처럼 특정 감정을 골라 머리 위에 잠깐 띄운다. */
   function showMood(partId, want) {
-    if (!state.motion || document.hidden || ui.sheet) return;
+    if (!state.motion || document.hidden || ui.sheet || inMeeting()) return;
     if (!PART_MAP[partId]) return;
     var mood = pickMood(partId, want);
     if (!mood) return;
@@ -569,7 +590,8 @@
 
   function overlayHTML() {
     var tags = PARTS.map(function (p) {
-      return '<span class="tag' + (isActive(p.id) ? '' : ' is-off') + '" style="left:' + p.tag[0] +
+      return '<span class="tag' + (isActive(p.id) ? '' : ' is-off') + '" data-part="' + p.id +
+        '" style="left:' + p.tag[0] +
         '%;top:' + p.tag[1] + '%">' +
         '<i class="tag__dot" style="background:' + (p.dot || p.color) + '"></i>' +
         '<span class="tag__name">' + esc(p.name) + '</span></span>';
@@ -586,7 +608,10 @@
         Math.round(p.home[1] * 10) + '" ' +
       'aria-label="' + esc(p.room) + ' · ' + esc(p.name) + ' 열기">' +
       '<span class="sprite__shadow"></span>' +
+      '<span class="sprite__glow"></span>' +
       '<span class="sprite__inner">' + avatarSVG(p.id) + '</span>' +
+      '<span class="sprite__keys"></span>' +
+      '<span class="sprite__tap"></span>' +
       '</button>';
   }
 
@@ -602,6 +627,41 @@
     });
   }
 
+  /* ---------------------------------------------------------
+     말풍선 · 이름표 — 캐릭터의 지금 발 위치를 따라간다
+     --------------------------------------------------------- */
+
+  function pointOf(id) {
+    var el = spriteEls[id];
+    var p = PART_MAP[id];
+    if (!el || !p) return p ? p.home.slice() : [50, 50];
+    var x = parseFloat(el.style.left);
+    var y = parseFloat(el.style.top);
+    return [isNaN(x) ? p.home[0] : x, isNaN(y) ? p.home[1] : y];
+  }
+
+  /* 책상 앞(home)에서 머리 위 라벨까지의 높이 차이를 그대로 유지하며,
+     지금 발 위치 위로 올린다. */
+  function anchorOf(partId, which) {
+    var p = PART_MAP[partId];
+    if (!p) return [50, 50];
+    var pt = pointOf(partId);
+    return [pt[0], pt[1] - (p.home[1] - p[which][1])];
+  }
+
+  function clampBubble(el, x, y) {
+    el.style.left = x + '%';
+    el.style.top = y.toFixed(2) + '%';
+    var stage = $('#mapStage');
+    if (!stage || !el.offsetWidth) return;
+    var sw = stage.clientWidth;
+    var bw = el.offsetWidth;
+    var cx = sw * x / 100;
+    var half = bw / 2 + 6;
+    if (cx < half) el.style.left = (half / sw * 100) + '%';
+    else if (cx > sw - half) el.style.left = ((sw - half) / sw * 100) + '%';
+  }
+
   /* mood 를 주지 않으면 지금 상태 문구(할 일 안내) 말풍선이 뜨고,
      mood 를 주면 감정 아이콘과 함께 감정 말풍선이 뜬다. */
   function placeBubble(partId, animate, mood) {
@@ -610,8 +670,7 @@
     var p = PART_MAP[partId];
     if (!p) { el.hidden = true; return; }
     var emo = mood && EMOTIONS[mood.e] ? EMOTIONS[mood.e] : null;
-    el.style.left = p.bubble[0] + '%';
-    el.style.top = p.bubble[1] + '%';
+    var a = anchorOf(partId, 'bubble');
     el.className = 'bubble bubble--' + p.tail + (isActive(partId) ? '' : ' is-off') +
       (emo ? ' bubble--mood m-' + emo.cls : ' bubble--status');
     var ico = $('.bubble__ico', el);
@@ -621,19 +680,30 @@
     }
     $('.bubble__txt', el).textContent = emo ? mood.t : statusOf(partId);
     el.hidden = false;
-    var stage = $('#mapStage');
-    if (stage) {
-      var sw = stage.clientWidth;
-      var bw = el.offsetWidth;
-      var cx = sw * p.bubble[0] / 100;
-      var half = bw / 2 + 6;
-      if (cx < half) el.style.left = (half / sw * 100) + '%';
-      else if (cx > sw - half) el.style.left = ((sw - half) / sw * 100) + '%';
-    }
+    clampBubble(el, a[0], a[1]);
     if (animate) {
       el.classList.remove('is-pop');
       void el.offsetWidth;
       el.classList.add('is-pop');
+    }
+  }
+
+  /* 이름표를 캐릭터 위치에 맞춰 옮기고, 그 캐릭터 말풍선이 떠 있으면 함께 옮긴다. */
+  function syncAnchor(id, dur) {
+    var p = PART_MAP[id];
+    if (!p) return;
+    var pt = pointOf(id);
+    var tag = $('.tag[data-part="' + id + '"]');
+    if (tag) {
+      tag.style.transitionDuration = (dur == null ? 0.4 : dur) + 's';
+      tag.style.left = pt[0] + '%';
+      tag.style.top = (pt[1] - (p.home[1] - p.tag[1])).toFixed(2) + '%';
+    }
+    var b = $('#mapBubble');
+    if (b && !b.hidden && state.focus === id) {
+      var a = anchorOf(id, 'bubble');
+      b.style.transitionDuration = (dur == null ? 0.4 : dur) + 's';
+      clampBubble(b, a[0], a[1]);
     }
   }
 
@@ -654,7 +724,7 @@
   function startBubbleLoop() {
     window.clearInterval(bubbleTimer);
     bubbleTimer = window.setInterval(function () {
-      if (!state.motion || document.hidden || ui.sheet) return;
+      if (!state.motion || document.hidden || ui.sheet || inMeeting()) return;
       if (Date.now() - focusHold < 14000) return;
       var act = activeParts();
       if (!act.length) return;
@@ -673,9 +743,26 @@
      캐릭터 모션 — 한 번에 한 명만 걷고, 나머지는 자리에서 일한다
      --------------------------------------------------------- */
 
-  var walkGen = 0;
+  var walkGen = {};
+  var walkTimer = {};
+  var typeTimer = {};
   var walker = null;
   var motionTimer = null;
+
+  /* 회의 상태 — idle → gather(걸어가기) → meeting(마주 앉기) → return → idle.
+     회의 중에는 일반 순찰·타이핑 틱을 멈추고 회의 연출이 화면을 맡는다. */
+  var meeting = {
+    state: 'idle',
+    attendees: [],
+    seats: {},
+    gatherGen: 0,
+    talkTimer: null,
+    endTimer: null
+  };
+
+  function inMeeting() {
+    return meeting.state === 'gather' || meeting.state === 'meeting' || meeting.state === 'return';
+  }
 
   function moveSprite(id, point, dur) {
     var el = spriteEls[id];
@@ -684,6 +771,39 @@
     el.style.left = point[0] + '%';
     el.style.top = point[1] + '%';
     el.style.zIndex = Math.round(point[1] * 10);
+    syncAnchor(id, dur);
+  }
+
+  /* 경유점 배열을 순서대로 걸어간다. 거리에 따라 한 걸음 시간이 달라지고,
+     중간에 새 이동이 시작되면 옛 이동은 조용히 멈춘다. */
+  function walkPath(id, path, done) {
+    var el = spriteEls[id];
+    if (!el) { if (done) done(); return; }
+    var gen = (walkGen[id] = (walkGen[id] || 0) + 1);
+    var i = 0;
+    el.classList.add('is-walk');
+    el.classList.remove('is-seated', 'is-talking', 'is-typing');
+    window.clearTimeout(typeTimer[id]);
+
+    function next() {
+      if (gen !== walkGen[id]) return;
+      if (i >= path.length) {
+        el.classList.remove('is-walk');
+        if (done) done();
+        return;
+      }
+      var from = pointOf(id);
+      var to = path[i];
+      i += 1;
+      var dx = to[0] - from[0];
+      var dy = (to[1] - from[1]) * 4 / 3;   /* 무대는 3:4라 세로 1%가 가로 1%보다 길다 */
+      var d = Math.sqrt(dx * dx + dy * dy);
+      var dur = Math.max(0.3, Math.min(1.2, 0.2 + d * 0.072));
+      moveSprite(id, to, dur);
+      window.clearTimeout(walkTimer[id]);
+      walkTimer[id] = window.setTimeout(next, dur * 1000 + 40);
+    }
+    next();
   }
 
   function popEmoji(id) {
@@ -706,76 +826,234 @@
     el.classList.toggle('is-typing', !!on);
   }
 
+  /* 자리에서 타자를 치는 시간을 한 번에 길게 잡아, 390px 폭에서도
+     '지금 일하는 중'이 금방 읽히게 한다. */
+  function startTyping(id, ms) {
+    if (!state.motion || document.hidden) return;
+    var el = spriteEls[id];
+    if (!el || el.classList.contains('is-walk') || el.classList.contains('is-seated')) return;
+    setTyping(id, true);
+    window.clearTimeout(typeTimer[id]);
+    typeTimer[id] = window.setTimeout(function () { setTyping(id, false); }, ms || 3400);
+  }
+
+  function stopTyping(id) {
+    window.clearTimeout(typeTimer[id]);
+    setTyping(id, false);
+  }
+
   function startWalk(id) {
     var p = PART_MAP[id];
     var el = spriteEls[id];
-    if (!p || !el || walker) return;
-    var gen = ++walkGen;
+    if (!p || !el || walker || inMeeting()) return;
     walker = id;
+    stopTyping(id);
     var out = p.paces[Math.floor(Math.random() * p.paces.length)];
-    setTyping(id, false);
-    el.classList.add('is-walk');
-    moveSprite(id, out, 1.3);
-    window.setTimeout(function () {
-      if (gen !== walkGen) return;
-      el.classList.remove('is-walk');
+    walkPath(id, [out], function () {
+      if (walker !== id) return;
       popEmoji(id);
-    }, 1360);
-    window.setTimeout(function () {
-      if (gen !== walkGen) return;
-      el.classList.add('is-walk');
-      moveSprite(id, p.home, 1.35);
-    }, 3600);
-    window.setTimeout(function () {
-      if (gen !== walkGen) return;
-      el.classList.remove('is-walk');
-      setTyping(id, true);
-      window.setTimeout(function () { if (gen === walkGen) setTyping(id, false); }, 2400);
-    }, 5000);
-    window.setTimeout(function () {
-      if (gen !== walkGen) return;
-      walker = null;
-    }, 5200);
+      window.setTimeout(function () {
+        if (walker !== id || inMeeting()) { if (walker === id) walker = null; return; }
+        walkPath(id, [p.home], function () {
+          if (walker !== id) return;
+          walker = null;
+          startTyping(id, 1800 + Math.random() * 2200);
+        });
+      }, 1900);
+    });
   }
 
   function motionTick() {
-    if (!state.motion || document.hidden || ui.sheet) return;
+    if (!state.motion || document.hidden || ui.sheet || inMeeting()) return;
     var act = activeParts();
     if (!act.length) return;
 
-    if (!walker && Math.random() < 0.5) {
+    if (!walker && Math.random() < 0.45) {
       var pick = act[Math.floor(Math.random() * act.length)];
-      if (pick.id !== state.focus || Math.random() < 0.4) startWalk(pick.id);
+      if (pick.id !== state.focus || Math.random() < 0.35) startWalk(pick.id);
     }
 
-    if (Math.random() < 0.42) {
-      popEmoji(act[Math.floor(Math.random() * act.length)].id);
+    if (Math.random() < 0.5) {
+      var e = act[Math.floor(Math.random() * act.length)];
+      var el = spriteEls[e.id];
+      if (el && !el.classList.contains('is-walk')) popEmoji(e.id);
     }
 
-    if (!walker && Math.random() < 0.55) {
-      var t = act[Math.floor(Math.random() * act.length)].id;
-      setTyping(t, true);
-      window.setTimeout(function () { setTyping(t, false); }, 1800 + Math.random() * 2200);
+    if (!walker) {
+      var free = act.filter(function (p) {
+        var el2 = spriteEls[p.id];
+        return el2 && !el2.classList.contains('is-walk') && !el2.classList.contains('is-typing');
+      });
+      if (free.length && Math.random() < 0.75) {
+        startTyping(free[Math.floor(Math.random() * free.length)].id, 3200 + Math.random() * 3200);
+      }
     }
   }
 
   function startMotionLoop() {
     window.clearInterval(motionTimer);
-    motionTimer = window.setInterval(motionTick, 2600);
+    motionTimer = window.setInterval(motionTick, 2400);
   }
 
   function resetMotion() {
-    walkGen += 1;
-    walker = null;
     Object.keys(spriteEls).forEach(function (id) {
       var p = PART_MAP[id];
       var el = spriteEls[id];
       if (!p || !el) return;
-      el.classList.remove('is-walk', 'is-typing');
+      walkGen[id] = (walkGen[id] || 0) + 1;
+      window.clearTimeout(walkTimer[id]);
+      window.clearTimeout(typeTimer[id]);
+      el.classList.remove('is-walk', 'is-typing', 'is-seated', 'is-talking');
       el.style.transitionDuration = '0s';
       el.style.left = p.home[0] + '%';
       el.style.top = p.home[1] + '%';
+      el.style.zIndex = Math.round(p.home[1] * 10);
+      syncAnchor(id, 0);
     });
+    walker = null;
+    meeting.state = 'idle';
+    meeting.attendees = [];
+    meeting.gatherGen += 1;
+    window.clearInterval(meeting.talkTimer);
+    window.clearTimeout(meeting.endTimer);
+    document.body.classList.remove('is-meeting');
+    syncMeetChip();
+  }
+
+  /* ---------------------------------------------------------
+     회의실 모임 — 일이나 안건이 생기면 넷이 걸어가 마주 앉는다
+     --------------------------------------------------------- */
+
+  function seatPath(id) {
+    var p = PART_MAP[id];
+    var route = ROOM.route[id] || [p.home];
+    return route.slice(1).concat([ROOM.seats[p.seat] || route[route.length - 1]]);
+  }
+
+  function backPath(id) {
+    var p = PART_MAP[id];
+    var route = ROOM.route[id] || [p.home];
+    var seat = ROOM.seats[p.seat] || route[route.length - 1];
+    return [seat].concat(route.slice(1).reverse()).concat([[p.home[0], p.home[1]]]);
+  }
+
+  function syncMeetChip() {
+    var chip = $('#meetChip');
+    var txt = $('#meetChipText');
+    var hint = $('#mapFootHint');
+    if (!chip || !txt) return;
+    var on = meeting.state === 'gather' || meeting.state === 'meeting';
+    chip.classList.toggle('is-on', on);
+    chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    txt.textContent = meeting.state === 'gather' ? '회의실로 모이는 중' :
+      meeting.state === 'meeting' ? '회의 중 · 해산' : '회의 소집';
+    if (hint) {
+      hint.textContent = meeting.state === 'meeting' ? '회의실에 모여 안건을 보고 있어요 · 탭하면 해산' :
+        meeting.state === 'gather' ? '하나둘씩 회의실로 걸어가는 중이에요' :
+        meeting.state === 'return' ? '각자 자리로 돌아가는 중이에요' :
+        '캐릭터를 누르면 그 비서의 오늘 일정이 열려요';
+    }
+  }
+
+  function conveneToRoom(quiet) {
+    if (!state.motion) { toast('모션을 켜면 회의 장면이 보여요'); return; }
+    if (inMeeting()) {
+      if (meeting.state === 'meeting') extendMeeting();
+      return;
+    }
+    var act = activeParts();
+    if (!act.length) return;
+    meeting.state = 'gather';
+    meeting.attendees = act.map(function (p) { return p.id; });
+    meeting.seats = {};
+    var gen = (meeting.gatherGen += 1);
+    walker = null;
+    document.body.classList.add('is-meeting');
+    syncMeetChip();
+    var arrived = 0;
+    act.forEach(function (p, i) {
+      meeting.seats[p.id] = p.seat;
+      window.setTimeout(function () {
+        if (gen !== meeting.gatherGen) return;
+        walkPath(p.id, seatPath(p.id), function () {
+          if (gen !== meeting.gatherGen) return;
+          var el = spriteEls[p.id];
+          if (el) el.classList.add('is-seated');
+          popEmoji(p.id);
+          arrived += 1;
+          if (arrived === meeting.attendees.length) beginMeeting(gen);
+        });
+      }, i * 260);
+    });
+    if (!quiet) toast(act.length + '명이 회의실로 모여요');
+  }
+
+  function beginMeeting(gen) {
+    if (gen !== meeting.gatherGen) return;
+    meeting.state = 'meeting';
+    syncMeetChip();
+    startMeetingTalk();
+    window.clearTimeout(meeting.endTimer);
+    meeting.endTimer = window.setTimeout(function () { dismissMeeting(); }, 36000 + Math.random() * 12000);
+  }
+
+  function startMeetingTalk() {
+    window.clearInterval(meeting.talkTimer);
+    var turn = 0;
+    function talk() {
+      if (meeting.state !== 'meeting' || document.hidden || ui.sheet) return;
+      var ids = meeting.attendees;
+      if (!ids.length) return;
+      var id = ids[turn % ids.length];
+      turn += 1;
+      var el = spriteEls[id];
+      if (!el) return;
+      state.focus = id;
+      focusHold = Date.now();
+      refreshFocus();
+      placeBubble(id, true, pickMood(id));
+      el.classList.add('is-talking');
+      window.setTimeout(function () { el.classList.remove('is-talking'); }, 2100);
+      if (Math.random() < 0.55) popEmoji(id);
+    }
+    talk();
+    meeting.talkTimer = window.setInterval(talk, 2900);
+  }
+
+  function extendMeeting() {
+    window.clearTimeout(meeting.endTimer);
+    meeting.endTimer = window.setTimeout(function () { dismissMeeting(); }, 34000);
+  }
+
+  function dismissMeeting(silent) {
+    if (meeting.state === 'idle' || meeting.state === 'return') return;
+    window.clearInterval(meeting.talkTimer);
+    window.clearTimeout(meeting.endTimer);
+    meeting.state = 'return';
+    var gen = (meeting.gatherGen += 1);
+    var ids = meeting.attendees.slice();
+    document.body.classList.remove('is-meeting');
+    syncMeetChip();
+    ids.forEach(function (id, i) {
+      var el = spriteEls[id];
+      if (el) el.classList.remove('is-seated', 'is-talking');
+      window.setTimeout(function () {
+        if (gen !== meeting.gatherGen) return;
+        walkPath(id, backPath(id), function () {
+          if (gen !== meeting.gatherGen) return;
+          startTyping(id, 2200 + Math.random() * 1800);
+        });
+      }, i * 220);
+    });
+    window.setTimeout(function () {
+      if (gen !== meeting.gatherGen) return;
+      meeting.state = 'idle';
+      meeting.attendees = [];
+      meeting.seats = {};
+      syncMeetChip();
+      if (!silent && state.motion) placeBubble(state.focus, true);
+    }, 5400);
+    if (!silent) toast('회의를 마치고 각자 자리로 돌아가요');
   }
 
   /* ---------------------------------------------------------
@@ -1518,6 +1796,7 @@
     }
     toast('할 일을 추가했어요');
     if (!ui.sheet) showMood(partId, ['focus', 'hype']);
+    conveneToRoom(true);
   }
 
   function addAgenda(title) {
@@ -1529,6 +1808,7 @@
     renderHeader();
     if (ui.sheet) renderSheet();
     toast('안건을 올렸어요');
+    conveneToRoom(true);
   }
 
   function toggleTask(id) {
@@ -1550,6 +1830,9 @@
     renderAgenda();
     renderHeader();
     if (ui.sheet) renderSheet();
+    var hit = null;
+    state.agenda.forEach(function (a) { if (a.id === id) hit = a; });
+    if (hit && hit.done && state.motion) dismissMeeting(true);
   }
 
   function removeTask(id) {
@@ -1661,6 +1944,15 @@
       setMotion(!state.motion);
       toast(state.motion ? '모션을 켰어요' : '모션을 껐어요');
     });
+
+    var chip = $('#meetChip');
+    if (chip) {
+      chip.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (meeting.state === 'meeting' || meeting.state === 'gather') dismissMeeting();
+        else conveneToRoom();
+      });
+    }
 
     $('#tabs').addEventListener('click', function (e) {
       var btn = e.target.closest('.tab');
@@ -1892,6 +2184,7 @@
     fxResize();
     applyEnv();
     loadWeather();
+    syncMeetChip();
     window.setInterval(applyEnv, 60000);
     window.setInterval(loadWeather, 30 * 60 * 1000);
 

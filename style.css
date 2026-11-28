@@ -443,6 +443,78 @@ body.motion .toggle__dot { transform: translateX(16px); }
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .35));
 }
 
+/* 자리에서 타자를 칠 때의 불빛 — 키보드 불빛·모니터 빛·손끝 점 */
+.sprite__glow,
+.sprite__keys,
+.sprite__tap {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.sprite__glow {
+  left: 50%;
+  top: 4%;
+  width: 132%;
+  height: 74%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 46%, rgba(150, 205, 255, .42) 0%, rgba(150, 205, 255, 0) 68%);
+  mix-blend-mode: screen;
+  transition: opacity .45s ease;
+}
+
+.sprite__keys {
+  left: 50%;
+  bottom: .5%;
+  width: 54%;
+  height: 4.5%;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #fff6d6, #ffcb74);
+  box-shadow: 0 0 7px 1px rgba(255, 194, 92, .85);
+}
+
+.sprite__tap {
+  left: 50%;
+  bottom: 4%;
+  width: 36%;
+  height: 10%;
+  transform: translateX(-50%);
+}
+
+.sprite__tap::before,
+.sprite__tap::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 1px;
+  background: rgba(255, 252, 240, .95);
+  box-shadow: 0 0 4px rgba(255, 238, 196, .95);
+}
+.sprite__tap::before { left: 16%; bottom: 0; }
+.sprite__tap::after { right: 16%; bottom: 18%; }
+
+.sprite.is-typing .sprite__keys { animation: keysTap .34s steps(2, end) infinite; }
+.sprite.is-typing .sprite__glow { opacity: .8; animation: glowBreathe 3.2s ease-in-out infinite; }
+.sprite.is-typing .sprite__tap::before { animation: tapDot .34s steps(2, end) infinite; }
+.sprite.is-typing .sprite__tap::after { animation: tapDot .34s steps(2, end) infinite .17s; }
+
+@keyframes keysTap {
+  0%, 100% { opacity: .3; }
+  50% { opacity: 1; }
+}
+@keyframes glowBreathe {
+  0%, 100% { opacity: .45; }
+  50% { opacity: .85; }
+}
+@keyframes tapDot {
+  0% { opacity: 0; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-3px); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
 .sprite svg.mini-char { width: 100%; height: auto; display: block; }
 
 .sprite[data-part="gpt"] .sprite__inner { animation-duration: 5.1s; }
@@ -456,10 +528,9 @@ body.motion .toggle__dot { transform: translateX(16px); }
 }
 
 @keyframes spriteType {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-1px) rotate(-1.4deg); }
-  50% { transform: translateY(0) rotate(1.2deg); }
-  75% { transform: translateY(-1px) rotate(-.6deg); }
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(-.7px, -.7px); }
+  66% { transform: translate(.7px, -.2px); }
 }
 
 @keyframes spriteWalk {
@@ -468,8 +539,23 @@ body.motion .toggle__dot { transform: translateX(16px); }
 }
 
 .sprite.is-typing .sprite__inner {
-  animation: spriteType .62s steps(2, end) infinite;
+  animation: spriteType .26s steps(1, end) infinite;
 }
+
+/* 회의실에 앉았을 때 — 살짝 작아지고 천천히 몸을 흔들며, 말할 때 끄덕인다 */
+@keyframes seatSway {
+  0%, 100% { transform: translateY(0) rotate(-.7deg); }
+  50% { transform: translateY(-1px) rotate(.7deg); }
+}
+@keyframes talkNod {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(-1.4deg); }
+  55% { transform: translateY(0) rotate(1.1deg); }
+}
+
+.sprite.is-seated .sprite__inner { animation: seatSway 3.6s ease-in-out infinite; }
+.sprite.is-seated .sprite__shadow { transform: translateX(-50%) scale(.9); opacity: .78; }
+.sprite.is-seated.is-talking .sprite__inner { animation: talkNod .85s ease-in-out 2; }
 
 .sprite.is-walk .sprite__inner {
   animation: spriteWalk .34s ease-in-out infinite;
@@ -537,6 +623,43 @@ body.motion .toggle__dot { transform: translateX(16px); }
 }
 
 /* environment chip + preview panel */
+
+/* meeting chip — 오피스맵 왼쪽 위 작은 컨트롤 */
+.meet-chip {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px 5px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .85);
+  background: rgba(255, 253, 248, .82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 14px -10px rgba(60, 44, 24, .9);
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #4a4237;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+.meet-chip__ico { font-size: 11px; line-height: 1; }
+.meet-chip.is-on {
+  background: #eef3ff;
+  border-color: #d3e0ff;
+  color: #3e5aa8;
+  box-shadow: 0 0 0 2px rgba(120, 160, 230, .16), 0 8px 16px -10px rgba(60, 44, 24, .9);
+}
+.meet-chip.is-on .meet-chip__ico { animation: meetPulse 1.6s ease-in-out infinite; }
+@keyframes meetPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
 
 .env-chip {
   position: absolute;
@@ -629,7 +752,12 @@ body.motion .toggle__dot { transform: translateX(16px); }
 }
 
 body.no-motion .sprite__inner,
-body.no-motion .sprite__emoji { animation: none !important; }
+body.no-motion .sprite__emoji,
+body.no-motion .sprite__keys,
+body.no-motion .sprite__glow,
+body.no-motion .sprite__tap::before,
+body.no-motion .sprite__tap::after,
+body.no-motion .meet-chip__ico { animation: none !important; }
 body.no-motion .sprite { transition: none; }
 
 /* name tags */
@@ -654,7 +782,8 @@ body.no-motion .sprite { transition: none; }
   font-weight: 800;
   color: var(--ink);
   white-space: nowrap;
-  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+  transition: left .8s cubic-bezier(.42, .02, .5, 1), top .8s cubic-bezier(.42, .02, .5, 1),
+              transform .2s ease, box-shadow .2s ease, background .2s ease;
 }
 
 .tag__dot {
