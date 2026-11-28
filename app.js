@@ -867,14 +867,14 @@
     var h = c.height;
     fxParts = [];
     if (kind === 'rain') {
-      for (var i = 0; i < 64; i += 1) {
-        fxParts.push({ x: Math.random() * w, y: Math.random() * h, s: 210 + Math.random() * 160,
-          l: 7 + Math.random() * 7, a: 0.28 + Math.random() * 0.3 });
+      for (var i = 0; i < 84; i += 1) {
+        fxParts.push({ x: Math.random() * w, y: Math.random() * h, s: 240 + Math.random() * 180,
+          l: 8 + Math.random() * 8, a: 0.42 + Math.random() * 0.34 });
       }
     } else if (kind === 'snow') {
-      for (var j = 0; j < 46; j += 1) {
-        fxParts.push({ x: Math.random() * w, y: Math.random() * h, s: 18 + Math.random() * 22,
-          r: 1 + Math.random() * 1.1, d: Math.random() * Math.PI * 2, a: 0.5 + Math.random() * 0.4 });
+      for (var j = 0; j < 54; j += 1) {
+        fxParts.push({ x: Math.random() * w, y: Math.random() * h, s: 16 + Math.random() * 20,
+          r: 1.4 + Math.random() * 1.4, d: Math.random() * Math.PI * 2, a: 0.62 + Math.random() * 0.36 });
       }
     }
   }
@@ -889,7 +889,7 @@
     fxCtx.clearRect(0, 0, w, h);
 
     if (fxKind === 'rain') {
-      fxCtx.strokeStyle = 'rgba(214,234,255,.6)';
+      fxCtx.strokeStyle = 'rgba(226,242,255,.85)';
       fxCtx.lineWidth = 1;
       for (var i = 0; i < fxParts.length; i += 1) {
         var p = fxParts[i];
