@@ -1976,7 +1976,7 @@
     var sheet = $('#sheetWrap .sheet');
     var btn = $('#helpBtn');
     if (sheet) sheet.classList.toggle('sheet--guide', !!(ui.sheet && ui.sheet.type === 'help'));
-    if (btn) btn.setAttribute('aria-expanded', 'true');
+    if (btn) btn.setAttribute('aria-expanded', (ui.sheet && ui.sheet.type === 'help') ? 'true' : 'false');
     window.clearTimeout(closeTimer);
     wrap.hidden = false;
     document.body.style.overflow = 'hidden';
