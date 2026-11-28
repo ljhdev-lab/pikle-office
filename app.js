@@ -1322,6 +1322,8 @@
     } else {
       resetMotion();
       setTypingAllOff();
+      var b = $('#mapBubble');
+      if (b) b.hidden = true;
     }
     refreshFxRun();
   }
@@ -1484,7 +1486,7 @@
   function bind() {
     $('#motionBtn').addEventListener('click', function () {
       setMotion(!state.motion);
-      toast(state.motion ? '말풍선을 켰어요' : '말풍선을 껐어요');
+      toast(state.motion ? '모션을 켰어요' : '모션을 껐어요');
     });
 
     $('#tabs').addEventListener('click', function (e) {
