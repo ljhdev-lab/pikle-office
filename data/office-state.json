@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-28T16:55:00+09:00",
+  "updatedAt": "2026-11-28T17:58:00+09:00",
   "brief": "오늘은 비서실 모니터링 화면을 정리하고, 남은 일감과 토큰 잔여를 한 번 훑어요.",
   "boost": { "claude": false },
   "tokens": {
@@ -108,6 +108,14 @@
       "id": "chat-1128-token-plan",
       "title": "AI 토큰 체력 추정 차감·회복 로직 추가",
       "owner": "claude",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-icon",
+      "title": "비서실 심플 픽셀 앱 아이콘 교체",
+      "owner": "gemini",
       "done": true,
       "date": "11.28",
       "source": "chat"
