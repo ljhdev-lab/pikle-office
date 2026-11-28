@@ -785,6 +785,8 @@
     var i = 0;
     el.classList.add('is-walk');
     el.classList.remove('is-seated', 'is-talking', 'is-typing');
+    var tagEl = $('.tag[data-part="' + id + '"]');
+    if (tagEl) tagEl.classList.remove('is-seated');
     window.clearTimeout(typeTimer[id]);
 
     function next() {
@@ -906,6 +908,8 @@
       window.clearTimeout(walkTimer[id]);
       window.clearTimeout(typeTimer[id]);
       el.classList.remove('is-walk', 'is-typing', 'is-seated', 'is-talking');
+      var tagEl = $('.tag[data-part="' + id + '"]');
+      if (tagEl) tagEl.classList.remove('is-seated');
       el.style.transitionDuration = '0s';
       el.style.left = p.home[0] + '%';
       el.style.top = p.home[1] + '%';
@@ -981,6 +985,8 @@
           if (gen !== meeting.gatherGen) return;
           var el = spriteEls[p.id];
           if (el) el.classList.add('is-seated');
+          var tag = $('.tag[data-part="' + p.id + '"]');
+          if (tag) tag.classList.add('is-seated');
           popEmoji(p.id);
           arrived += 1;
           if (arrived === meeting.attendees.length) beginMeeting(gen);

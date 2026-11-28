@@ -796,7 +796,7 @@ body.no-motion .sprite { transition: none; }
   color: var(--ink);
   white-space: nowrap;
   transition: left .8s cubic-bezier(.42, .02, .5, 1), top .8s cubic-bezier(.42, .02, .5, 1),
-              transform .2s ease, box-shadow .2s ease, background .2s ease;
+              transform .2s ease, box-shadow .2s ease, background .2s ease, opacity .35s ease;
 }
 
 .tag__dot {
@@ -814,6 +814,9 @@ body.no-motion .sprite { transition: none; }
 }
 
 .tag.is-off { opacity: .55; }
+
+/* 회의실에 앉았을 때는 이름표를 잠시 숨겨 캐릭터와 테이블이 가려지지 않게 */
+.tag.is-seated { opacity: 0; transform: translate(-50%, -50%) scale(.9); }
 
 /* hotspots */
 
