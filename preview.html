@@ -15,8 +15,11 @@
 <div class="wrap">
   <div>
     <p class="cap">390×844</p>
-    <div class="phone"><iframe id="f" src="./index.html?preview=1&amp;t=1795836426" title="미리보기"></iframe></div>
+    <div class="phone"><iframe id="f" title="미리보기"></iframe></div>
   </div>
 </div>
+<script>
+  document.getElementById('f').src = './index.html?preview=1&t=' + Date.now();
+</script>
 </body>
 </html>
