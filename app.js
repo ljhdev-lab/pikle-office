@@ -1973,7 +1973,7 @@
     }
     if (name === 'map') window.requestAnimationFrame(function () {
       autosize($('#todayLine'));
-      PARTS.forEach(function (p) { if (state.motion && isActive(p.id)) placeBubble(p.id, false); });
+      syncBubble();     /* 숨어 있는 동안에도 대사가 바뀌었을 수 있어 자리만 다시 잡는다 */
     });
   }
 
