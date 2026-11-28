@@ -94,7 +94,7 @@
     { id: 'grok', room: '트렌드·속보실', name: '그록', role: 'X · 실시간 트렌드 · 직설 요약', task: '트렌드·요약',
       color: '#4b5163', deep: '#2c303a', soft: '#eceef3',
       dot: 'conic-gradient(from 200deg, #3a3f4a, #9aa1b1, #3a3f4a)',
-      home: [69.5, 89.5], seat: 'L3', w: 15.0, tag: [69.5, 75.9], bubble: [69.5, 73.2], tail: 'down', delay: 2.4,
+      home: [69.5, 89.5], seat: 'L3', w: 13.5, tag: [69.5, 75.9], bubble: [69.5, 73.2], tail: 'down', delay: 2.4,
       meet: [50, 84, 'up'],
       paces: [[74.4, 90.4], [64.8, 89.8]], emoji: ['⚡', '📈', '🔥'],
       persona: '직설과 유쾌함으로 실시간 트렌드를 긁어 오는 트렌드 담당 · X에서 지금 뜨는 걸 제일 먼저 캐치',
@@ -303,7 +303,7 @@
         gpt: { status: '새 글 기획안 쓰는 중', active: true, boost: false, quota: defaultQuota('gpt') },
         claude: { status: '자료 조사해서 정리 중', active: true, boost: false, quota: defaultQuota('claude') },
         gemini: { status: '표지 이미지 다듬는 중', active: true, boost: false, quota: defaultQuota('gemini') },
-        grok: { status: 'X에서 지금 뜨는 것 훑는 중', active: true, boost: false, quota: defaultQuota('grok') }
+        grok: { status: 'X 트렌드 훑는 중', active: true, boost: false, quota: defaultQuota('grok') }
       },
       agenda: [],
       tasks: [],
@@ -1033,9 +1033,12 @@
       '<g fill="none" stroke="' + color + '" stroke-width="4.6" stroke-linecap="butt" shape-rendering="crispEdges">' +
         '<path d="M35.6 14.5A15 15 0 0 0 13.7 34.6"/>' +
         '<path d="M16.4 37.5A15 15 0 0 0 37.5 16.4"/>' +
-        '<path d="M27.6 23.4L45.4 4.6" stroke-width="5.4"/>' +
-        '<path d="M24.4 28.6L6.6 47.4" stroke-width="5.4"/>' +
+        '<path d="M32 19.2L47.2 3.4" stroke-width="5.2"/>' +
+        '<path d="M20 32.8L4.8 48.6" stroke-width="5.2"/>' +
       '</g>' +
+      '<rect x="17.4" y="22.2" width="3.4" height="3.4" fill="' + color + '"/>' +
+      '<rect x="24.6" y="22.2" width="3.4" height="3.4" fill="' + color + '"/>' +
+      '<rect x="20.6" y="29.6" width="4.2" height="1.7" fill="' + color + '"/>' +
       '</svg>';
   }
 
