@@ -19,7 +19,7 @@
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
       color: '#6790d0', deep: '#4a68a6', soft: '#eaf1fb',
       home: [47.5, 42.2], seat: 'L1', w: 17.0, tag: [47.5, 27.8], bubble: [47.5, 25.4], tail: 'down', delay: 0,
-      meet: [26.5, 44.5, 'down'],
+      meet: [25, 44, 'down'],
       paces: [[43.2, 43.2], [52.4, 43.4]], emoji: ['🗂', '✨', '☕'],
       persona: '당차고 야무진 주디 홉스 스타일 — 오늘 할 일부터 챙기는 비서실장',
       moods: [
@@ -37,7 +37,7 @@
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
       color: '#52b394', deep: '#2f8a6e', soft: '#e6f7f0',
       home: [20.4, 60.2], seat: 'L2', w: 15.4, tag: [20.4, 46.6], bubble: [20.4, 43.9], tail: 'down', delay: 0.6,
-      meet: [39.5, 55.0, 'right'],
+      meet: [31, 76.2, 'up'],
       paces: [[24.6, 62.8], [15.8, 62.4]], emoji: ['💡', '✍', '✨'],
       persona: '아이디어가 샘솟는 텐션 높은 기획자 · 숫자로 기획안을 다듬는 열정 만렙',
       moods: [
@@ -55,7 +55,7 @@
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
       color: '#e27f5f', deep: '#b25a3a', soft: '#fdeee7',
       home: [76.6, 60.2], seat: 'R1', w: 15.0, tag: [76.6, 46.8], bubble: [76.6, 44.1], tail: 'down', delay: 1.2,
-      meet: [68.5, 44.5, 'down'],
+      meet: [72, 44, 'down'],
       paces: [[71.8, 62.8], [81.4, 62.4]], emoji: ['🔎', '📄', '🧩'],
       persona: '차분하고 꼼꼼한 분석가 · 근거 없으면 작게 한숨 쉬고 끝까지 확인',
       moods: [
@@ -74,7 +74,7 @@
       color: '#6f8fe0', deep: '#5a6bb8', soft: '#eef1fb',
       dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
       home: [18.6, 88.4], seat: 'R2', w: 15.0, tag: [18.6, 74.8], bubble: [18.6, 72.1], tail: 'down', delay: 1.8,
-      meet: [62.5, 53.9, 'left'],
+      meet: [69, 76.2, 'up'],
       paces: [[24.8, 90.6], [12.2, 90.2]], emoji: ['🎨', '🖼', '✨'],
       persona: '1px도 놓치지 않는 감각적인 아트 디렉터 겸 깐깐한 최종 검수자',
       moods: [
@@ -718,7 +718,8 @@
       var tx = Math.max(13, Math.min(bw - 13, ax - left));
       el.style.setProperty('--tail-x', tx + 'px');
     } else {
-      left = spot.tail === 'left' ? cx - bw - gap : cx + gap;
+      /* 꼬리 방향은 꼬리가 붙은 쪽 — 'right' 꼬리면 말풍선은 캐릭터 왼쪽에 선다 */
+      left = spot.tail === 'right' ? cx - bw - gap : cx + gap;
       top = cy - bh / 2;
       left = Math.max(pad, Math.min(sw - bw - pad, left));
       top = Math.max(pad, Math.min(sh - bh - pad, top));
