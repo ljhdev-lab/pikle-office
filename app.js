@@ -280,6 +280,7 @@
       tasks: [],
       chatSyncedAt: 0,
       chatSyncedLabel: '',
+      /* 예전 버전에서 지운 채팅 항목 기억 — 지금은 화면에서 지우지 않으므로 참고용으로만 남긴다 */
       dismissedChatIds: [],
       demoCleared: false,
       updatedAt: now
@@ -555,7 +556,6 @@
       if (!row || typeof row !== 'object') return;
       if (row.source && row.source !== 'chat') return;
       if (typeof row.id !== 'string' || !row.id) return;
-      if (state.dismissedChatIds.indexOf(row.id) >= 0) return;
       var title = typeof row.title === 'string' ? row.title.trim().slice(0, 80) : '';
       if (!title) return;
       var part = PART_MAP[row.owner] ? row.owner : 'byeol';
