@@ -641,6 +641,7 @@
   ];
   var WEATHER_LABEL = { clear: '맑음', cloudy: '흐림', rain: '비', snow: '눈' };
   var WEATHER_ICON = { clear: '☀', cloudy: '☁', rain: '☂', snow: '❄' };
+  var NIGHT_ICON = { clear: '☾', cloudy: '☁', rain: '☂', snow: '❄' };
   var PHASE_LABEL = { dawn: '아침', day: '낮', sunset: '노을', night: '밤' };
 
   function hexToRgb(hex) {
@@ -662,8 +663,8 @@
     var sr = env.sunrise;
     var ss = env.sunset;
     var raw = [
-      { t: sr - 2.2, sky: [18, 26, 50], wash: '#1d2748', op: 0.62 },
-      { t: sr - 0.7, sky: [56, 56, 92], wash: '#4a4472', op: 0.48 },
+      { t: sr - 2.2, sky: [16, 23, 46], wash: '#1a2344', op: 0.70 },
+      { t: sr - 0.7, sky: [52, 52, 88], wash: '#433d6c', op: 0.52 },
       { t: sr + 0.1, sky: [198, 134, 124], wash: '#ffbf94', op: 0.30 },
       { t: sr + 0.9, sky: [250, 198, 152], wash: '#ffd6a8', op: 0.18 },
       { t: sr + 2.6, sky: [190, 218, 240], wash: '#fff4e4', op: 0.07 },
@@ -672,8 +673,8 @@
       { t: ss - 0.5, sky: [252, 182, 120], wash: '#ffb27a', op: 0.22 },
       { t: ss + 0.4, sky: [214, 124, 112], wash: '#ff9a72', op: 0.30 },
       { t: ss + 1.4, sky: [70, 66, 110], wash: '#6a5a86', op: 0.44 },
-      { t: ss + 2.6, sky: [24, 32, 60], wash: '#232c4e', op: 0.58 },
-      { t: ss + 4.0, sky: [18, 26, 50], wash: '#1d2748', op: 0.62 }
+      { t: ss + 2.6, sky: [22, 30, 58], wash: '#1f2848', op: 0.66 },
+      { t: ss + 4.0, sky: [16, 23, 46], wash: '#1a2344', op: 0.70 }
     ];
     raw.sort(function (a, b) { return a.t - b.t; });
     var out = [];
@@ -794,15 +795,15 @@
       var lights = [];
       monitors.forEach(function (m) {
         lights.push('radial-gradient(circle at ' + m[0] + '% ' + m[1] + '%, rgba(150,205,255,' +
-          (0.55 * d + 0.06).toFixed(2) + ') 0%, rgba(120,180,240,' + (0.22 * d).toFixed(2) + ') 22%, rgba(90,140,210,0) 46%)');
+          (0.40 * d + 0.03).toFixed(2) + ') 0%, rgba(120,180,240,' + (0.14 * d).toFixed(2) + ') 17%, rgba(90,140,210,0) 33%)');
       });
       PARTS.forEach(function (p) {
         if (!isActive(p.id)) return;
-        lights.push('radial-gradient(circle at ' + p.home[0] + '% ' + (p.home[1] - 3) + '%, rgba(255,214,150,' +
-          (0.30 * d).toFixed(2) + ') 0%, rgba(255,200,120,0) 26%)');
+        lights.push('radial-gradient(circle at ' + p.home[0] + '% ' + (p.home[1] - 4) + '%, rgba(255,208,140,' +
+          (0.17 * d).toFixed(2) + ') 0%, rgba(255,200,120,0) 17%)');
       });
       lampEl.style.backgroundImage = lights.join(',');
-      lampEl.style.opacity = d > 0.05 ? (0.35 + 0.65 * d).toFixed(2) : '0';
+      lampEl.style.opacity = d > 0.05 ? (0.2 + 0.8 * d).toFixed(2) : '0';
     }
 
     var orb = $('#skyOrb');
@@ -838,7 +839,7 @@
     var txt = $('#envText');
     if (txt) txt.textContent = label + tempTxt;
     var ico = $('#envIcon');
-    if (ico) ico.textContent = WEATHER_ICON[kind];
+    if (ico) ico.textContent = (phase === 'night' ? NIGHT_ICON : WEATHER_ICON)[kind];
 
     setFx(kind);
   }
