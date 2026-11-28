@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-28T15:42:00+09:00",
+  "updatedAt": "2026-11-28T15:48:00+09:00",
   "tokens": {
     "byeol": { "pct": 17, "basis": "estimate", "asOf": "2026-11-28T15:37:00+09:00", "reset": "매일 04:00" },
     "gpt": { "pct": 92, "basis": "estimate", "asOf": "2026-11-28T15:35:00+09:00", "reset": "마지막 사용 5시간 뒤" },
@@ -68,9 +68,17 @@
     },
     {
       "id": "chat-1128-sync",
-      "title": "비서실 채팅 작업 동기화 구조 정리",
+      "title": "비서실 공개 JSON 기반 채팅 작업 연동 구현",
       "owner": "byeol",
-      "done": false,
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
+    {
+      "id": "chat-1128-token-plan",
+      "title": "AI 토큰 체력 추정 차감·회복 로직 추가",
+      "owner": "claude",
+      "done": true,
       "date": "11.28",
       "source": "chat"
     },
