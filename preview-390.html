@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>390×844 검증</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #ddd; }
+  #f { display: block; width: 390px; height: 844px; border: 0; background: #fff; }
+</style>
+</head>
+<body>
+<iframe id="f" src="index.html?v=35&pv=1"></iframe>
+<script>
+window.__errors = [];
+(function () {
+  var f = document.getElementById('f');
+  var first = true;
+  f.addEventListener('load', function () {
+    if (first) {
+      first = false;
+      try {
+        f.contentWindow.addEventListener('error', function (e) {
+          window.__errors.push('error: ' + (e.message || e.type));
+        });
+        f.contentWindow.addEventListener('unhandledrejection', function (e) {
+          window.__errors.push('rejection: ' + e.reason);
+        });
+      } catch (e) {}
+      f.src = f.src;
+    }
+  });
+})();
+
+function rect(el, base) {
+  var r = el.getBoundingClientRect();
+  var b = base.getBoundingClientRect();
+  return {
+    l: +(r.left - b.left).toFixed(1),
+    t: +(r.top - b.top).toFixed(1),
+    w: +r.width.toFixed(1),
+    h: +r.height.toFixed(1),
+    r: +(r.right - b.left).toFixed(1),
+    b: +(r.bottom - b.top).toFixed(1)
+  };
+}
+
+function overlap(a, b) {
+  var w = Math.min(a.r, b.r) - Math.max(a.l, b.l);
+  var h = Math.min(a.b, b.b) - Math.max(a.t, b.t);
+  if (w <= 0 || h <= 0) return 0;
+  return +(w * h).toFixed(0);
+}
+
+window.__measure = function () {
+  var w = document.getElementById('f').contentWindow;
+  var d = w.document;
+  var stage = d.getElementById('mapStage');
+  var sr = stage.getBoundingClientRect();
+  var out = {
+    viewport: w.innerWidth + '×' + w.innerHeight,
+    stage: { w: Math.round(sr.width), h: Math.round(sr.height) },
+    docScrollW: d.scrollingElement.scrollWidth,
+    motion: d.body.classList.contains('motion'),
+    meeting: !!d.body.classList.contains('is-meeting'),
+    bubbles: [],
+    tags: [],
+    overlaps: [],
+    errors: window.__errors.slice()
+  };
+  var list = [];
+  Array.prototype.forEach.call(d.querySelectorAll('.bubble[data-part]'), function (el) {
+    var box = rect(el, stage);
+    var row = {
+      part: el.getAttribute('data-part'),
+      hidden: el.hidden,
+      cls: el.className,
+      text: el.querySelector('.bubble__txt') ? el.querySelector('.bubble__txt').textContent : '',
+      box: box
+    };
+    out.bubbles.push(row);
+    if (!el.hidden) list.push(row);
+  });
+  Array.prototype.forEach.call(d.querySelectorAll('.tag[data-part]'), function (el) {
+    var op = parseFloat(w.getComputedStyle(el).opacity);
+    out.tags.push({ part: el.getAttribute('data-part'), opacity: op, box: rect(el, stage) });
+  });
+  for (var i = 0; i < list.length; i += 1) {
+    for (var j = i + 1; j < list.length; j += 1) {
+      var ov = overlap(list[i].box, list[j].box);
+      if (ov > 0) out.overlaps.push([list[i].part, list[j].part, ov]);
+    }
+    var tb = 0;
+    out.tags.forEach(function (t) {
+      if (t.opacity > 0.1) tb += overlap(list[i].box, t.box);
+    });
+    list[i].tagOverlap = tb;
+    var bx = list[i].box;
+    list[i].outOfStage = bx.l < -0.5 || bx.t < -0.5 || bx.r > out.stage.w + 0.5 || bx.b > out.stage.h + 0.5;
+  }
+  out.visible = list.length;
+  return out;
+};
+</script>
+</body>
+</html>

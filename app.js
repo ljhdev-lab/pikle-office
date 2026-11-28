@@ -12,11 +12,14 @@
   /* 좌표는 assets/office-map-v5.webp (864×1152, 3:4) 안의 위치를 % 로 적은 값.
      home 은 캐릭터 **발바닥 중앙**, tag·bubble 은 머리 위 라벨/말풍선 기준점이다.
      w 는 무대 가로 대비 캐릭터 폭. seat 은 회의실에서 앉는 자리 키다.
+     meet 은 회의실에 앉았을 때 말풍선이 설 자리 [x%, y%, 꼬리방향] — 좌석이
+     가까워 머리 위에 그대로 두면 넷이 겹치므로, 좌석 바깥(위·왼쪽·오른쪽)으로 뻗는다.
      이미지를 바꾸면 이 값만 다시 맞추면 된다. */
   var PARTS = [
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
       color: '#6790d0', deep: '#4a68a6', soft: '#eaf1fb',
       home: [47.5, 42.2], seat: 'L1', w: 17.0, tag: [47.5, 27.8], bubble: [47.5, 25.4], tail: 'down', delay: 0,
+      meet: [26.5, 44.5, 'down'],
       paces: [[43.2, 43.2], [52.4, 43.4]], emoji: ['🗂', '✨', '☕'],
       persona: '당차고 야무진 주디 홉스 스타일 — 오늘 할 일부터 챙기는 비서실장',
       moods: [
@@ -34,6 +37,7 @@
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
       color: '#52b394', deep: '#2f8a6e', soft: '#e6f7f0',
       home: [20.4, 60.2], seat: 'L2', w: 15.4, tag: [20.4, 46.6], bubble: [20.4, 43.9], tail: 'down', delay: 0.6,
+      meet: [39.5, 55.0, 'right'],
       paces: [[24.6, 62.8], [15.8, 62.4]], emoji: ['💡', '✍', '✨'],
       persona: '아이디어가 샘솟는 텐션 높은 기획자 · 숫자로 기획안을 다듬는 열정 만렙',
       moods: [
@@ -51,6 +55,7 @@
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
       color: '#e27f5f', deep: '#b25a3a', soft: '#fdeee7',
       home: [76.6, 60.2], seat: 'R1', w: 15.0, tag: [76.6, 46.8], bubble: [76.6, 44.1], tail: 'down', delay: 1.2,
+      meet: [68.5, 44.5, 'down'],
       paces: [[71.8, 62.8], [81.4, 62.4]], emoji: ['🔎', '📄', '🧩'],
       persona: '차분하고 꼼꼼한 분석가 · 근거 없으면 작게 한숨 쉬고 끝까지 확인',
       moods: [
@@ -69,6 +74,7 @@
       color: '#6f8fe0', deep: '#5a6bb8', soft: '#eef1fb',
       dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
       home: [18.6, 88.4], seat: 'R2', w: 15.0, tag: [18.6, 74.8], bubble: [18.6, 72.1], tail: 'down', delay: 1.8,
+      meet: [62.5, 53.9, 'left'],
       paces: [[24.8, 90.6], [12.2, 90.2]], emoji: ['🎨', '🖼', '✨'],
       persona: '1px도 놓치지 않는 감각적인 아트 디렉터 겸 깐깐한 최종 검수자',
       moods: [
@@ -270,9 +276,9 @@
   var saveTimer = null;
   var toastTimer = null;
   var closeTimer = null;
-  var bubbleTimer = null;
-  var focusHold = 0;
-  var bubbleTurn = 0;
+  var bubbleTimers = {};
+  var bubbleTurn = {};
+  var bubbleEls = {};
   var lastMood = {};
   var uidCount = 0;
 
@@ -442,15 +448,13 @@
     return rows[rows.length - 1].m;
   }
 
-  /* 할 일을 마쳤을 때처럼 특정 감정을 골라 머리 위에 잠깐 띄운다. */
+  /* 할 일을 마쳤을 때처럼 특정 감정을 골라 머리 위에 잠깐 띄운다.
+     그 캐릭터의 말풍선만 바뀎고, 다른 캐릭터의 말풍선은 그대로 둔다. */
   function showMood(partId, want) {
     if (!state.motion || document.hidden || ui.sheet || inMeeting()) return;
-    if (!PART_MAP[partId]) return;
+    if (!PART_MAP[partId] || !isActive(partId)) return;
     var mood = pickMood(partId, want);
     if (!mood) return;
-    state.focus = partId;
-    focusHold = Date.now();
-    refreshFocus();
     placeBubble(partId, true, mood);
   }
 
@@ -597,8 +601,12 @@
         '<span class="tag__name">' + esc(p.name) + '</span></span>';
     }).join('');
 
-    return tags + '<span class="bubble" id="mapBubble" hidden><span class="bubble__ico" hidden></span>' +
-      '<span class="bubble__txt"></span></span>';
+    return tags + PARTS.map(function (p) {
+      /* 말풍선은 넷이 각자 하나씩 — 한 번에 하나만 돌아가며 뜨지 않고
+         가동 중인 캐릭터의 머리 위에 4개가 동시에 떠 있다. */
+      return '<span class="bubble bubble--down bubble--status" data-part="' + p.id + '" hidden>' +
+        '<span class="bubble__ico" hidden></span><span class="bubble__txt"></span></span>';
+    }).join('');
   }
 
   function spriteHTML(p) {
@@ -651,29 +659,87 @@
     return [pt[0], pt[1] - (p.home[1] - p[which][1]) * k];
   }
 
-  function clampBubble(el, x, y) {
-    el.style.left = x + '%';
-    el.style.top = y.toFixed(2) + '%';
+  function bubbleElsReady() {
+    bubbleEls = {};
+    $$('.bubble[data-part]').forEach(function (el) {
+      bubbleEls[el.getAttribute('data-part')] = el;
+    });
+  }
+
+  /* 말풍선이 설 자리 — 책상 앞에서는 그 캐릭터의 머리 위를 따라가고,
+     회의실에 앉으면 좌석 바깥으로 뻗은 자리(PARTS[].meet)를 쓴다.
+     ax·ay 는 꼬리가 가리킬 캐릭터 머리 좌표(%)다. */
+  function bubbleSpot(partId) {
+    var p = PART_MAP[partId];
+    var el = spriteEls[partId];
+    var head = anchorOf(partId, 'bubble');
+    var seated = !!(el && el.classList.contains('is-seated'));
+    var spot = seated && p.meet ? p.meet : null;
+    return {
+      x: spot ? spot[0] : head[0],
+      y: spot ? spot[1] : head[1],
+      tail: spot ? spot[2] : 'down',
+      ax: head[0],
+      ay: head[1]
+    };
+  }
+
+  /* 말풍선을 무대 안에 두고, 잘려서 밀렸을 때도 꼬리가 캐릭터를 가리키게 한다. */
+  function moveBubble(partId, dur) {
+    var el = bubbleEls[partId];
     var stage = $('#mapStage');
-    if (!stage || !el.offsetWidth) return;
+    if (!el || el.hidden || !stage) return;
     var sw = stage.clientWidth;
+    var sh = stage.clientHeight;
+    if (!sw || !sh) return;
+    var spot = bubbleSpot(partId);
     var bw = el.offsetWidth;
-    var cx = sw * x / 100;
-    var half = bw / 2 + 6;
-    if (cx < half) el.style.left = (half / sw * 100) + '%';
-    else if (cx > sw - half) el.style.left = ((sw - half) / sw * 100) + '%';
+    var bh = el.offsetHeight;
+    if (dur == null) el.style.transitionDuration = '';
+    else el.style.transitionDuration = dur + 's';
+    if (!bw || !bh) {
+      el.style.left = spot.x + '%';
+      el.style.top = spot.y + '%';
+      return;
+    }
+    var cx = sw * spot.x / 100;
+    var cy = sh * spot.y / 100;
+    var ax = sw * spot.ax / 100;
+    var ay = sh * spot.ay / 100;
+    var pad = 3;
+    var gap = 5;   /* 머리와 말풍선 사이 여백 */
+    var left;
+    var top;
+    if (spot.tail === 'down' || spot.tail === 'up') {
+      left = cx - bw / 2;
+      top = spot.tail === 'down' ? cy - bh - gap : cy + gap;
+      left = Math.max(pad, Math.min(sw - bw - pad, left));
+      top = Math.max(pad, Math.min(sh - bh - pad, top));
+      var tx = Math.max(13, Math.min(bw - 13, ax - left));
+      el.style.setProperty('--tail-x', tx + 'px');
+    } else {
+      left = spot.tail === 'left' ? cx - bw - gap : cx + gap;
+      top = cy - bh / 2;
+      left = Math.max(pad, Math.min(sw - bw - pad, left));
+      top = Math.max(pad, Math.min(sh - bh - pad, top));
+      var ty = Math.max(11, Math.min(bh - 11, ay - top));
+      el.style.setProperty('--tail-y', ty + 'px');
+    }
+    el.style.left = left + 'px';
+    el.style.top = top + 'px';
   }
 
   /* mood 를 주지 않으면 지금 상태 문구(할 일 안내) 말풍선이 뜨고,
-     mood 를 주면 감정 아이콘과 함께 감정 말풍선이 뜬다. */
+     mood 를 주면 감정 아이콘과 함께 감정 말풍선이 뜬다.
+     캐릭터마다 자기 말풍선 하나만 건드린다. */
   function placeBubble(partId, animate, mood) {
-    var el = $('#mapBubble');
-    if (!el) return;
+    var el = bubbleEls[partId];
     var p = PART_MAP[partId];
-    if (!p) { el.hidden = true; return; }
+    if (!el || !p) return;
+    if (!state.motion || !isActive(partId)) { el.hidden = true; return; }
     var emo = mood && EMOTIONS[mood.e] ? EMOTIONS[mood.e] : null;
-    var a = anchorOf(partId, 'bubble');
-    el.className = 'bubble bubble--' + p.tail + (isActive(partId) ? '' : ' is-off') +
+    var spot = bubbleSpot(partId);
+    el.className = 'bubble bubble--' + spot.tail +
       (emo ? ' bubble--mood m-' + emo.cls : ' bubble--status');
     var ico = $('.bubble__ico', el);
     if (ico) {
@@ -682,7 +748,7 @@
     }
     $('.bubble__txt', el).textContent = emo ? mood.t : statusOf(partId);
     el.hidden = false;
-    clampBubble(el, a[0], a[1]);
+    moveBubble(partId, animate ? null : 0);
     if (animate) {
       el.classList.remove('is-pop');
       void el.offsetWidth;
@@ -690,7 +756,19 @@
     }
   }
 
-  /* 이름표를 캐릭터 위치에 맞춰 옮기고, 그 캐릭터 말풍선이 떠 있으면 함께 옮긴다. */
+  /* 가동 중인 캐릭터 넷의 말풍선을 한꺼번에 띄운다(휴식 중인 캐릭터는 숨김). */
+  function renderBubbles(animate) {
+    PARTS.forEach(function (p) {
+      if (state.motion && isActive(p.id)) placeBubble(p.id, !!animate);
+      else if (bubbleEls[p.id]) bubbleEls[p.id].hidden = true;
+    });
+  }
+
+  function hideBubbles() {
+    Object.keys(bubbleEls).forEach(function (id) { bubbleEls[id].hidden = true; });
+  }
+
+  /* 이름표를 캐릭터 위치에 맞춰 옮기고, 그 캐릭터 말풍선도 함께 옮긴다. */
   function syncAnchor(id, dur) {
     var p = PART_MAP[id];
     if (!p) return;
@@ -701,44 +779,80 @@
       tag.style.left = pt[0] + '%';
       tag.style.top = (pt[1] - (p.home[1] - p.tag[1])).toFixed(2) + '%';
     }
-    var b = $('#mapBubble');
-    if (b && !b.hidden && state.focus === id) {
-      var a = anchorOf(id, 'bubble');
-      b.style.transitionDuration = (dur == null ? 0.4 : dur) + 's';
-      clampBubble(b, a[0], a[1]);
-    }
+    moveBubble(id, dur == null ? 0.4 : dur);
   }
 
+  /* 위치만 다시 잡는다(말풍선 내용은 그대로). */
   function syncBubble() {
-    if (!state.motion) { var b = $('#mapBubble'); if (b) b.hidden = true; return; }
-    placeBubble(state.focus, true);
+    if (!state.motion || document.hidden) { hideBubbles(); return; }
+    PARTS.forEach(function (p) { moveBubble(p.id, 0); });
   }
 
   function refreshFocus() {
-    $$('.tag').forEach(function (tag, i) {
-      tag.classList.toggle('is-focus', PARTS[i] && PARTS[i].id === state.focus);
+    /* 이름표 강조는 그 비서의 방이 열려 있을 때만 */
+    var openId = ui.sheet && ui.sheet.type === 'part' ? ui.sheet.id : null;
+    $$('.tag').forEach(function (tag) {
+      var id = tag.getAttribute('data-part');
+      tag.classList.toggle('is-focus', !!id && id === openId);
     });
     Object.keys(spriteEls).forEach(function (id) {
-      spriteEls[id].classList.toggle('is-focus', id === state.focus);
+      spriteEls[id].classList.toggle('is-focus', id === openId);
     });
   }
 
+  /* ---------------------------------------------------------
+     말풍선 대사 교체 — 넷이 각자 다른 박자로 자기 대사를 바꾼다
+     (4.6~6.9초, 회의 중에는 3.2~5.2초). 한꺼번에 바뀌지 않는다.
+     --------------------------------------------------------- */
+
+  var BUBBLE_CADENCE = {
+    desk: { byeol: 4600, gpt: 5300, claude: 6100, gemini: 6900 },
+    meet: { byeol: 3200, gpt: 3900, claude: 4600, gemini: 5300 }
+  };
+
+  function bubbleCadence(partId) {
+    var row = meeting.state === 'meeting' ? BUBBLE_CADENCE.meet : BUBBLE_CADENCE.desk;
+    return row[partId] || 5200;
+  }
+
+  function stopBubbleLoop() {
+    Object.keys(bubbleTimers).forEach(function (id) { window.clearTimeout(bubbleTimers[id]); });
+    bubbleTimers = {};
+  }
+
+  function bubbleTick(partId) {
+    var base = bubbleCadence(partId);
+    var wait = base * (0.85 + Math.random() * 0.32);
+    bubbleTimers[partId] = window.setTimeout(function () { bubbleTick(partId); }, wait);
+
+    if (!state.motion || document.hidden || ui.sheet) return;
+    if (!isActive(partId)) {
+      if (bubbleEls[partId]) bubbleEls[partId].hidden = true;
+      return;
+    }
+    if (meeting.state === 'meeting') {
+      /* 회의 중 — 각자 자기 박자로 한마디씩, 말할 때 살짝 끄덕인다 */
+      placeBubble(partId, true, pickMood(partId));
+      var sp = spriteEls[partId];
+      if (sp && sp.classList.contains('is-seated')) {
+        sp.classList.add('is-talking');
+        window.setTimeout(function () { sp.classList.remove('is-talking'); }, 1500);
+        if (Math.random() < 0.3) popEmoji(partId);
+      }
+      return;
+    }
+    bubbleTurn[partId] = (bubbleTurn[partId] || 0) + 1;
+    /* 상태 문구 ↔ 감정 말풍선을 번갈아 띄운다 */
+    placeBubble(partId, true, bubbleTurn[partId] % 2 === 0 ? null : pickMood(partId));
+  }
+
   function startBubbleLoop() {
-    window.clearInterval(bubbleTimer);
-    bubbleTimer = window.setInterval(function () {
-      if (!state.motion || document.hidden || ui.sheet || inMeeting()) return;
-      if (Date.now() - focusHold < 14000) return;
-      var act = activeParts();
-      if (!act.length) return;
-      var i = act.map(function (p) { return p.id; }).indexOf(state.focus);
-      var next = act[(i + 1) % act.length];
-      if (next.id === state.focus && act.length > 1) next = act[(i + 2) % act.length];
-      state.focus = next.id;
-      bubbleTurn += 1;
-      /* 상태 문구 ↔ 감정 말풍선을 번갈아 띄운다 */
-      refreshFocus();
-      placeBubble(state.focus, true, bubbleTurn % 2 === 0 ? null : pickMood(state.focus));
-    }, 5200);
+    stopBubbleLoop();
+    PARTS.forEach(function (p) {
+      /* 캐릭터마다 첫 대사 시점도 조금씩 다르게 — 넷이 동시에 깜빡이지 않게 */
+      var first = bubbleCadence(p.id) * (0.15 + Math.random() * 0.35);
+      bubbleTimers[p.id] = window.setTimeout(function () { bubbleTick(p.id); }, first);
+    });
   }
 
   /* ---------------------------------------------------------
@@ -758,7 +872,6 @@
     attendees: [],
     seats: {},
     gatherGen: 0,
-    talkTimer: null,
     endTimer: null
   };
 
@@ -935,7 +1048,6 @@
     meeting.state = 'idle';
     meeting.attendees = [];
     meeting.gatherGen += 1;
-    window.clearInterval(meeting.talkTimer);
     window.clearTimeout(meeting.endTimer);
     document.body.classList.remove('is-meeting');
     syncMeetChip();
@@ -1003,6 +1115,8 @@
           if (el) el.classList.add('is-seated');
           var tag = $('.tag[data-part="' + p.id + '"]');
           if (tag) tag.classList.add('is-seated');
+          /* 앉은 자리 기준 말풍선 자리로 옮긴다 */
+          moveBubble(p.id, 0.4);
           popEmoji(p.id);
           arrived += 1;
           if (arrived === meeting.attendees.length) beginMeeting(gen);
@@ -1016,32 +1130,11 @@
     if (gen !== meeting.gatherGen) return;
     meeting.state = 'meeting';
     syncMeetChip();
-    startMeetingTalk();
+    /* 넷이 각자 자기 박자로 대사를 바꾸며 회의한다 — 말풍선은 넷 다 계속 떠 있다 */
+    startBubbleLoop();
+    renderBubbles(false);
     window.clearTimeout(meeting.endTimer);
     meeting.endTimer = window.setTimeout(function () { dismissMeeting(); }, 36000 + Math.random() * 12000);
-  }
-
-  function startMeetingTalk() {
-    window.clearInterval(meeting.talkTimer);
-    var turn = 0;
-    function talk() {
-      if (meeting.state !== 'meeting' || document.hidden || ui.sheet) return;
-      var ids = meeting.attendees;
-      if (!ids.length) return;
-      var id = ids[turn % ids.length];
-      turn += 1;
-      var el = spriteEls[id];
-      if (!el) return;
-      state.focus = id;
-      focusHold = Date.now();
-      refreshFocus();
-      placeBubble(id, true, pickMood(id));
-      el.classList.add('is-talking');
-      window.setTimeout(function () { el.classList.remove('is-talking'); }, 2100);
-      if (Math.random() < 0.55) popEmoji(id);
-    }
-    talk();
-    meeting.talkTimer = window.setInterval(talk, 2900);
   }
 
   function extendMeeting() {
@@ -1051,7 +1144,6 @@
 
   function dismissMeeting(silent) {
     if (meeting.state === 'idle' || meeting.state === 'return') return;
-    window.clearInterval(meeting.talkTimer);
     window.clearTimeout(meeting.endTimer);
     meeting.state = 'return';
     var gen = (meeting.gatherGen += 1);
@@ -1075,7 +1167,7 @@
       meeting.attendees = [];
       meeting.seats = {};
       syncMeetChip();
-      if (!silent && state.motion) placeBubble(state.focus, true);
+      if (state.motion) { renderBubbles(false); startBubbleLoop(); }
     }, 5400);
     if (!silent) toast('회의를 마치고 각자 자리로 돌아가요');
   }
@@ -1551,8 +1643,9 @@
     if (!overlay) return;
     renderSprites();
     overlay.innerHTML = overlayHTML();
+    bubbleElsReady();
     refreshFocus();
-    syncBubble();
+    renderBubbles(false);
   }
 
   function crewHTML(p) {
@@ -1780,11 +1873,14 @@
       var s = card.querySelector('.crew-card__status');
       if (s && id) s.textContent = statusOf(id);
     });
-    var b = $('#mapBubble');
-    if (b && !b.classList.contains('bubble--mood')) {
+    /* 상태 문구를 보여 주는 중인 말풍선은 글자만 바로 바꾸고 자리를 다시 잡는다 */
+    Object.keys(bubbleEls).forEach(function (id) {
+      var b = bubbleEls[id];
+      if (!b || b.hidden || b.classList.contains('bubble--mood')) return;
       var btxt = $('.bubble__txt', b);
-      if (btxt) btxt.textContent = statusOf(state.focus);
-    }
+      if (btxt) btxt.textContent = statusOf(id);
+      moveBubble(id, 0.2);
+    });
   }
 
   /* ---------------------------------------------------------
@@ -1794,11 +1890,9 @@
   function openRoom(id) {
     if (!PART_MAP[id]) return;
     state.focus = id;
-    focusHold = Date.now();
     save();
     ui.sheet = { type: 'part', id: id };
     refreshFocus();
-    placeBubble(id, true);
     renderSheet();
     var wrap = $('#sheetWrap');
     window.clearTimeout(closeTimer);
@@ -1813,6 +1907,7 @@
     wrap.classList.remove('is-open');
     document.body.style.overflow = '';
     ui.sheet = null;
+    refreshFocus();
     window.clearTimeout(closeTimer);
     closeTimer = window.setTimeout(function () { wrap.hidden = true; }, 340);
   }
@@ -1875,7 +1970,10 @@
       save();
       window.scrollTo(0, 0);
     }
-    if (name === 'map') window.requestAnimationFrame(function () { autosize($('#todayLine')); });
+    if (name === 'map') window.requestAnimationFrame(function () {
+      autosize($('#todayLine'));
+      PARTS.forEach(function (p) { if (state.motion && isActive(p.id)) placeBubble(p.id, false); });
+    });
   }
 
   function setMotion(on) {
@@ -1886,12 +1984,13 @@
     $('#motionState').textContent = state.motion ? 'ON' : 'OFF';
     save();
     if (state.motion) {
-      syncBubble();
+      renderBubbles(false);
+      startBubbleLoop();
     } else {
       resetMotion();
       setTypingAllOff();
-      var b = $('#mapBubble');
-      if (b) b.hidden = true;
+      stopBubbleLoop();
+      hideBubbles();
     }
     refreshFxRun();
   }
@@ -2241,10 +2340,13 @@
       fxResize();
       seedFx(fxKind);
       refreshFxRun();
+      PARTS.forEach(function (p) { moveBubble(p.id, 0); });
     });
 
     document.addEventListener('visibilitychange', function () {
-      if (!document.hidden && state.motion) placeBubble(state.focus, false);
+      if (!document.hidden && state.motion) {
+        PARTS.forEach(function (p) { if (isActive(p.id)) placeBubble(p.id, false); });
+      }
       refreshFxRun();
     });
 

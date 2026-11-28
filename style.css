@@ -881,62 +881,60 @@ body.no-motion .sprite { transition: none; }
   box-shadow: 0 0 0 2px rgba(255, 255, 255, .3);
 }
 
-/* speech bubble */
+/* speech bubble — 넷이 각자 하나씩 띄우므로 좁은 무대에서도 서로 가리지 않게 컴팩트 */
 
 .bubble {
   position: absolute;
   z-index: 30;
-  max-width: 122px;
-  padding: 7px 10px;
-  border-radius: 13px;
+  max-width: 112px;
+  padding: 6px 9px;
+  border-radius: 12px;
   background: rgba(255, 253, 248, .97);
   border: 1px solid #f0e6d7;
-  box-shadow: 0 10px 20px -12px rgba(96, 74, 40, .75);
-  font-size: 11px;
+  box-shadow: 0 8px 16px -11px rgba(96, 74, 40, .8);
+  font-size: 10.5px;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--ink);
   text-align: center;
   pointer-events: none;
   word-break: keep-all;
+  transition: left .4s cubic-bezier(.42, .02, .5, 1), top .4s cubic-bezier(.42, .02, .5, 1),
+              opacity .3s ease;
 }
 
-.bubble--down { transform: translate(-50%, -100%); margin-top: -6px; }
-.bubble--up { transform: translate(-50%, 0); margin-top: 6px; }
-.bubble--right { transform: translate(0, -50%); }
-.bubble--left { transform: translate(-100%, -50%); }
-
+/* 꼬리 방향은 클래스로만 정하고, 위치·꼬리 끝점은 JS 가 px 로 잡아 준다 */
 .bubble::after {
   content: "";
   position: absolute;
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   background: inherit;
   border: inherit;
   border-width: 0 1px 1px 0;
 }
 .bubble--down::after {
-  left: 50%;
-  bottom: -6px;
+  left: var(--tail-x, 50%);
+  bottom: -5px;
   transform: translateX(-50%) rotate(45deg);
   border-radius: 0 0 3px 0;
 }
 .bubble--up::after {
-  left: 50%;
-  top: -6px;
+  left: var(--tail-x, 50%);
+  top: -5px;
   transform: translateX(-50%) rotate(-135deg);
   border-radius: 0 0 3px 0;
 }
 .bubble--right::after {
   right: -5px;
   left: auto;
-  top: 50%;
+  top: var(--tail-y, 50%);
   transform: translateY(-50%) rotate(-45deg);
   border-radius: 0 0 3px 0;
 }
 .bubble--left::after {
   left: -5px;
-  top: 50%;
+  top: var(--tail-y, 50%);
   transform: translateY(-50%) rotate(135deg);
   border-radius: 0 0 3px 0;
 }
@@ -953,11 +951,11 @@ body.no-motion .sprite { transition: none; }
 .bubble--mood {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  max-width: 138px;
-  padding: 6px 10px 6px 7px;
+  gap: 4px;
+  max-width: 118px;
+  padding: 5px 8px 5px 6px;
   text-align: left;
-  border-radius: 15px;
+  border-radius: 13px;
   background: var(--mood-bg, #fffdf8);
   border-color: var(--mood-line, #f0e6d7);
 }
@@ -966,15 +964,16 @@ body.no-motion .sprite { transition: none; }
   flex: none;
   display: grid;
   place-items: center;
-  width: 17px;
-  height: 17px;
-  border-radius: 9px;
+  width: 15px;
+  height: 15px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .92);
   box-shadow: inset 0 0 0 1px rgba(120, 96, 60, .1);
-  font-size: 10.5px;
+  font-size: 9.5px;
   line-height: 1;
 }
 .bubble__ico[hidden] { display: none; }
+.bubble[hidden] { display: none; }
 .bubble--mood .bubble__txt { flex: 1; min-width: 0; }
 
 .bubble.m-idea   { --mood-bg: #fffaea; --mood-line: #f4e3b3; }
@@ -1778,8 +1777,8 @@ body.no-motion .sprite { transition: none; }
 @media (min-width: 480px) {
   .map-card { padding: 10px 10px 0; }
   .tag { font-size: 11.5px; }
-  .bubble { max-width: 170px; font-size: 11.5px; }
-  .bubble--mood { max-width: 190px; }
+  .bubble { max-width: 150px; font-size: 11.5px; }
+  .bubble--mood { max-width: 158px; }
 }
 
 @media (min-width: 700px) {
