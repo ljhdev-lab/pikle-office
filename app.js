@@ -2102,7 +2102,7 @@
       }
       if (q.pct != null && q.pct < 100 && now - q.lastUsedAt >= rule.hours * 3600000) {
         q.pct = 100;
-        q.est = true;
+        q.est = false;   /* 회복 시점의 100%는 짐작이 아니라 확정값 */
         q.checkedAt = q.lastUsedAt + rule.hours * 3600000;
         q.lastResetAt = q.checkedAt;
         return true;
@@ -2118,7 +2118,7 @@
       q.lastResetAt = b;
       if (q.pct != null && q.pct < 100) {
         q.pct = 100;
-        q.est = true;
+        q.est = false;   /* 회복 시점의 100%는 확정값 */
         q.checkedAt = b;
       }
       return true;
@@ -2865,7 +2865,7 @@
     $('#memo').value = state.memo;
     $('#nickInput').value = state.nick;
     $('#memoHint').textContent = '자동 저장';
-    refreshAllQuotas();
+    if (refreshAllQuotas()) save();
     renderAll();
     setTab(state.tab || 'map', true);
     applyEnv();
