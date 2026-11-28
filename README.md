@@ -55,7 +55,7 @@
 | `app.js` | 동기화, 상태 계산, 오피스맵 오버레이 좌표, 읽기 전용 렌더 |
 | `data/office-state.json` | 채팅에서 맡긴 일·안건·브리핑·토큰 잔여 (공개·비식별) |
 | `assets/office-map-v5.webp` | 캐릭터 없는 코지 픽셀아트 아이소메트릭 비서실 (864×1152, 창문 유리 알파) |
-| `icon.svg`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | 앱 아이콘 |
+| `icon.svg`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `assets/app-icon.png` | 앱 아이콘 — 36도트 그리드 픽셀 별이(3사 협의). `python3 tools/make_icons.py`로 재생성 |
 | `manifest.json` | 웹 앱 매니페스트 |
 | `tools/` | 아이콘·장면 미리보기용 개발 스크립트 (배포에는 필요 없음) |
 
