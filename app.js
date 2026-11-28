@@ -15,20 +15,20 @@
   var PARTS = [
     { id: 'byeol', room: '총괄 지휘실', name: '별이', role: '비서실장 · 총괄 지휘', task: '총괄',
       color: '#6790d0', deep: '#4a68a6', soft: '#eaf1fb',
-      home: [47.5, 46.4], w: 14.6, tag: [47.5, 32.2], bubble: [47.5, 30.6], tail: 'down', delay: 0,
+      home: [47.5, 46.4], w: 17.0, tag: [47.5, 31.6], bubble: [47.5, 29.2], tail: 'down', delay: 0,
       paces: [[42.6, 48.8], [53.0, 49.6]], emoji: ['🗂', '✨', '☕'] },
     { id: 'gpt', room: '콘텐츠·기획실', name: 'GPT', role: '콘텐츠 · 기획', task: '콘텐츠·기획',
       color: '#52b394', deep: '#2f8a6e', soft: '#e6f7f0',
-      home: [20.4, 60.2], w: 13.4, tag: [20.4, 47.2], bubble: [20.4, 45.4], tail: 'down', delay: 0.6,
+      home: [20.4, 60.2], w: 15.4, tag: [20.4, 46.6], bubble: [20.4, 43.9], tail: 'down', delay: 0.6,
       paces: [[24.6, 62.8], [15.8, 62.4]], emoji: ['💡', '✍', '✨'] },
     { id: 'claude', room: '조사·분석실', name: '클로드', role: '조사 · 분석 · 문서', task: '조사·분석',
       color: '#e27f5f', deep: '#b25a3a', soft: '#fdeee7',
-      home: [76.6, 60.2], w: 13.0, tag: [76.6, 47.4], bubble: [76.6, 45.6], tail: 'down', delay: 1.2,
+      home: [76.6, 60.2], w: 15.0, tag: [76.6, 46.8], bubble: [76.6, 44.1], tail: 'down', delay: 1.2,
       paces: [[71.8, 62.8], [81.4, 62.4]], emoji: ['🔎', '📄', '🧩'] },
     { id: 'gemini', room: '디자인·검수실', name: '제미나이', role: '디자인 · 검수 · 이미지', task: '디자인·검수',
       color: '#6f8fe0', deep: '#5a6bb8', soft: '#eef1fb',
       dot: 'conic-gradient(from 210deg, #ea4335, #fbbc04, #34a853, #4285f4, #ea4335)',
-      home: [18.6, 88.4], w: 13.0, tag: [18.6, 75.4], bubble: [18.6, 73.6], tail: 'down', delay: 1.8,
+      home: [18.6, 88.4], w: 15.0, tag: [18.6, 74.8], bubble: [18.6, 72.1], tail: 'down', delay: 1.8,
       paces: [[24.8, 90.6], [12.2, 90.2]], emoji: ['🎨', '🖼', '✨'] }
   ];
   var PART_MAP = {};
