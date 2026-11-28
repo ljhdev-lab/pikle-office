@@ -92,6 +92,32 @@
   var PART_MAP = {};
   PARTS.forEach(function (p) { PART_MAP[p.id] = p; });
 
+  /* 각 AI의 토큰(한도) 기본값 — 실제로 확인한 계정 상태를 그대로 옮긴다.
+     Claude(Pro): 2026-11-28 15:00 claude.ai › 설정 › 사용량 에서 주간 3% 사용
+     = 잔여 97% 를 확인해 pct 로 넣었다. 같은 화면의 현재 세션 10% 사용(잔여
+     90%)과 초기화 시각은 시트 안내문에 적는다.
+     ChatGPT(Free)·제미나이(무료)·별이(무료)는 정량 %를 화면에 주지 않아
+     숫자를 지어내지 않고 상태(plenty 여유 / ok 보통 / low 부족)로만 둔다. */
+  var QUOTA_DEFAULTS = {
+    byeol: { plan: '무료', pct: null, level: 'plenty' },
+    gpt: { plan: '무료', pct: null, level: 'plenty' },
+    claude: { plan: 'Pro', pct: 97, level: 'plenty', checkedAt: Date.parse('2026-11-28T15:00:00+09:00') },
+    gemini: { plan: '무료', pct: null, level: 'plenty' }
+  };
+
+  function defaultQuota(id) {
+    var q = QUOTA_DEFAULTS[id] || QUOTA_DEFAULTS.byeol;
+    return { plan: q.plan, pct: q.pct, level: q.level, checkedAt: q.checkedAt || 0 };
+  }
+
+  /* %가 없는 플랜에서 고를 수 있는 한도 상태 — 막대 길이와 색도 여기서 나온다. */
+  var QUOTA_LEVEL = {
+    plenty: { label: '여유', fill: 100, tone: 'high' },
+    ok: { label: '보통', fill: 62, tone: 'mid' },
+    low: { label: '부족', fill: 30, tone: 'low' }
+  };
+  var QUOTA_LEVEL_ORDER = ['plenty', 'ok', 'low'];
+
   /* 회의실 — v5 배경 가운데 유리 파티션 안의 좌석 4곳과, 각자 책상 앞에서
      그 좌석까지 걷는 경유점(발바닥 좌표 %). 가구와 유리벽을 뚫지 않도록
      통로를 따라 꺾어 가고, 마지막에 자기 좌석으로 붙는다. */
@@ -142,14 +168,14 @@
   var GUIDE = {
     map: {
       title: '오피스 맵',
-      core: '네 사람의 지금 상태를 한눈에 봐요.',
+      core: '네 사람의 상태와 토큰 체력을 한눈에 봐요.',
       steps: [
         '오늘의 한마디를 적으면 바로 저장돼요.',
-        '파티 칸에서 남은 일감과 게이지를 봐요.',
-        '칸이나 캐릭터를 누르면 그 비서 방이 열려요.'
+        '파티 칸에서 상태·토큰 잔여·남은 일감을 봐요.',
+        '칸을 눌러 토큰을 맞추고 클로드 부스터 모드를 켜요.'
       ],
-      routine: '아침에 한마디를 남기고 남은 일감을 확인해요.',
-      note: '회의 소집은 모션이 켜져 있을 때 장면이 보이고, 시간·날씨 칩은 미리보기예요.'
+      routine: '아침에 한마디를 남기고 토큰 잔여부터 확인해요.',
+      note: '체력바는 각 AI의 남은 토큰(한도)이에요. 30% 이하는 주황, 15% 이하는 빨강이고, 클로드 부스터 모드는 Opus로 고난도 작업을 맡길 때 켜요.'
     },
     meeting: {
       title: '회의실',
@@ -175,14 +201,14 @@
     },
     team: {
       title: '비서현황',
-      core: '비서별 상태와 가동을 정리해요.',
+      core: '비서별 상태·토큰·가동을 정리해요.',
       steps: [
         '카드에 한 줄 상태를 적어 둬요.',
-        '쉬게 할 비서는 가동 스위치를 꺼요.',
-        '[할 일 보기]로 맡은 일을 확인해요.'
+        '토큰 막대와 슬라이더로 잔여 한도를 맞춰요.',
+        '쉬게 할 비서는 가동 스위치를 꺼요.'
       ],
-      routine: '하루를 시작할 때 가동 여부와 진행 건수를 봐요.',
-      note: '휴식 중인 비서는 말풍선과 모션에서 빠져요.'
+      routine: '하루를 시작할 때 토큰 잔여와 진행 건수를 봐요.',
+      note: '클로드 카드의 ⚡ 부스터는 Opus 고난도 작업을 맡길 때 켜요.'
     },
     memo: {
       title: '메모·백업',
@@ -216,10 +242,10 @@
       tab: 'map',
       focus: 'byeol',
       parts: {
-        byeol: { status: '오늘 할 일 정리해 두었어요', active: true },
-        gpt: { status: '새 글 기획안 쓰는 중', active: true },
-        claude: { status: '자료 조사해서 정리 중', active: true },
-        gemini: { status: '표지 이미지 다듬는 중', active: true }
+        byeol: { status: '오늘 할 일 정리해 두었어요', active: true, boost: false, quota: defaultQuota('byeol') },
+        gpt: { status: '새 글 기획안 쓰는 중', active: true, boost: false, quota: defaultQuota('gpt') },
+        claude: { status: '자료 조사해서 정리 중', active: true, boost: false, quota: defaultQuota('claude') },
+        gemini: { status: '표지 이미지 다듬는 중', active: true, boost: false, quota: defaultQuota('gemini') }
       },
       agenda: [
         { id: 'a1', title: '이번 주 블로그 글 순서 정하기', done: false, at: now - 7200000 },
@@ -268,6 +294,15 @@
         if (!s || typeof s !== 'object') return;
         if (typeof s.status === 'string') base.parts[p.id].status = s.status.slice(0, 40);
         if (typeof s.active === 'boolean') base.parts[p.id].active = s.active;
+        if (typeof s.boost === 'boolean') base.parts[p.id].boost = s.boost;
+        var q = s.quota;
+        if (!q || typeof q !== 'object') return;
+        var tq = base.parts[p.id].quota;
+        if (typeof q.plan === 'string' && q.plan.trim()) tq.plan = q.plan.trim().slice(0, 12);
+        if (typeof q.pct === 'number' && isFinite(q.pct)) tq.pct = clamp(Math.round(q.pct), 0, 100);
+        else if (q.pct === null) tq.pct = null;
+        if (QUOTA_LEVEL[q.level]) tq.level = q.level;
+        if (typeof q.checkedAt === 'number' && q.checkedAt > 0) tq.checkedAt = q.checkedAt;
       });
     }
 
@@ -1734,8 +1769,11 @@
 
   /* ---------------------------------------------------------
      파티 도트 바 — 오피스 맵 위 4인 상태창
-     이름·상태점·남은 일감·오늘 일 진행 게이지를 한 칸에 담고,
-     누르면 그 비서의 방(시트)이 열린다.
+     이름·상태점·남은 일감과 함께, 게이지는 '남은 일감'이 아니라
+     각 AI의 토큰(사용 한도) 잔여를 보여 준다. 한도 %를 주는 계정
+     (클로드)은 실제 잔여 %, %가 없는 무료 플랜은 상태(여유·보통·부족)를
+     게이지 길이로 옮긴다. 30% 이하는 주황, 15% 이하는 빨강.
+     칸을 누르면 그 비서의 방(시트)이 열린다.
      --------------------------------------------------------- */
 
   var PARTY_STATE = {
@@ -1758,21 +1796,42 @@
     return 'on';
   }
 
-  /* 남은 일이 적을수록 게이지가 차오른다 — 0건이면 가득 */
-  function partyGauge(p) {
-    var open = tasksOf(p.id, false).length;
-    return Math.max(25, 100 - open * 22);
+  /* 남은 토큰 — pct 가 있으면 그 값이, 없으면 고른 상태가 게이지가 된다. */
+  function quotaOf(id) {
+    return (state.parts[id] && state.parts[id].quota) || defaultQuota(id);
+  }
+
+  function quotaView(q) {
+    if (q.pct == null) {
+      var lv = QUOTA_LEVEL[q.level] || QUOTA_LEVEL.plenty;
+      return { fill: lv.fill, tone: lv.tone, pct: null, text: lv.label };
+    }
+    var pct = clamp(Math.round(q.pct), 0, 100);
+    return { fill: pct, tone: pct <= 15 ? 'low' : pct <= 30 ? 'mid' : 'high', pct: pct, text: pct + '%' };
+  }
+
+  function boostOn(id) {
+    return !!(state.parts[id] && state.parts[id].boost);
+  }
+
+  /* 칸 아래 한 줄 — 'Pro 97%' / '무료 · 여유' */
+  function quotaLabel(q, v) {
+    return v.pct == null ? q.plan + ' · ' + v.text : q.plan + ' ' + v.text;
   }
 
   function partyCellHTML(p) {
     var key = partyStateOf(p.id);
     var meta = PARTY_STATE[key];
     var open = tasksOf(p.id, false).length;
-    return '<button class="pm" type="button" data-action="open-room" data-part="' + p.id +
-      '" data-state="' + key + '"' +
-      ' style="--c:' + p.color + ';--soft:' + p.soft + ';--edge:' + p.color + '55;--fill:' +
-        partyGauge(p) + '%"' +
-      ' aria-label="' + esc(p.name + ' ' + meta.long + ' · 남은 일 ' + open + '건 · 방 열기') + '">' +
+    var q = quotaOf(p.id);
+    var v = quotaView(q);
+    var boost = boostOn(p.id);
+    var aria = p.name + (boost ? ' 부스터 모드' : '') + ' ' + meta.long + ' · 토큰 ' +
+      (v.pct == null ? '무료 ' + v.text : v.text + ' 남음') + ' · 남은 일 ' + open + '건 · 방 열기';
+    return '<button class="pm' + (boost ? ' is-boost' : '') + '" type="button" data-action="open-room" data-part="' +
+      p.id + '" data-state="' + key + '" data-tone="' + v.tone + '"' +
+      ' style="--c:' + p.color + ';--soft:' + p.soft + ';--edge:' + p.color + '55;--fill:' + v.fill + '%"' +
+      ' aria-label="' + esc(aria) + '">' +
       '<span class="pm__top">' +
         '<span class="pm__ico">' + avatarSVG(p.id) + '</span>' +
         '<span class="pm__name">' + esc(p.name) + '</span>' +
@@ -1781,6 +1840,8 @@
       '<span class="pm__meta"><span class="pm__st">' + meta.label + '</span>' +
         '<span class="pm__n">' + open + '건</span></span>' +
       '<span class="pm__bar"><i></i></span>' +
+      '<span class="pm__tk"><span class="pm__tk-t">' + esc(quotaLabel(q, v)) + '</span>' +
+        (boost ? '<i class="pm__boost" aria-hidden="true">⚡ 부스터</i>' : '') + '</span>' +
     '</button>';
   }
 
@@ -1792,7 +1853,7 @@
     el.innerHTML = '<div class="party__frame"><div class="party__in">' +
       '<div class="party__head"><span class="party__title">비서 파티</span>' +
         '<span class="party__meta">' + (act ? act + '인 가동' : '전원 휴식') +
-        ' · 일감 ' + open + '건</span></div>' +
+        ' · 토큰 잔여</span></div>' +
       '<div class="party__row">' + PARTS.map(partyCellHTML).join('') + '</div>' +
     '</div></div>';
   }
@@ -1808,14 +1869,89 @@
       var key = partyStateOf(id);
       var meta = PARTY_STATE[key];
       var open = tasksOf(id, false).length;
+      var q = quotaOf(id);
+      var v = quotaView(q);
+      var boost = boostOn(id);
       cell.setAttribute('data-state', key);
-      cell.style.setProperty('--fill', partyGauge(p) + '%');
+      cell.setAttribute('data-tone', v.tone);
+      cell.style.setProperty('--fill', v.fill + '%');
+      cell.classList.toggle('is-boost', boost);
       var st = $('.pm__st', cell);
       if (st) st.textContent = meta.label;
       var n = $('.pm__n', cell);
       if (n) n.textContent = open + '건';
-      cell.setAttribute('aria-label', p.name + ' ' + meta.long + ' · 남은 일 ' + open + '건 · 방 열기');
+      var tk = $('.pm__tk-t', cell);
+      if (tk) tk.textContent = quotaLabel(q, v);
+      cell.setAttribute('aria-label', p.name + (boost ? ' 부스터 모드' : '') + ' ' + meta.long +
+        ' · 토큰 ' + (v.pct == null ? '무료 ' + v.text : v.text + ' 남음') + ' · 남은 일 ' + open + '건 · 방 열기');
     });
+  }
+
+  /* ---------------------------------------------------------
+     토큰 한도 패널 — 방 시트와 비서현황에서 같은 것을 쓴다.
+     %를 주는 계정은 슬라이더로 실제 잔여 %를 맞추고, 무료 플랜은
+     여유·보통·부족 셋 중 하나를 고른다.
+     --------------------------------------------------------- */
+
+  var QUOTA_HINT = {
+    claude: '11.28 15:00 claude.ai › 설정 › 사용량 확인: 이번 주 3% 사용(잔여 97%, 12.5 05:00 초기화) · 현재 세션 10% 사용(잔여 90%, 오늘 16:30 초기화). 바뀐 주간 잔여 %로 슬라이더를 맞춰 두세요.',
+    free: '무료 플랜은 사용량 %를 보여 주지 않아 지어내지 않고 상태로만 표시해요. 실제 한도가 화면에 뜨면 그만큼 여유·보통·부족을 골라 두세요.'
+  };
+
+  function quotaPanelHTML(p, compact) {
+    var q = quotaOf(p.id);
+    var v = quotaView(q);
+    var pctMode = q.pct != null;
+    var when = (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '직접 맞춤') + ' 값 · 주간 기준';
+    var controls;
+    if (pctMode) {
+      controls = '<input class="quota__range" type="range" min="0" max="100" step="1" value="' + v.pct +
+          '" data-quota="' + p.id + '" aria-label="' + esc(p.name) + ' 주간 잔여 토큰 %">' +
+        (compact ? '' : '<p class="quota__hint">' + esc(QUOTA_HINT[p.id] || QUOTA_HINT.free) + '</p>') +
+        '<div class="quota__foot">' +
+          '<a class="quota__btn" href="https://claude.ai/settings/usage" target="_blank" rel="noopener">사용량 열어 확인</a>' +
+          (QUOTA_DEFAULTS[p.id] && QUOTA_DEFAULTS[p.id].pct != null
+            ? '<button class="quota__btn" type="button" data-action="quota-default" data-part="' + p.id + '">' +
+              '측정값 ' + QUOTA_DEFAULTS[p.id].pct + '%로</button>'
+            : '') +
+        '</div>';
+    } else {
+      controls = '<div class="quota__levels">' + QUOTA_LEVEL_ORDER.map(function (k) {
+          var on = (q.level || 'plenty') === k;
+          return '<button class="quota__lv' + (on ? ' is-on' : '') + '" type="button" data-action="quota-level"' +
+            ' data-part="' + p.id + '" data-level="' + k + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
+            QUOTA_LEVEL[k].label + '</button>';
+        }).join('') + '</div>' +
+        (compact ? '' : '<p class="quota__hint">' + esc(QUOTA_HINT.free) + '</p>');
+    }
+    return '<div class="quota' + (compact ? ' quota--compact' : '') + '" data-quota-box="' + p.id + '">' +
+      '<div class="quota__head">' +
+        '<span class="quota__plan">' + esc(p.name) + ' · ' + esc(q.plan) + '</span>' +
+        '<span class="quota__num" data-quota-val="' + p.id + '">' +
+          esc(v.pct == null ? v.text : v.text + ' 남음') + '</span>' +
+      '</div>' +
+      '<div class="quota__bar" data-quota-bar="' + p.id + '" data-tone="' + v.tone + '">' +
+        '<i style="width:' + v.fill + '%"></i></div>' +
+      controls +
+      (pctMode ? '<p class="quota__when" data-quota-when="' + p.id + '">' + esc(when) + '</p>' : '') +
+    '</div>';
+  }
+
+  /* 클로드 부스터 모드 — Opus(상위 모델)로 고난도 작업을 맡길 때 켜는 스위치.
+     켜 두면 파티 칸이 금빛 배지로 바뀌고, 시트·비서현황에 설명이 남는다. */
+  function boostPanelHTML(p) {
+    var on = boostOn(p.id);
+    return '<div class="boost' + (on ? ' is-on' : '') + '">' +
+      '<div class="boost__top">' +
+        '<span class="boost__title"><i aria-hidden="true">⚡</i>부스터 모드</span>' +
+        '<button class="switch switch--boost" type="button" data-action="toggle-boost" data-part="' + p.id + '" ' +
+          'aria-pressed="' + (on ? 'true' : 'false') + '" aria-label="' + esc(p.name) + ' 부스터 모드"></button>' +
+      '</div>' +
+      '<p class="boost__desc">Opus 부스터 모드 · 고난도 분석/작성</p>' +
+      '<p class="boost__hint">' + (on
+        ? '켜져 있어요. 어려운 분석·긴 문서처럼 Opus가 필요한 지시는 ‘부스터 모드’라고 부르면 돼요.'
+        : '켜면 파티 칸에 ⚡ 부스터 배지가 붙어요. Opus로 고난도 분석·작성을 맡길 때 켜 두세요.') + '</p>' +
+    '</div>';
   }
 
   function taskItemHTML(t) {
@@ -1893,9 +2029,15 @@
       '<p class="agent__persona">' + esc(p.persona) + '</p>' +
       '<input class="agent__status" data-status="' + p.id + '" maxlength="40" value="' + esc(st.status) +
         '" aria-label="' + esc(p.name) + ' 상태 문구">' +
+      quotaPanelHTML(p, true) +
       '<div class="agent__foot">' +
         '<span class="pill-soft">' + (st.active ? '가동 중' : '휴식 중') + '</span>' +
         '<span class="pill-soft">진행 ' + n + '건</span>' +
+        (p.id === 'claude'
+          ? '<button class="boost-chip' + (boostOn(p.id) ? ' is-on' : '') + '" type="button" ' +
+            'data-action="toggle-boost" data-part="' + p.id + '" aria-pressed="' +
+            (boostOn(p.id) ? 'true' : 'false') + '">⚡ 부스터 ' + (boostOn(p.id) ? 'ON' : 'OFF') + '</button>'
+          : '') +
         '<button class="link" type="button" data-action="go-work" data-part="' + p.id + '">할 일 보기 →</button>' +
       '</div>' +
     '</article>';
@@ -2066,6 +2208,8 @@
     var p = PART_MAP[target.id];
     if (!p) return;
     var st = state.parts[p.id];
+    var q = quotaOf(p.id);
+    var v = quotaView(q);
     var list = tasksOf(p.id, true).sort(sortTask);
     var openN = list.filter(function (t) { return !t.done; }).length;
 
@@ -2081,6 +2225,10 @@
       '<label class="field"><span class="field__label">한 줄 상태</span>' +
         '<input class="input input--soft" data-status="' + p.id + '" maxlength="40" value="' + esc(st.status) +
           '" aria-label="상태 문구"></label>' +
+      '<div class="sheet__row"><h4 class="sheet__h4">토큰 한도</h4>' +
+        '<span class="sheet__count">' + esc(q.plan) + (v.pct == null ? ' · 상태 표시' : ' · 주간') + '</span></div>' +
+      quotaPanelHTML(p) +
+      (p.id === 'claude' ? boostPanelHTML(p) : '') +
       '<div class="sheet__row"><h4 class="sheet__h4">할 일</h4>' +
         '<span class="sheet__count">' + (openN ? openN + '건 진행 중' : '전부 정리됨') + '</span></div>' +
       (list.length
@@ -2221,8 +2369,62 @@
     toast('안건을 지웠어요');
   }
 
-  function toggleActive(id) {
+  /* 부스터 모드 토글 — 클로드만 쓴다(상위 모델 Opus 작업 표시) */
+  function toggleBoost(id) {
     if (!state.parts[id]) return;
+    var on = !state.parts[id].boost;
+    state.parts[id].boost = on;
+    save();
+    renderParty();
+    renderTeam();
+    if (ui.sheet) renderSheet();
+    toast(on ? PART_MAP[id].name + ' 부스터 모드 ON · Opus 고난도 작업'
+      : PART_MAP[id].name + ' 부스터 모드 OFF · 기본 모델');
+  }
+
+  function setQuotaLevel(id, level) {
+    if (!state.parts[id] || !QUOTA_LEVEL[level]) return;
+    state.parts[id].quota.level = level;
+    save();
+    renderParty();
+    renderTeam();
+    if (ui.sheet) renderSheet();
+    toast(PART_MAP[id].name + ' 한도 ' + QUOTA_LEVEL[level].label + '으로 표시');
+  }
+
+  /* 슬라이더는 끄는 동안 시트를 다시 그리지 않고 숫자·막대만 바로 고친다. */
+  function setQuotaPct(id, pct) {
+    if (!state.parts[id]) return;
+    state.parts[id].quota.pct = clamp(Math.round(pct), 0, 100);
+    state.parts[id].quota.checkedAt = Date.now();
+    saveSoon();
+    syncQuotaUI(id);
+  }
+
+  function syncQuotaUI(id) {
+    var q = quotaOf(id);
+    var v = quotaView(q);
+    syncPartyStates();
+    $$('[data-quota-val="' + id + '"]').forEach(function (el) {
+      el.textContent = v.pct == null ? v.text : v.text + ' 남음';
+    });
+    $$('[data-quota-bar="' + id + '"]').forEach(function (el) {
+      el.setAttribute('data-tone', v.tone);
+      var i = el.querySelector('i');
+      if (i) i.style.width = v.fill + '%';
+    });
+    $$('[data-quota-when="' + id + '"]').forEach(function (el) {
+      el.textContent = (q.checkedAt ? shortDate(q.checkedAt) + ' ' + timeLabel(q.checkedAt) : '직접 맞춤') +
+        ' 값 · 주간 기준';
+    });
+    /* 시트와 비서현황에 같은 슬라이더가 둘 있어, 끌고 있지 않은 쪽도 숫자를 맞춘다 */
+    if (v.pct != null) $$('input[data-quota="' + id + '"]').forEach(function (el) {
+      if (document.activeElement === el) return;
+      if (String(el.value) !== String(v.pct)) el.value = v.pct;
+    });
+  }
+
+  function toggleActive(id) {
     state.parts[id].active = !state.parts[id].active;
     save();
     renderMap();
@@ -2440,6 +2642,20 @@
         case 'toggle-active':
           toggleActive(el.getAttribute('data-part'));
           break;
+        case 'toggle-boost':
+          toggleBoost(el.getAttribute('data-part'));
+          break;
+        case 'quota-level':
+          setQuotaLevel(el.getAttribute('data-part'), el.getAttribute('data-level'));
+          break;
+        case 'quota-default':
+          var qid = el.getAttribute('data-part');
+          if (QUOTA_DEFAULTS[qid] && QUOTA_DEFAULTS[qid].pct != null) {
+            setQuotaPct(qid, QUOTA_DEFAULTS[qid].pct);
+            if (ui.sheet) renderSheet();
+            toast('측정한 주간 잔여로 맞췄어요');
+          }
+          break;
         case 'guide-tab':
           if (!ui.sheet || ui.sheet.type !== 'help') break;
           ui.sheet.gtab = el.getAttribute('data-gtab');
@@ -2484,6 +2700,11 @@
     document.addEventListener('input', function (e) {
       var t = e.target;
       if (!t || !t.getAttribute) return;
+      var qid = t.getAttribute('data-quota');
+      if (qid && state.parts[qid]) {
+        setQuotaPct(qid, parseFloat(t.value) || 0);
+        return;
+      }
       var id = t.getAttribute('data-status');
       if (!id || !state.parts[id]) return;
       state.parts[id].status = t.value.slice(0, 40);
