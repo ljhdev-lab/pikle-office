@@ -442,15 +442,21 @@
     return Number(m[1]) + '.' + Number(m[2]) + ' ' + m[3] + ':' + m[4];
   }
 
-  /* '11.28' 같은 날짜를 그날 09:00 으로 옮긴다. 오늘보다 한참 앞선
-     날짜면 지난해 일로 본다(연말에 연초 기록이 섞일 때). */
+  /* '11.28' 같은 날짜를 그날 09:00 으로 옮긴다. 연도가 적혀 있지 않으니
+     올해·지난해·내년 중 지금과 가장 가까운 날로 본다(12.01 예정 일감이
+     지난해로 밀리지 않게). */
   function chatTaskAt(dateStr, fallback, idx) {
     var m = /^(\d{1,2})\.(\d{1,2})$/.exec(dateStr || '');
     if (m) {
       var now = new Date();
-      var d = new Date(now.getFullYear(), Number(m[1]) - 1, Number(m[2]), 9, 0, 0, 0);
-      if (d.getTime() - now.getTime() > 172800000) d.setFullYear(d.getFullYear() - 1);
-      return d.getTime();
+      var nowTs = now.getTime();
+      var best = 0;
+      for (var k = -1; k <= 1; k++) {
+        var d = new Date(now.getFullYear() + k, Number(m[1]) - 1, Number(m[2]), 9, 0, 0, 0);
+        var ts = d.getTime();
+        if (!best || Math.abs(ts - nowTs) < Math.abs(best - nowTs)) best = ts;
+      }
+      return best;
     }
     return (fallback || Date.now()) - idx * 60000;
   }
