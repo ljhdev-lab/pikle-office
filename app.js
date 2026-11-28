@@ -219,14 +219,14 @@
     },
     work: {
       title: '작업실',
-      core: '채팅에서 맡긴 일의 진행 현황을 확인해요.',
+      core: '맡긴 일을 현재·예약·완료로 나눠 확인해요.',
       steps: [
-        '진행 중·완료 상태와 담당 비서, 날짜를 한 줄씩 봐요.',
-        '담당 칩으로 그 비서의 일만 골라 봐요.',
-        '값이 늦으면 새로고침을 눌러 다시 읽어요.'
+        '현재는 확인이 필요한 일과 진행 중인 일을 최신순으로 보여줘요.',
+        '예약은 단발·정기 일감을 임박한 순서로 보여줘요.',
+        '완료는 최근 3건만 보여주고, 더 보기로 펼쳐요.'
       ],
-      routine: '오전에 한 번, 저녁에 한 번 진행률을 확인해요.',
-      note: '여기는 보기만 하는 화면이에요. 일을 맡기거나 끝난 일을 정리하는 건 피클 채팅에서 해요. 💬 채팅 배지가 붙은 항목이 채팅에서 맡긴 일이에요.'
+      routine: '오전에 한 번, 저녁에 한 번 확인 필요 일과 진행률을 봐요.',
+      note: '배지는 진행 중(파랑)·확인 필요(주황)·단발·정기(보라)·완료(회색)예요. 예약 시각이 지났는데 끝나지 않은 일은 확인 필요로 올라오고, 정기는 다음 회차 시각으로 표기돼요. 진행률은 예약을 빼고 현재·완료로만 계산해요. 여기는 보기만 하는 화면이에요.'
     },
     team: {
       title: '비서현황',
@@ -244,6 +244,7 @@
       core: '현황판이 어디서 값을 받는지 확인해요.',
       steps: [
         '마지막 동기화 시각과 받은 작업·안건 수를 봐요.',
+        '작업실은 현재·예약(단발·정기)·완료로 나뉘어 보여요.',
         '새로고침을 누르면 최신 파일을 다시 읽어요.',
         '한도 회복 주기와 모니터링 사용법을 여기서 봐요.'
       ],
@@ -412,7 +413,7 @@
     state.motion = false;
   }
 
-  var ui = { filter: 'all', sheet: null };
+  var ui = { filter: 'all', sheet: null, moreSched: false, moreDone: false };
   var saveTimer = null;
   var toastTimer = null;
   var closeTimer = null;
@@ -473,6 +474,15 @@
       return best;
     }
     return (fallback || Date.now()) - idx * 60000;
+  }
+
+  /* 'YYYY-MM-DDTHH:MM' 형태의 예약 시각만 받아들인다. 형식이 어긋나면
+     예약 정보가 없는 것으로 보고 현재 일로 처리한다. */
+  function normalizeRunAt(v) {
+    if (typeof v !== 'string') return '';
+    var s = v.trim();
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) return '';
+    return isFinite(Date.parse(s)) ? s : '';
   }
 
   function mergeRemote(data) {
@@ -561,6 +571,10 @@
       var part = PART_MAP[row.owner] ? row.owner : 'byeol';
       var done = row.done === true;
       var date = typeof row.date === 'string' ? row.date.slice(0, 5) : '';
+      /* 예약 정보 — runAt 은 예정 시각, every 는 반복 주기(예: 매주).
+         둘 다 없으면 지금 하는 일로 본다. */
+      var runAt = normalizeRunAt(row.runAt);
+      var every = typeof row.every === 'string' ? row.every.trim().slice(0, 12) : '';
 
       var hit = null;
       state.tasks.forEach(function (t) { if (t.id === row.id) hit = t; });
@@ -571,6 +585,15 @@
         if (hit.title !== title) { hit.title = title; out.changed = true; }
         if (done && !hit.done) { hit.done = true; out.changed = true; }
         if (date && hit.date !== date) { hit.date = date; out.changed = true; }
+        /* 예약 필드는 파일이 정본이라 달라지면 그대로 맞춘다(정기 회차 갱신 포함). */
+        if ((hit.runAt || '') !== runAt) {
+          if (runAt) hit.runAt = runAt; else delete hit.runAt;
+          out.changed = true;
+        }
+        if ((hit.every || '') !== every) {
+          if (every) hit.every = every; else delete hit.every;
+          out.changed = true;
+        }
         return;
       }
 
@@ -581,6 +604,8 @@
         done: done,
         at: chatTaskAt(date, remoteAt, i),
         date: date,
+        runAt: runAt || undefined,
+        every: every || undefined,
         chat: true
       });
       out.added += 1;
@@ -603,17 +628,18 @@
     var el = $('#syncText');
     if (el) {
       el.textContent = label ? '채팅 동기화 · ' + label : '채팅 동기화 · 대기 중';
-      var n = state.tasks.filter(function (t) { return t.chat && !t.done; }).length;
+      var cb = taskBuckets(state.tasks.filter(function (t) { return t.chat; }));
       var cnt = $('#syncCount');
-      if (cnt) cnt.textContent = n ? n + '건 진행' : '모두 완료';
+      if (cnt) cnt.textContent = cb.current ? cb.current + '건 진행'
+        : (cb.sched ? '예약 ' + cb.sched + '건' : '모두 완료');
     }
 
-    var open = state.tasks.filter(function (t) { return !t.done; }).length;
-    var done = state.tasks.length - open;
+    var ib = taskBuckets(state.tasks);
     var when = $('#infoSyncWhen');
     if (when) when.textContent = label || '대기 중';
     var counts = $('#infoSyncCounts');
-    if (counts) counts.textContent = state.tasks.length ? '진행 ' + open + ' · 완료 ' + done : '없음';
+    if (counts) counts.textContent = state.tasks.length
+      ? '진행 ' + ib.current + ' · 예약 ' + ib.sched + ' · 완료 ' + ib.done : '없음';
 
     var openA = state.agenda.filter(function (a) { return !a.done; }).length;
     var agCounts = $('#infoAgendaCounts');
@@ -730,6 +756,70 @@
   function sortTask(a, b) {
     if (a.done !== b.done) return a.done ? 1 : -1;
     return (b.at || 0) - (a.at || 0);
+  }
+
+  /* ---------------------------------------------------------
+     작업실 구역 판정 — 현재 / 예약(단발·정기) / 완료
+     --------------------------------------------------------- */
+
+  var TASK_STATE = {
+    check:  { label: '확인 필요', cls: 'is-check' },
+    active: { label: '진행 중', cls: '' },
+    once:   { label: '단발', cls: 'is-sched' },
+    repeat: { label: '정기', cls: 'is-sched' },
+    done:   { label: '완료', cls: 'is-done' }
+  };
+
+  /* 한 구역에 기본으로 보여 주는 건수 — 나머지는 '더 보기'로 접는다. */
+  var GROUP_LIMIT = 3;
+
+  /* done 이면 완료, every 가 있으면 정기, runAt 이 미래면 단발,
+     runAt 이 지났는데 안 끝났으면 확인 필요, 나머지는 진행 중. */
+  function taskState(t) {
+    if (t && t.done === true) return 'done';
+    if (t && t.every) return 'repeat';
+    var ts = t && t.runAt ? Date.parse(t.runAt) : 0;
+    if (ts) return ts > Date.now() ? 'once' : 'check';
+    return 'active';
+  }
+
+  /* 오늘 날짜는 보는 기기의 시간대가 아니라 한국 시각(+09:00) 기준으로 센다. */
+  function kstToday() {
+    var d = new Date(Date.now() + 9 * 3600 * 1000);
+    return [d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()];
+  }
+
+  /* '오늘 21:00' 또는 '11.30(월) 09:10' — runAt 에 적힌 시각 그대로 보여 준다. */
+  function runAtView(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso || '');
+    if (!m) return '';
+    var y = Number(m[1]), mo = Number(m[2]), day = Number(m[3]);
+    var today = kstToday();
+    var wd = WEEK[new Date(Date.UTC(y, mo - 1, day)).getUTCDay()];
+    var head = (y === today[0] && mo === today[1] && day === today[2])
+      ? '오늘' : mo + '.' + pad2(day) + '(' + wd + ')';
+    return head + ' ' + m[4] + ':' + m[5];
+  }
+
+  /* 예약 일감의 예정 표기 — 정기는 다음 회차와 주기를 함께 보여 준다. */
+  function schedLabel(t) {
+    var when = runAtView(t.runAt);
+    if (!when) return t.every || '';
+    if (!t.every) return when;
+    var upcoming = (Date.parse(t.runAt) || 0) > Date.now();
+    return (upcoming && when.indexOf('오늘') !== 0 ? '다음 ' + when : when) + ' · ' + t.every;
+  }
+
+  /* 작업·안건을 현재/예약/완료로 나눈 건수 — 진행률과 상단 요약이 함께 쓴다. */
+  function taskBuckets(tasks) {
+    var b = { current: 0, sched: 0, done: 0 };
+    (tasks || []).forEach(function (t) {
+      var s = taskState(t);
+      if (s === 'done') b.done += 1;
+      else if (s === 'once' || s === 'repeat') b.sched += 1;
+      else b.current += 1;
+    });
+    return b;
   }
 
   function statusOf(partId) {
@@ -1993,8 +2083,10 @@
     $('#meetingDot').hidden = openAgenda === 0;
     $('#meetingMeta').textContent = openAgenda ? '안건 ' + openAgenda + '건' : '지금은 한가해요';
 
-    var openTasks = state.tasks.filter(function (t) { return !t.done; }).length;
-    $('#workMeta').textContent = openTasks ? '진행 ' + openTasks + '건' : '전부 정리됨';
+    var tb = taskBuckets(state.tasks);
+    var workMeta = tb.current ? '진행 ' + tb.current + '건' : '지금 할 일 없음';
+    if (tb.sched) workMeta += ' · 예약 ' + tb.sched + '건';
+    $('#workMeta').textContent = workMeta;
 
     var d = new Date();
     $('#brandDate').textContent = (d.getMonth() + 1) + '.' + d.getDate() + ' ' + WEEK[d.getDay()];
@@ -2008,7 +2100,7 @@
         '채팅에서 맡긴 일은 작업실에서, 한도는 위 파티 바에서 확인할 수 있어요.';
     }
 
-    $('#todayStats').textContent = '진행 ' + openTasks + ' · 안건 ' + openAgenda;
+    $('#todayStats').textContent = '진행 ' + tb.current + ' · 안건 ' + openAgenda;
 
     renderParty();
   }
@@ -2303,18 +2395,44 @@
 
   function taskItemHTML(t) {
     var p = PART_MAP[t.part] || PARTS[0];
+    var key = taskState(t);
+    var st = TASK_STATE[key];
+    var when = '';
+    if (key === 'once' || key === 'repeat') when = schedLabel(t);
+    else if (key === 'check') when = runAtView(t.runAt) + ' 예정';
     return '<li class="item item--read' + (t.done ? ' item--done' : '') + '">' +
-      '<span class="state-pill' + (t.done ? ' is-done' : '') + '">' + (t.done ? '완료' : '진행 중') + '</span>' +
+      '<span class="state-pill' + (st.cls ? ' ' + st.cls : '') + '">' + st.label + '</span>' +
       '<div class="item__body">' +
         '<p class="item__title">' + esc(t.title) + '</p>' +
         '<p class="item__meta">' +
           '<span class="tag-chip" style="background:' + p.soft + ';color:' + p.deep + '">' +
           esc(p.name) + '</span>' +
-          '<span>' + esc(t.date || shortDate(t.at)) + '</span>' +
+          (when ? '<span class="when-chip' + (key === 'check' ? ' is-check' : '') + '">' + esc(when) + '</span>'
+                : '<span>' + esc(t.date || shortDate(t.at)) + '</span>') +
           (t.chat ? '<span class="chat-badge">💬 채팅</span>' : '') +
         '</p>' +
       '</div>' +
     '</li>';
+  }
+
+  function moreTasksBtnHTML(group, open, label, rest) {
+    return '<button class="tgroup__more" type="button" data-action="more-tasks" ' +
+      'data-group="' + group + '" aria-expanded="' + (open ? 'true' : 'false') + '">' +
+      label + ' ' + rest + '건 ' + (open ? '접기' : '더 보기') +
+      '<span class="tgroup__caret' + (open ? ' is-open' : '') + '" aria-hidden="true">▾</span>' +
+    '</button>';
+  }
+
+  function taskGroupHTML(title, items, total, emptyText, more) {
+    return '<section class="tgroup" aria-label="' + title + '">' +
+      '<div class="tgroup__head">' +
+        '<h3 class="tgroup__title">' + title + '</h3>' +
+        '<span class="tgroup__count">' + total + '건</span>' +
+      '</div>' +
+      (items.length ? '<ul class="list">' + items.map(taskItemHTML).join('') + '</ul>'
+         : '<p class="tgroup__empty">' + emptyText + '</p>') +
+      (more || '') +
+    '</section>';
   }
 
   function agendaItemHTML(a) {
@@ -2341,19 +2459,48 @@
   }
 
   function renderTasks() {
-    var ul = $('#taskList');
-    if (!ul) return;
-    var list = state.tasks.slice().sort(sortTask);
+    var host = $('#taskList');
+    if (!host) return;
+    var list = state.tasks.slice();
     if (ui.filter !== 'all') {
       list = list.filter(function (t) { return t.part === ui.filter; });
     }
-    ul.innerHTML = list.map(taskItemHTML).join('');
+
+    var groups = { check: [], active: [], once: [], repeat: [], done: [] };
+    list.forEach(function (t) { groups[taskState(t)].push(t); });
+
+    var newest = function (a, b) { return (b.at || 0) - (a.at || 0); };
+    var soonest = function (a, b) { return (Date.parse(a.runAt) || 0) - (Date.parse(b.runAt) || 0); };
+
+    /* 현재 = 확인 필요 먼저(최신순) → 진행 중(최신순) */
+    var current = groups.check.sort(newest).concat(groups.active.sort(newest));
+    /* 예약 = 단발·정기 섞어서 임박한 순 */
+    var sched = groups.once.concat(groups.repeat).sort(soonest);
+    var done = groups.done.sort(newest);
+
+    var schedRest = Math.max(0, sched.length - GROUP_LIMIT);
+    var doneRest = Math.max(0, done.length - GROUP_LIMIT);
+
+    host.innerHTML = list.length
+      ? taskGroupHTML('현재', current, current.length, '지금 할 일이 없어요', '') +
+        taskGroupHTML('예약', ui.moreSched ? sched : sched.slice(0, GROUP_LIMIT), sched.length, '예약된 일이 없어요',
+          schedRest ? moreTasksBtnHTML('sched', ui.moreSched, '예약', schedRest) : '') +
+        taskGroupHTML('완료', ui.moreDone ? done : done.slice(0, GROUP_LIMIT), done.length, '완료한 일이 없어요',
+          doneRest ? moreTasksBtnHTML('done', ui.moreDone, '완료', doneRest) : '')
+      : '';
     $('#taskEmpty').hidden = list.length > 0;
 
-    var total = state.tasks.length;
-    var done = state.tasks.filter(function (t) { return t.done; }).length;
-    $('#taskProgressBar').style.width = total ? (done / total * 100) + '%' : '0%';
-    $('#taskProgressText').textContent = done + ' / ' + total + ' 완료';
+    /* 진행률은 예약을 빼고 현재+완료로만 센다. */
+    var counted = list.filter(function (t) {
+      var s = taskState(t);
+      return s !== 'once' && s !== 'repeat';
+    });
+    var doneN = counted.filter(function (t) { return t.done; }).length;
+    var total = counted.length;
+    var pct = total ? Math.round(doneN / total * 100) : 0;
+    $('#taskProgressBar').style.width = total ? (doneN / total * 100) + '%' : '0%';
+    $('#taskProgressText').textContent =
+      '진행·완료 ' + doneN + '/' + total + ' (' + pct + '%) · 예약 ' + sched.length + '건 별도';
 
     $('#taskFilters').innerHTML = FILTERS.map(function (f) {
       var n = f.id === 'all' ? state.tasks.length
@@ -2569,7 +2716,8 @@
     var key = partyStateOf(p.id);
     var meta = PARTY_STATE[key];
     var list = tasksOf(p.id, true).sort(sortTask);
-    var openN = list.filter(function (t) { return !t.done; }).length;
+    var buckets = taskBuckets(list);
+    var openN = buckets.current;
 
     head.style.setProperty('--c', p.color);
     head.innerHTML = '<div class="sheet__avatar" style="background:' + p.soft + '">' + avatarSVG(p.id) + '</div>' +
@@ -2585,7 +2733,8 @@
       quotaPanelHTML(p) +
       (p.id === 'claude' ? boostPanelHTML(p) : '') +
       '<div class="sheet__row"><h4 class="sheet__h4">배정된 작업</h4>' +
-        '<span class="sheet__count">' + (openN ? openN + '건 진행 중' : '전부 정리됨') + '</span></div>' +
+        '<span class="sheet__count">' + (openN ? openN + '건 진행 중' : '지금 할 일 없음') +
+          (buckets.sched ? ' · 예약 ' + buckets.sched + '건' : '') + '</span></div>' +
       (list.length
         ? '<ul class="list list--compact">' + list.map(taskItemHTML).join('') + '</ul>'
         : '<p class="field__hint">아직 배정된 작업이 없어요.</p>') +
@@ -2708,12 +2857,16 @@
           break;
         case 'go-work':
           ui.filter = el.getAttribute('data-part') || 'all';
+          ui.moreSched = false;
+          ui.moreDone = false;
           closeSheet();
           setTab('work');
           renderTasks();
           break;
         case 'go-work-all':
           ui.filter = 'all';
+          ui.moreSched = false;
+          ui.moreDone = false;
           setTab('work');
           renderTasks();
           break;
@@ -2722,6 +2875,13 @@
           break;
         case 'filter':
           ui.filter = el.getAttribute('data-filter');
+          ui.moreSched = false;
+          ui.moreDone = false;
+          renderTasks();
+          break;
+        case 'more-tasks':
+          if (el.getAttribute('data-group') === 'sched') ui.moreSched = !ui.moreSched;
+          else ui.moreDone = !ui.moreDone;
           renderTasks();
           break;
         default:

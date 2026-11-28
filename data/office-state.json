@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-28T19:05:00+09:00",
+  "updatedAt": "2026-11-28T19:35:00+09:00",
   "brief": "오늘은 비서실 모니터링 화면을 정리하고, 남은 일감과 토큰 잔여를 한 번 훑어요.",
   "boost": { "claude": false },
   "tokens": {
@@ -32,6 +32,14 @@
     }
   ],
   "tasks": [
+    {
+      "id": "chat-1128-work-sections",
+      "title": "작업실 현재·예약 구분 UI 개편",
+      "owner": "gpt",
+      "done": true,
+      "date": "11.28",
+      "source": "chat"
+    },
     {
       "id": "chat-1128-monitor",
       "title": "비서실 모니터링 전용 화면 개편",
@@ -142,6 +150,8 @@
       "owner": "gpt",
       "done": false,
       "date": "11.29",
+      "runAt": "2026-11-29T11:48:00+09:00",
+      "every": "매주",
       "source": "chat"
     },
     {
@@ -150,6 +160,7 @@
       "owner": "claude",
       "done": false,
       "date": "11.30",
+      "runAt": "2026-11-30T09:10:00+09:00",
       "source": "chat"
     },
     {
@@ -158,6 +169,8 @@
       "owner": "claude",
       "done": false,
       "date": "12.01",
+      "runAt": "2026-12-01T09:00:00+09:00",
+      "every": "매월 1일",
       "source": "chat"
     }
   ]
